@@ -18,7 +18,10 @@ function ContactPage() {
     e.preventDefault();
     setResponseMsg('');
 
-    // 로컬에서는 .env.local 파일을, Vercel에서는 환경 변수를 사용하도록 되돌립니다.
+    // --- 디버깅을 위한 console.log 추가 ---
+    // '제출하기' 버튼을 누를 때마다 개발자 도구 콘솔에 이 메시지가 출력됩니다.
+    console.log("VITE_API_URL의 현재 값:", import.meta.env.VITE_API_URL);
+    
     const apiUrl = `${import.meta.env.VITE_API_URL}/api/contact`;
 
     try {
