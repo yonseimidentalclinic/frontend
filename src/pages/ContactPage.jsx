@@ -2,36 +2,29 @@ import React, { useState } from 'react';
 import axios from 'axios';
 
 function ContactPage() {
-  // 사용자가 입력하는 값을 저장하기 위한 state
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     message: '',
   });
-  // 백엔드로부터 받은 응답 메시지를 저장하기 위한 state
   const [responseMsg, setResponseMsg] = useState('');
 
-  // 입력 칸에 글자를 쓸 때마다 formData의 값을 업데이트하는 함수
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prevState => ({ ...prevState, [name]: value }));
   };
 
-  // '제출' 버튼을 눌렀을 때 실행되는 함수
   const handleSubmit = async (e) => {
-    e.preventDefault(); // form의 기본 동작(페이지 새로고침)을 막습니다.
-    setResponseMsg(''); // 이전 응답 메시지를 초기화합니다.
+    e.preventDefault();
+    setResponseMsg('');
 
-    // Vercel에 설정한 백엔드 API 주소를 가져옵니다.
+    // 로컬에서는 .env.local 파일을, Vercel에서는 환경 변수를 사용하도록 되돌립니다.
     const apiUrl = `${import.meta.env.VITE_API_URL}/api/contact`;
 
     try {
-      // axios를 사용해 백엔드로 POST 요청을 보냅니다.
       const response = await axios.post(apiUrl, formData);
-      // 성공하면 백엔드가 보낸 메시지를 화면에 보여줍니다.
       setResponseMsg(response.data.message);
     } catch (error) {
-      // 실패하면 에러 메시지를 화면에 보여줍니다.
       const errorMessage = error.response?.data?.message || '문의 제출 중 오류가 발생했습니다.';
       setResponseMsg(`실패: ${errorMessage}`);
     }
@@ -69,7 +62,6 @@ function ContactPage() {
           제출하기
         </button>
       </form>
-      {/* responseMsg에 내용이 있을 때만 화면에 표시 */}
       {responseMsg && <p className="mt-4 text-center font-semibold">{responseMsg}</p>}
     </div>
   );
