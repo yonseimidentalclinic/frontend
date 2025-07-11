@@ -7,7 +7,7 @@ import App from './App.jsx';
 import './index.css';
 
 const HomePage = lazy(() => import('./pages/HomePage.jsx'));
-const AboutPage = lazy(() => import('./pages/AboutPage.jsx'));
+const AboutPage = lazy(() => import('./pages/AboutPage.jsx')); // 오타 수정
 const ServicesPage = lazy(() => import('./pages/ServicesPage.jsx'));
 const ContactPage = lazy(() => import('./pages/ContactPage.jsx'));
 const NoticeListPage = lazy(() => import('./pages/NoticeListPage.jsx'));
