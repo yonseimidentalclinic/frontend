@@ -62,12 +62,12 @@ const servicesData = {
 };
 
 function ServicesPage() {
-  // 'implant'를 기본으로 선택된 탭으로 설정
   const [activeTab, setActiveTab] = useState('implant');
   const activeService = servicesData[activeTab];
 
   const tabButtonClasses = (tabName) => 
-    `px-6 py-3 text-lg font-semibold rounded-t-lg focus:outline-none ` +
+    // whitespace-nowrap: 탭 버튼의 글자가 줄바꿈되지 않도록 함
+    `px-4 sm:px-6 py-3 text-base sm:text-lg font-semibold rounded-t-lg focus:outline-none whitespace-nowrap ` +
     (activeTab === tabName 
       ? 'bg-white text-blue-600 border-b-2 border-blue-600' 
       : 'bg-gray-100 text-gray-500 hover:bg-gray-200');
@@ -76,7 +76,8 @@ function ServicesPage() {
     <div>
       {/* 탭 메뉴 */}
       <div className="border-b border-gray-200">
-        <nav className="-mb-px flex space-x-2" aria-label="Tabs">
+        {/* overflow-x-auto: 내용이 넘칠 경우 가로 스크롤을 허용 */}
+        <nav className="flex space-x-2 overflow-x-auto" aria-label="Tabs">
           <button onClick={() => setActiveTab('implant')} className={tabButtonClasses('implant')}>
             임플란트
           </button>
@@ -90,15 +91,15 @@ function ServicesPage() {
       </div>
 
       {/* 선택된 탭 내용 */}
-      <div className="mt-8 bg-white p-8 rounded-b-lg shadow-lg">
-        <h2 className="text-3xl font-bold text-gray-800 mb-4">{activeService.title}</h2>
+      <div className="mt-8 bg-white p-6 md:p-8 rounded-b-lg shadow-lg">
+        <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4">{activeService.title}</h2>
         <p className="text-gray-600 mb-8">{activeService.description}</p>
         <img src={activeService.imageUrl} alt={activeService.title} className="rounded-lg mb-8 w-full" />
         
         <div className="space-y-6">
           {activeService.details.map((detail, index) => (
             <div key={index}>
-              <h3 className="text-xl font-bold text-blue-600 mb-2">{detail.title}</h3>
+              <h3 className="text-lg md:text-xl font-bold text-blue-600 mb-2">{detail.title}</h3>
               <p className="text-gray-700">{detail.content}</p>
             </div>
           ))}

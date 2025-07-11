@@ -2,11 +2,14 @@ import React from 'react';
 
 // 의료진 프로필을 위한 재사용 가능한 컴포넌트
 const DoctorProfile = ({ name, specialty, imageUrl, bio }) => (
-  <div className="flex flex-col md:flex-row items-center bg-white p-6 rounded-lg shadow-md gap-6">
+  // flex-col: 모바일에서는 세로로 쌓임
+  // md:flex-row: 태블릿 이상 크기에서는 가로로 배치
+  <div className="flex flex-col md:flex-row items-center text-center md:text-left bg-white p-6 rounded-lg shadow-md gap-6">
     <img 
       src={imageUrl} 
       alt={`${name} 원장 사진`} 
       className="w-32 h-32 rounded-full object-cover flex-shrink-0"
+      // 이미지가 없을 경우 표시될 대체 이미지
       onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/128x128/e2e8f0/64748b?text=Image'; }}
     />
     <div>
@@ -19,11 +22,11 @@ const DoctorProfile = ({ name, specialty, imageUrl, bio }) => (
 
 function AboutPage() {
   return (
-    <div className="space-y-16">
+    <div className="space-y-12 md:space-y-16">
       {/* 1. 원장 인사말 섹션 */}
       <section>
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-10">인사말</h2>
-        <div className="bg-white p-10 rounded-lg shadow-lg">
+        <div className="bg-white p-6 md:p-10 rounded-lg shadow-lg">
           <p className="text-5xl text-blue-500 font-serif leading-tight mb-4">“</p>
           <p className="text-lg text-gray-700 mb-4">
             저희 연세미치과 홈페이지를 찾아주신 모든 분들께 진심으로 감사드립니다.
@@ -52,6 +55,8 @@ function AboutPage() {
       {/* 3. 병원 둘러보기 섹션 */}
       <section>
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-10">병원 둘러보기</h2>
+        {/* grid-cols-1: 모바일에서는 1열
+            md:grid-cols-3: 태블릿 이상에서는 3열 */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <img src="https://placehold.co/600x400/bfdbfe/1e3a8a?text=대기실" alt="병원 대기실" className="rounded-lg shadow-md w-full h-full object-cover" />
           <img src="https://placehold.co/600x400/bfdbfe/1e3a8a?text=진료실" alt="병원 진료실" className="rounded-lg shadow-md w-full h-full object-cover" />
