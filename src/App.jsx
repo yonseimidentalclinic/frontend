@@ -13,6 +13,8 @@ function App() {
             <Link to="/" className="text-gray-600 hover:text-blue-500">홈</Link>
             <Link to="/about" className="text-gray-600 hover:text-blue-500">병원소개</Link>
             <Link to="/services" className="text-gray-600 hover:text-blue-500">진료안내</Link>
+            {/* '온라인 문의' 링크 추가 */}
+            <Link to="/contact" className="text-gray-600 hover:text-blue-500">온라인 문의</Link>
           </div>
         </nav>
       </header>
