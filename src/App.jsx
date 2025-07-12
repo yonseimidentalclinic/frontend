@@ -30,7 +30,7 @@ function App() {
             <Link to="/about" className="text-gray-600 hover:text-blue-500">병원소개</Link>
             <Link to="/services" className="text-gray-600 hover:text-blue-500">진료안내</Link>
             <Link to="/notices" className="text-gray-600 hover:text-blue-500">병원소식</Link>
-            <Link to="/contact" className="text-gray-600 hover:text-blue-500">온라인 문의</Link>
+            <Link to="/consultations" className="text-gray-600 hover:text-blue-500">온라인 상담</Link>
           </div>
 
           <div className="md:hidden">
@@ -46,7 +46,7 @@ function App() {
             <Link to="/about" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">병원소개</Link>
             <Link to="/services" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">진료안내</Link>
             <Link to="/notices" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">병원소식</Link>
-            <Link to="/contact" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">온라인 문의</Link>
+            <Link to="/consultations" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">온라인 상담</Link>
           </div>
         )}
       </header>
