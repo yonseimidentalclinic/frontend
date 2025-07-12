@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
+import { NavermapsProvider } from 'react-naver-maps'; // 1. 네이버 지도 Provider를 불러옵니다.
 
 import App from './App.jsx';
 import './index.css';
@@ -20,7 +21,7 @@ const NoticeDetailPage = lazy(() => import('./pages/NoticeDetailPage.jsx'));
 const ConsultationListPage = lazy(() => import('./pages/ConsultationListPage.jsx'));
 const ConsultationWritePage = lazy(() => import('./pages/ConsultationWritePage.jsx'));
 const ConsultationDetailPage = lazy(() => import('./pages/ConsultationDetailPage.jsx'));
-const LocationPage = lazy(() => import('./pages/LocationPage.jsx')); // LocationPage 추가
+const LocationPage = lazy(() => import('./pages/LocationPage.jsx'));
 
 // 관리자 페이지
 const AdminLoginPage = lazy(() => import('./pages/AdminLoginPage.jsx'));
@@ -47,7 +48,7 @@ const router = createBrowserRouter([
       { path: 'consultations', element: <ConsultationListPage /> },
       { path: 'consultations/write', element: <ConsultationWritePage /> },
       { path: 'consultations/:id', element: <ConsultationDetailPage /> },
-      { path: 'location', element: <LocationPage /> }, // location 경로 추가
+      { path: 'location', element: <LocationPage /> },
     ],
   },
   // 관리자 사이트 라우트
@@ -79,14 +80,20 @@ const loadingMarkup = (
   <div className="flex justify-center items-center h-screen">
     <p className="text-lg">페이지를 불러오는 중입니다...</p>
   </div>
-)
+);
+
+// 2. 환경 변수에서 네이버 클라이언트 ID를 가져옵니다.
+const NAVER_MAP_CLIENT_ID = import.meta.env.VITE_NAVER_MAP_CLIENT_ID;
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <HelmetProvider>
-      <Suspense fallback={loadingMarkup}>
-        <RouterProvider router={router} />
-      </Suspense>
-    </HelmetProvider>
+    {/* 3. NavermapsProvider로 전체 앱을 감싸고, Client ID를 전달합니다. */}
+    <NavermapsProvider ncpClientId={NAVER_MAP_CLIENT_ID}>
+      <HelmetProvider>
+        <Suspense fallback={loadingMarkup}>
+          <RouterProvider router={router} />
+        </Suspense>
+      </HelmetProvider>
+    </NavermapsProvider>
   </React.StrictMode>
 );
