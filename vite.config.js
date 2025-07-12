@@ -12,6 +12,7 @@ export default defineConfig(({ mode }) => {
     define: {
       // .env 파일에서 읽어온 모든 VITE_ 변수들을 코드에서 사용할 수 있도록 설정합니다.
       'import.meta.env.VITE_API_URL': JSON.stringify(env.VITE_API_URL),
+      // 쉼표를 정확히 추가하고, 네이버 지도 키만 남깁니다.
       'import.meta.env.VITE_NAVER_MAP_CLIENT_ID': JSON.stringify(env.VITE_NAVER_MAP_CLIENT_ID)
     }
   }
