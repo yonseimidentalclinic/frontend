@@ -2,23 +2,27 @@ import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { Helmet } from 'react-helmet-async';
-import Pagination from '../../components/Pagination'; // 1. Pagination 컴포넌트 import
+import Pagination from '../../components/Pagination';
 
 function AdminConsultationListPage() {
   const [consultations, setConsultations] = useState([]);
   const [pagination, setPagination] = useState(null);
   const [loading, setLoading] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
+  
+  // 검색어를 관리하기 위한 state
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
 
   const currentPage = parseInt(searchParams.get('page') || '1', 10);
+  const currentSearch = searchParams.get('search') || '';
 
   useEffect(() => {
     const fetchConsultations = async () => {
       setLoading(true);
       const token = localStorage.getItem('adminToken');
       try {
-        // 2. API 요청 시 현재 페이지 번호를 함께 보냅니다.
-        const apiUrl = `${import.meta.env.VITE_API_URL}/api/admin/consultations?page=${currentPage}`;
+        // API 요청 시 현재 페이지 번호와 검색어를 함께 보냅니다.
+        const apiUrl = `${import.meta.env.VITE_API_URL}/api/admin/consultations?page=${currentPage}&search=${currentSearch}`;
         const response = await axios.get(apiUrl, { headers: { 'Authorization': `Bearer ${token}` } });
         setConsultations(response.data.data);
         setPagination(response.data.pagination);
@@ -29,10 +33,16 @@ function AdminConsultationListPage() {
       }
     };
     fetchConsultations();
-  }, [currentPage]); // 3. 페이지 번호가 바뀔 때마다 데이터를 다시 불러옵니다.
+  }, [currentPage, currentSearch]); // 페이지나 검색어가 바뀔 때마다 데이터를 다시 불러옵니다.
 
   const handlePageChange = (pageNumber) => {
-    setSearchParams({ page: pageNumber });
+    setSearchParams({ page: pageNumber, search: currentSearch });
+  };
+
+  // 검색 실행 함수
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setSearchParams({ page: 1, search: searchTerm }); // 검색 시에는 항상 1페이지부터 보여줍니다.
   };
 
   if (loading) return <div>로딩 중...</div>;
@@ -40,11 +50,30 @@ function AdminConsultationListPage() {
   return (
     <>
       <Helmet><title>상담 관리 | 연세미치과</title></Helmet>
-      <h1 className="text-2xl font-bold mb-6">온라인 상담 관리</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">온라인 상담 관리</h1>
+        {/* 검색 폼 */}
+        <form onSubmit={handleSearch} className="flex gap-2">
+          <input 
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="제목 또는 작성자로 검색"
+            className="px-3 py-2 border rounded"
+          />
+          <button type="submit" className="bg-gray-600 text-white font-semibold py-2 px-4 rounded hover:bg-gray-700">검색</button>
+        </form>
+      </div>
       <div className="bg-white shadow-md rounded-lg overflow-hidden">
         <table className="min-w-full">
-          {/* ... (테이블 a a a a헤더는 이전과 동일) ... */}
-          <thead className="bg-gray-50"> <tr> <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">상태</th> <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">제목</th> <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">작성자</th> <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">작성일</th> </tr> </thead>
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">상태</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">제목</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">작성자</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">작성일</th>
+            </tr>
+          </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {consultations.map(item => (
               <tr key={item.id} className="hover:bg-gray-50">
@@ -68,7 +97,7 @@ function AdminConsultationListPage() {
           </tbody>
         </table>
       </div>
-      {/* 4. Pagination 컴포넌트를 추가합니다. */}
+      {/* Pagination 컴포넌트 */}
       {pagination && (
         <Pagination
           currentPage={pagination.currentPage}
