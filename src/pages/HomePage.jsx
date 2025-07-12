@@ -2,8 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 
-// 아이콘 컴포넌트는 변경사항 없습니다.
-// ... (이전과 동일한 아이콘 SVG 코드) ...
+// 아이콘 컴포넌트
 const ImplantIcon = () => (
   <svg className="w-12 h-12 mx-auto text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
 );
@@ -23,7 +22,7 @@ function HomePage() {
         <meta name="description" content="일산 주엽동에 위치한 연세미치과입니다. 최고의 의료진과 최첨단 장비로 임플란트, 치아교정, 치아미백 등 편안하고 정직한 진료를 약속합니다." />
       </Helmet>
       <div className="space-y-12 md:space-y-16">
-        {/* ... (이전과 동일한 페이지 내용) ... */}
+        {/* 1. 히어로 섹션 */}
         <section className="text-center bg-blue-50 p-6 md:p-12 rounded-lg">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
             환자 한 분 한 분의 미소를 소중히 여기는
@@ -41,8 +40,16 @@ function HomePage() {
             온라인 상담 문의하기
           </Link>
         </section>
+
+        {/* 2. 핵심 진료과목 소개 */}
         <section>
-          <h2 className="text-3xl font-bold text-center text-gray-800 mb-10">핵심 진료과목</h2>
+          <div className="flex justify-center items-center mb-10">
+            <h2 className="text-3xl font-bold text-gray-800">핵심 진료과목</h2>
+            {/* '더보기' 버튼 추가 */}
+            <Link to="/services" className="ml-4 text-sm font-semibold text-blue-600 hover:text-blue-800">
+              더보기 &rarr;
+            </Link>
+          </div>
           <div className="grid md:grid-cols-3 gap-8">
             <div className="bg-white p-8 rounded-lg shadow-md text-center">
               <ImplantIcon />
@@ -67,23 +74,21 @@ function HomePage() {
             </div>
           </div>
         </section>
+
+        {/* 3. 병원 소식 */}
         <section>
-          <h2 className="text-3xl font-bold text-center text-gray-800 mb-10">병원 소식</h2>
+          <div className="flex justify-center items-center mb-10">
+            <h2 className="text-3xl font-bold text-gray-800">병원 소식</h2>
+            {/* '더보기' 버튼 추가 */}
+            <Link to="/notices" className="ml-4 text-sm font-semibold text-blue-600 hover:text-blue-800">
+              더보기 &rarr;
+            </Link>
+          </div>
           <div className="bg-white p-6 md:p-8 rounded-lg shadow-md max-w-3xl mx-auto">
-            <ul>
-              <li className="flex flex-col sm:flex-row sm:justify-between py-3 border-b">
-                <span className="text-gray-700">여름맞이 치아미백 이벤트 안내</span>
-                <span className="text-gray-500 text-sm sm:text-base">2025-07-11</span>
-              </li>
-              <li className="flex flex-col sm:flex-row sm:justify-between py-3 border-b">
-                <span className="text-gray-700">새로운 3D CT 장비 도입 안내</span>
-                <span className="text-gray-500 text-sm sm:text-base">2025-07-05</span>
-              </li>
-              <li className="flex flex-col sm:flex-row sm:justify-between py-3">
-                <span className="text-gray-700">홈페이지 리뉴얼 오픈!</span>
-                <span className="text-gray-500 text-sm sm:text-base">2025-07-01</span>
-              </li>
-            </ul>
+            {/* 실제 데이터는 공지사항 페이지에서 보여주므로, 여기서는 간단한 안내 문구로 대체할 수 있습니다. */}
+            <p className="text-center text-gray-500">
+              병원의 최신 소식과 이벤트는 '병원소식' 게시판에서 확인하실 수 있습니다.
+            </p>
           </div>
         </section>
       </div>
