@@ -32,8 +32,14 @@ function AdminLayout() {
           >
             대시보드
           </NavLink>
+          <NavLink 
+            to="/admin/consultations" 
+            style={({ isActive }) => (isActive ? activeLinkStyle : undefined)} 
+            className="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700"
+          >
+            상담 관리
+          </NavLink>
           {/* 앞으로 추가될 메뉴들 */}
-          {/* <NavLink to="/admin/consultations" style={({ isActive }) => (isActive ? activeLinkStyle : undefined)} className="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">상담 관리</NavLink> */}
           {/* <NavLink to="/admin/notices" style={({ isActive }) => (isActive ? activeLinkStyle : undefined)} className="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">공지사항 관리</NavLink> */}
         </nav>
         <div className="p-4 border-t border-gray-700">

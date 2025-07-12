@@ -2,6 +2,10 @@ import React, { Suspense, lazy } from 'react';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
+import AdminLayout from './components/AdminLayout.jsx';
+import PrivateRoute from './components/PrivateRoute.jsx';
+
+
 
 import App from './App.jsx';
 import './index.css';
@@ -20,6 +24,7 @@ const NoticeDetailPage = lazy(() => import('./pages/NoticeDetailPage.jsx'));
 const ConsultationListPage = lazy(() => import('./pages/ConsultationListPage.jsx'));
 const ConsultationWritePage = lazy(() => import('./pages/ConsultationWritePage.jsx'));
 const ConsultationDetailPage = lazy(() => import('./pages/ConsultationDetailPage.jsx'));
+
 
 // 관리자 페이지
 const AdminLoginPage = lazy(() => import('./pages/AdminLoginPage.jsx'));
