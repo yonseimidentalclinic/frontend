@@ -2,10 +2,6 @@ import React, { Suspense, lazy } from 'react';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
-import AdminLayout from './components/AdminLayout.jsx';
-import PrivateRoute from './components/PrivateRoute.jsx';
-
-
 
 import App from './App.jsx';
 import './index.css';
@@ -25,10 +21,15 @@ const ConsultationListPage = lazy(() => import('./pages/ConsultationListPage.jsx
 const ConsultationWritePage = lazy(() => import('./pages/ConsultationWritePage.jsx'));
 const ConsultationDetailPage = lazy(() => import('./pages/ConsultationDetailPage.jsx'));
 
-
 // 관리자 페이지
 const AdminLoginPage = lazy(() => import('./pages/AdminLoginPage.jsx'));
 const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage.jsx'));
+const AdminConsultationListPage = lazy(() => import('./pages/admin/AdminConsultationListPage.jsx'));
+const AdminConsultationDetailPage = lazy(() => import('./pages/admin/AdminConsultationDetailPage.jsx'));
+const AdminNoticeListPage = lazy(() => import('./pages/admin/AdminNoticeListPage.jsx'));
+const AdminNoticeWritePage = lazy(() => import('./pages/admin/AdminNoticeWritePage.jsx'));
+const AdminNoticeEditPage = lazy(() => import('./pages/admin/AdminNoticeEditPage.jsx'));
+
 
 const router = createBrowserRouter([
   // 사용자 사이트 라우트
@@ -52,7 +53,7 @@ const router = createBrowserRouter([
     path: '/admin',
     children: [
       { path: 'login', element: <AdminLoginPage /> },
-      // /admin/dashboard 와 같은 경로는 PrivateRoute의 검사를 거칩니다.
+      // /admin 경로의 모든 하위 경로는 PrivateRoute의 검사를 거칩니다.
       {
         element: <PrivateRoute />,
         children: [
@@ -61,7 +62,11 @@ const router = createBrowserRouter([
             element: <AdminLayout />,
             children: [
               { path: 'dashboard', element: <AdminDashboardPage /> },
-              // 앞으로 추가될 관리자 페이지들...
+              { path: 'consultations', element: <AdminConsultationListPage /> },
+              { path: 'consultations/:id', element: <AdminConsultationDetailPage /> },
+              { path: 'notices', element: <AdminNoticeListPage /> },
+              { path: 'notices/new', element: <AdminNoticeWritePage /> },
+              { path: 'notices/edit/:id', element: <AdminNoticeEditPage /> },
             ],
           },
         ],
