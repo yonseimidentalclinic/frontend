@@ -1,7 +1,46 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 
 function LocationPage() {
+  
+  useEffect(() => {
+    // 카카오맵 API 스크립트를 동적으로 로드합니다.
+    const script = document.createElement('script');
+    script.async = true;
+    // URL에 appkey 파라미터로 환경 변수에 저장된 키를 사용합니다.
+    script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_KAKAO_APP_KEY}&autoload=false`;
+    document.head.appendChild(script);
+
+    script.onload = () => {
+      // 스크립트가 로드되면, 카카오맵 API를 사용합니다.
+      window.kakao.maps.load(() => {
+        const mapContainer = document.getElementById('map'); // 지도를 표시할 div
+        const mapOption = {
+          center: new window.kakao.maps.LatLng(37.6830, 126.7634), // 병원 위치의 위도, 경도
+          level: 3, // 지도의 확대 레벨
+        };
+
+        const map = new window.kakao.maps.Map(mapContainer, mapOption);
+
+        // 마커가 표시될 위치입니다.
+        const markerPosition = new window.kakao.maps.LatLng(37.6830, 126.7634);
+
+        // 마커를 생성합니다.
+        const marker = new window.kakao.maps.Marker({
+          position: markerPosition,
+        });
+
+        // 마커가 지도 위에 표시되도록 설정합니다.
+        marker.setMap(map);
+      });
+    };
+
+    // 컴포넌트가 언마운트될 때 스크립트를 정리합니다.
+    return () => {
+      document.head.removeChild(script);
+    };
+  }, []);
+
   return (
     <>
       <Helmet>
@@ -12,10 +51,8 @@ function LocationPage() {
         <h1 className="text-3xl font-bold text-gray-800 mb-8 border-b pb-4">오시는 길</h1>
         
         <div className="bg-white p-8 rounded-lg shadow-lg">
-          {/* 나중에 이 div에 카카오맵이 들어갑니다. */}
-          <div className="w-full h-96 bg-gray-200 rounded-md mb-8 flex items-center justify-center">
-            <p className="text-gray-500">지도 로딩중...</p>
-          </div>
+          {/* 이 div에 카카오맵이 그려집니다. */}
+          <div id="map" className="w-full h-96 rounded-md mb-8"></div>
 
           <div className="grid md:grid-cols-2 gap-8">
             <div>
