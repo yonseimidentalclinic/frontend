@@ -20,6 +20,7 @@ const NoticeDetailPage = lazy(() => import('./pages/NoticeDetailPage.jsx'));
 const ConsultationListPage = lazy(() => import('./pages/ConsultationListPage.jsx'));
 const ConsultationWritePage = lazy(() => import('./pages/ConsultationWritePage.jsx'));
 const ConsultationDetailPage = lazy(() => import('./pages/ConsultationDetailPage.jsx'));
+const LocationPage = lazy(() => import('./pages/LocationPage.jsx')); // LocationPage 추가
 
 // 관리자 페이지
 const AdminLoginPage = lazy(() => import('./pages/AdminLoginPage.jsx'));
@@ -46,6 +47,7 @@ const router = createBrowserRouter([
       { path: 'consultations', element: <ConsultationListPage /> },
       { path: 'consultations/write', element: <ConsultationWritePage /> },
       { path: 'consultations/:id', element: <ConsultationDetailPage /> },
+      { path: 'location', element: <LocationPage /> }, // location 경로 추가
     ],
   },
   // 관리자 사이트 라우트
@@ -53,11 +55,9 @@ const router = createBrowserRouter([
     path: '/admin',
     children: [
       { path: 'login', element: <AdminLoginPage /> },
-      // /admin 경로의 모든 하위 경로는 PrivateRoute의 검사를 거칩니다.
       {
         element: <PrivateRoute />,
         children: [
-          // PrivateRoute를 통과한 경우에만 AdminLayout을 보여줍니다.
           {
             element: <AdminLayout />,
             children: [
