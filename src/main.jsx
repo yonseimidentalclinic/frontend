@@ -6,6 +6,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import App from './App.jsx';
 import './index.css';
 
+// 사용자 페이지
 const HomePage = lazy(() => import('./pages/HomePage.jsx'));
 const AboutPage = lazy(() => import('./pages/AboutPage.jsx'));
 const ServicesPage = lazy(() => import('./pages/ServicesPage.jsx'));
@@ -15,6 +16,10 @@ const NoticeDetailPage = lazy(() => import('./pages/NoticeDetailPage.jsx'));
 const ConsultationListPage = lazy(() => import('./pages/ConsultationListPage.jsx'));
 const ConsultationWritePage = lazy(() => import('./pages/ConsultationWritePage.jsx'));
 const ConsultationDetailPage = lazy(() => import('./pages/ConsultationDetailPage.jsx'));
+
+// 관리자 페이지
+const AdminLoginPage = lazy(() => import('./pages/AdminLoginPage.jsx'));
+const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage.jsx'));
 
 const router = createBrowserRouter([
   {
@@ -30,6 +35,9 @@ const router = createBrowserRouter([
       { path: 'consultations', element: <ConsultationListPage /> },
       { path: 'consultations/write', element: <ConsultationWritePage /> },
       { path: 'consultations/:id', element: <ConsultationDetailPage /> },
+      // 관리자 경로 추가
+      { path: 'admin/login', element: <AdminLoginPage /> },
+      { path: 'admin/dashboard', element: <AdminDashboardPage /> },
     ],
   },
 ]);
