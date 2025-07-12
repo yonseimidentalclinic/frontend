@@ -24,7 +24,8 @@ function Footer() {
             <ul className="space-y-2">
               <li><Link to="/about" className="text-gray-400 hover:text-white">병원소개</Link></li>
               <li><Link to="/services" className="text-gray-400 hover:text-white">진료안내</Link></li>
-              <li><Link to="/contact" className="text-gray-400 hover:text-white">온라인 문의</Link></li>
+              <li><Link to="/notices" className="text-gray-400 hover:text-white">병원소식</Link></li>
+              <li><Link to="/consultations" className="text-gray-400 hover:text-white">온라인 상담</Link></li>
             </ul>
           </div>
 
@@ -39,10 +40,15 @@ function Footer() {
           </div>
         </div>
 
-        {/* 하단 저작권 */}
+        {/* 하단 저작권 및 관리자 링크 */}
         <div className="mt-10 pt-8 border-t border-gray-700 text-center text-gray-500">
           <p>&copy; {currentYear} 연세미치과. All Rights Reserved.</p>
-          <p className="text-sm mt-2">본 사이트의 모든 컨텐츠는 저작권법의 보호를 받으며, 무단 전재 및 재배포를 금지합니다.</p>
+          <div className="mt-4">
+            {/* 관리자 로그인 링크 추가 */}
+            <Link to="/admin/login" className="text-sm text-gray-600 hover:text-gray-400">
+              관리자 페이지
+            </Link>
+          </div>
         </div>
       </div>
     </footer>
