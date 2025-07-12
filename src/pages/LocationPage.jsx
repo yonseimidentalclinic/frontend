@@ -1,13 +1,59 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Map, MapMarker } from 'react-kakao-maps-sdk';
+
+const KAKAO_APP_KEY = import.meta.env.VITE_KAKAO_APP_KEY;
 
 function LocationPage() {
-  // 병원의 위치 정보
-  const position = {
-    lat: 37.6830,
-    lng: 126.7634,
-  };
+  const [mapLoaded, setMapLoaded] = useState(false);
+
+  useEffect(() => {
+    // 이미 카카오맵 스크립트가 로드되어 있는지 확인
+    if (window.kakao && window.kakao.maps) {
+      setMapLoaded(true);
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_APP_KEY}&autoload=false`;
+    script.async = true;
+    
+    script.onload = () => {
+      window.kakao.maps.load(() => {
+        setMapLoaded(true);
+      });
+    };
+    
+    script.onerror = () => {
+      console.error("카카오맵 스크립트를 불러오는 데 실패했습니다.");
+    };
+
+    document.head.appendChild(script);
+
+    return () => {
+      // 컴포넌트가 사라질 때 스크립트 태그를 정리할 수 있지만,
+      // 다른 페이지에서도 지도를 사용할 수 있으므로 굳이 지우지 않아도 됩니다.
+    };
+  }, []);
+
+  useEffect(() => {
+    // 스크립트 로딩 및 API 준비가 완료되면 지도를 그립니다.
+    if (mapLoaded) {
+      const mapContainer = document.getElementById('map');
+      if (!mapContainer) return;
+
+      const mapOption = {
+        center: new window.kakao.maps.LatLng(37.6830, 126.7634),
+        level: 3,
+      };
+      const map = new window.kakao.maps.Map(mapContainer, mapOption);
+      
+      const markerPosition = new window.kakao.maps.LatLng(37.6830, 126.7634);
+      const marker = new window.kakao.maps.Marker({
+        position: markerPosition,
+      });
+      marker.setMap(map);
+    }
+  }, [mapLoaded]); // mapLoaded 상태가 true로 바뀌면 이 useEffect가 실행됩니다.
 
   return (
     <>
@@ -19,18 +65,10 @@ function LocationPage() {
         <h1 className="text-3xl font-bold text-gray-800 mb-8 border-b pb-4">오시는 길</h1>
         
         <div className="bg-white p-8 rounded-lg shadow-lg">
-          {/* Map 컴포넌트로 지도를 생성합니다. */}
-          <Map
-            center={position}
-            style={{ width: "100%", height: "360px" }}
-            level={3}
-            className="rounded-md mb-8"
-          >
-            {/* MapMarker로 지도에 마커를 표시합니다. */}
-            <MapMarker position={position}>
-              <div style={{color:"#000", padding: "5px"}}>연세미치과</div>
-            </MapMarker>
-          </Map>
+          {/* 이 div에 카카오맵이 그려집니다. */}
+          <div id="map" className="w-full h-96 rounded-md mb-8">
+            {!mapLoaded && <p className="flex items-center justify-center h-full text-gray-500">지도를 불러오는 중입니다...</p>}
+          </div>
 
           <div className="grid md:grid-cols-2 gap-8">
             <div>
