@@ -6,6 +6,10 @@ import { HelmetProvider } from 'react-helmet-async';
 import App from './App.jsx';
 import './index.css';
 
+// 레이아웃 및 보안 컴포넌트
+import AdminLayout from './components/AdminLayout.jsx';
+import PrivateRoute from './components/PrivateRoute.jsx';
+
 // 사용자 페이지
 const HomePage = lazy(() => import('./pages/HomePage.jsx'));
 const AboutPage = lazy(() => import('./pages/AboutPage.jsx'));
@@ -22,6 +26,7 @@ const AdminLoginPage = lazy(() => import('./pages/AdminLoginPage.jsx'));
 const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage.jsx'));
 
 const router = createBrowserRouter([
+  // 사용자 사이트 라우트
   {
     path: '/',
     element: <App />,
@@ -35,9 +40,27 @@ const router = createBrowserRouter([
       { path: 'consultations', element: <ConsultationListPage /> },
       { path: 'consultations/write', element: <ConsultationWritePage /> },
       { path: 'consultations/:id', element: <ConsultationDetailPage /> },
-      // 관리자 경로 추가
-      { path: 'admin/login', element: <AdminLoginPage /> },
-      { path: 'admin/dashboard', element: <AdminDashboardPage /> },
+    ],
+  },
+  // 관리자 사이트 라우트
+  {
+    path: '/admin',
+    children: [
+      { path: 'login', element: <AdminLoginPage /> },
+      // /admin/dashboard 와 같은 경로는 PrivateRoute의 검사를 거칩니다.
+      {
+        element: <PrivateRoute />,
+        children: [
+          // PrivateRoute를 통과한 경우에만 AdminLayout을 보여줍니다.
+          {
+            element: <AdminLayout />,
+            children: [
+              { path: 'dashboard', element: <AdminDashboardPage /> },
+              // 앞으로 추가될 관리자 페이지들...
+            ],
+          },
+        ],
+      },
     ],
   },
 ]);
