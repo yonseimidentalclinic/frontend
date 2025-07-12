@@ -1,55 +1,13 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Helmet } from 'react-helmet-async';
+import { Map, MapMarker } from 'react-kakao-maps-sdk';
 
 function LocationPage() {
-  
-  useEffect(() => {
-    // 환경 변수에서 카카오 앱 키를 가져옵니다.
-    const KAKAO_APP_KEY = import.meta.env.VITE_KAKAO_APP_KEY;
-
-    // 디버깅을 위해 현재 사용 중인 키를 콘솔에 출력합니다.
-    console.log("Using Kakao App Key:", KAKAO_APP_KEY);
-
-    if (!KAKAO_APP_KEY) {
-      console.error("Kakao App Key is not defined!");
-      return;
-    }
-
-    // 카카오맵 API 스크립트를 동적으로 로드합니다.
-    const script = document.createElement('script');
-    script.async = true;
-    script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_APP_KEY}&autoload=false`;
-    document.head.appendChild(script);
-
-    const handleScriptLoad = () => {
-      // 스크립트가 로드되면, 카카오맵 API를 사용합니다.
-      window.kakao.maps.load(() => {
-        const mapContainer = document.getElementById('map');
-        if (!mapContainer) return; // map div가 없으면 중단
-
-        const mapOption = {
-          center: new window.kakao.maps.LatLng(37.6830, 126.7634), // 병원 위치의 위도, 경도
-          level: 3, // 지도의 확대 레벨
-        };
-
-        const map = new window.kakao.maps.Map(mapContainer, mapOption);
-
-        const markerPosition = new window.kakao.maps.LatLng(37.6830, 126.7634);
-        const marker = new window.kakao.maps.Marker({
-          position: markerPosition,
-        });
-        marker.setMap(map);
-      });
-    };
-    
-    script.addEventListener('load', handleScriptLoad);
-
-    // 컴포넌트가 언마운트될 때 스크립트와 이벤트 리스너를 정리합니다.
-    return () => {
-      script.removeEventListener('load', handleScriptLoad);
-      document.head.removeChild(script);
-    };
-  }, []);
+  // 병원의 위치 정보
+  const position = {
+    lat: 37.6830,
+    lng: 126.7634,
+  };
 
   return (
     <>
@@ -61,7 +19,19 @@ function LocationPage() {
         <h1 className="text-3xl font-bold text-gray-800 mb-8 border-b pb-4">오시는 길</h1>
         
         <div className="bg-white p-8 rounded-lg shadow-lg">
-          <div id="map" className="w-full h-96 rounded-md mb-8"></div>
+          {/* Map 컴포넌트로 지도를 생성합니다. */}
+          <Map
+            center={position}
+            style={{ width: "100%", height: "360px" }}
+            level={3}
+            className="rounded-md mb-8"
+          >
+            {/* MapMarker로 지도에 마커를 표시합니다. */}
+            <MapMarker position={position}>
+              <div style={{color:"#000", padding: "5px"}}>연세미치과</div>
+            </MapMarker>
+          </Map>
+
           <div className="grid md:grid-cols-2 gap-8">
             <div>
               <h2 className="text-xl font-bold text-blue-600 mb-3">주소 안내</h2>
