@@ -1,60 +1,25 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Helmet } from 'react-helmet-async';
+import { Container as MapDiv, NaverMap, Marker, useNavermaps } from 'react-naver-maps';
 
-const KAKAO_APP_KEY = import.meta.env.VITE_KAKAO_APP_KEY;
+// 지도와 마커를 렌더링하는 부분을 별도의 컴포넌트로 분리합니다.
+function LocationMap() {
+  const navermaps = useNavermaps();
+  // 병원의 위치 정보
+  const position = new navermaps.LatLng(37.6830, 126.7634);
+
+  return (
+    <NaverMap
+      defaultCenter={position}
+      defaultZoom={15}
+      style={{ width: '100%', height: '100%' }}
+    >
+      <Marker defaultPosition={position} />
+    </NaverMap>
+  );
+}
 
 function LocationPage() {
-  const [mapLoaded, setMapLoaded] = useState(false);
-
-  useEffect(() => {
-    // 이미 카카오맵 스크립트가 로드되어 있는지 확인
-    if (window.kakao && window.kakao.maps) {
-      setMapLoaded(true);
-      return;
-    }
-
-    const script = document.createElement('script');
-    script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_APP_KEY}&autoload=false`;
-    script.async = true;
-    
-    script.onload = () => {
-      window.kakao.maps.load(() => {
-        setMapLoaded(true);
-      });
-    };
-    
-    script.onerror = () => {
-      console.error("카카오맵 스크립트를 불러오는 데 실패했습니다.");
-    };
-
-    document.head.appendChild(script);
-
-    return () => {
-      // 컴포넌트가 사라질 때 스크립트 태그를 정리할 수 있지만,
-      // 다른 페이지에서도 지도를 사용할 수 있으므로 굳이 지우지 않아도 됩니다.
-    };
-  }, []);
-
-  useEffect(() => {
-    // 스크립트 로딩 및 API 준비가 완료되면 지도를 그립니다.
-    if (mapLoaded) {
-      const mapContainer = document.getElementById('map');
-      if (!mapContainer) return;
-
-      const mapOption = {
-        center: new window.kakao.maps.LatLng(37.6830, 126.7634),
-        level: 3,
-      };
-      const map = new window.kakao.maps.Map(mapContainer, mapOption);
-      
-      const markerPosition = new window.kakao.maps.LatLng(37.6830, 126.7634);
-      const marker = new window.kakao.maps.Marker({
-        position: markerPosition,
-      });
-      marker.setMap(map);
-    }
-  }, [mapLoaded]); // mapLoaded 상태가 true로 바뀌면 이 useEffect가 실행됩니다.
-
   return (
     <>
       <Helmet>
@@ -65,10 +30,10 @@ function LocationPage() {
         <h1 className="text-3xl font-bold text-gray-800 mb-8 border-b pb-4">오시는 길</h1>
         
         <div className="bg-white p-8 rounded-lg shadow-lg">
-          {/* 이 div에 카카오맵이 그려집니다. */}
-          <div id="map" className="w-full h-96 rounded-md mb-8">
-            {!mapLoaded && <p className="flex items-center justify-center h-full text-gray-500">지도를 불러오는 중입니다...</p>}
-          </div>
+          {/* MapDiv가 지도를 감싸는 컨테이너 역할을 합니다. */}
+          <MapDiv style={{ width: '100%', height: '400px' }} className="rounded-md mb-8">
+            <LocationMap />
+          </MapDiv>
 
           <div className="grid md:grid-cols-2 gap-8">
             <div>

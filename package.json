@@ -15,6 +15,7 @@
     "react-dom": "^19.1.0",
     "react-helmet-async": "^2.0.5",
     "react-kakao-maps-sdk": "^1.2.0",
+    "react-naver-maps": "^0.1.4",
     "react-router-dom": "^7.6.3"
   },
   "devDependencies": {
