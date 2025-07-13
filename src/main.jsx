@@ -7,11 +7,14 @@ import { NavermapsProvider } from 'react-naver-maps';
 import App from './App.jsx';
 import './index.css';
 
-// 레이아웃 및 보안 컴포넌트
+// 로딩 스피너 컴포넌트 import
+import LoadingSpinner from './components/LoadingSpinner.jsx';
+
+// 레이아웃 및 보안 컴포넌트 (이미 lazy loading 되어 있을 필요는 없습니다)
 import AdminLayout from './components/AdminLayout.jsx';
 import PrivateRoute from './components/PrivateRoute.jsx';
 
-// 사용자 페이지
+// 사용자 페이지 (Lazy Loading)
 const HomePage = lazy(() => import('./pages/HomePage.jsx'));
 const AboutPage = lazy(() => import('./pages/AboutPage.jsx'));
 const ServicesPage = lazy(() => import('./pages/ServicesPage.jsx'));
@@ -26,7 +29,7 @@ const PostListPage = lazy(() => import('./pages/PostListPage.jsx'));
 const PostDetailPage = lazy(() => import('./pages/PostDetailPage.jsx'));
 const PostWritePage = lazy(() => import('./pages/PostWritePage.jsx'));
 
-// 관리자 페이지
+// 관리자 페이지 (Lazy Loading)
 const AdminLoginPage = lazy(() => import('./pages/AdminLoginPage.jsx'));
 const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage.jsx'));
 const AdminConsultationListPage = lazy(() => import('./pages/admin/AdminConsultationListPage.jsx'));
@@ -36,6 +39,12 @@ const AdminNoticeWritePage = lazy(() => import('./pages/admin/AdminNoticeWritePa
 const AdminNoticeEditPage = lazy(() => import('./pages/admin/AdminNoticeEditPage.jsx'));
 const AdminPostListPage = lazy(() => import('./pages/admin/AdminPostListPage.jsx'));
 
+// Suspense로 각 페이지를 감싸도록 라우터 설정 수정
+const createSuspenseElement = (Component) => (
+  <Suspense fallback={<LoadingSpinner />}>
+    <Component />
+  </Suspense>
+);
 
 const router = createBrowserRouter([
   // 사용자 사이트 라우트
@@ -43,39 +52,39 @@ const router = createBrowserRouter([
     path: '/',
     element: <App />,
     children: [
-      { index: true, element: <HomePage /> },
-      { path: 'about', element: <AboutPage /> },
-      { path: 'services', element: <ServicesPage /> },
-      { path: 'contact', element: <ContactPage /> },
-      { path: 'notices', element: <NoticeListPage /> },
-      { path: 'notices/:id', element: <NoticeDetailPage /> },
-      { path: 'consultations', element: <ConsultationListPage /> },
-      { path: 'consultations/write', element: <ConsultationWritePage /> },
-      { path: 'consultations/:id', element: <ConsultationDetailPage /> },
-      { path: 'posts', element: <PostListPage /> },
-      { path: 'posts/write', element: <PostWritePage /> },
-      { path: 'posts/:id', element: <PostDetailPage /> },
-      { path: 'location', element: <LocationPage /> },
+      { index: true, element: createSuspenseElement(HomePage) },
+      { path: 'about', element: createSuspenseElement(AboutPage) },
+      { path: 'services', element: createSuspenseElement(ServicesPage) },
+      { path: 'contact', element: createSuspenseElement(ContactPage) },
+      { path: 'notices', element: createSuspenseElement(NoticeListPage) },
+      { path: 'notices/:id', element: createSuspenseElement(NoticeDetailPage) },
+      { path: 'consultations', element: createSuspenseElement(ConsultationListPage) },
+      { path: 'consultations/write', element: createSuspenseElement(ConsultationWritePage) },
+      { path: 'consultations/:id', element: createSuspenseElement(ConsultationDetailPage) },
+      { path: 'posts', element: createSuspenseElement(PostListPage) },
+      { path: 'posts/write', element: createSuspenseElement(PostWritePage) },
+      { path: 'posts/:id', element: createSuspenseElement(PostDetailPage) },
+      { path: 'location', element: createSuspenseElement(LocationPage) },
     ],
   },
   // 관리자 사이트 라우트
   {
     path: '/admin',
     children: [
-      { path: 'login', element: <AdminLoginPage /> },
+      { path: 'login', element: createSuspenseElement(AdminLoginPage) },
       {
         element: <PrivateRoute />,
         children: [
           {
             element: <AdminLayout />,
             children: [
-              { path: 'dashboard', element: <AdminDashboardPage /> },
-              { path: 'consultations', element: <AdminConsultationListPage /> },
-              { path: 'consultations/:id', element: <AdminConsultationDetailPage /> },
-              { path: 'notices', element: <AdminNoticeListPage /> },
-              { path: 'notices/new', element: <AdminNoticeWritePage /> },
-              { path: 'notices/edit/:id', element: <AdminNoticeEditPage /> },
-              { path: 'posts', element: <AdminPostListPage /> },
+              { path: 'dashboard', element: createSuspenseElement(AdminDashboardPage) },
+              { path: 'consultations', element: createSuspenseElement(AdminConsultationListPage) },
+              { path: 'consultations/:id', element: createSuspenseElement(AdminConsultationDetailPage) },
+              { path: 'notices', element: createSuspenseElement(AdminNoticeListPage) },
+              { path: 'notices/new', element: createSuspenseElement(AdminNoticeWritePage) },
+              { path: 'notices/edit/:id', element: createSuspenseElement(AdminNoticeEditPage) },
+              { path: 'posts', element: createSuspenseElement(AdminPostListPage) },
             ],
           },
         ],
@@ -84,21 +93,14 @@ const router = createBrowserRouter([
   },
 ]);
 
-const loadingMarkup = (
-  <div className="flex justify-center items-center h-screen">
-    <p className="text-lg">페이지를 불러오는 중입니다...</p>
-  </div>
-);
-
 const NAVER_MAP_CLIENT_ID = import.meta.env.VITE_NAVER_MAP_CLIENT_ID;
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <NavermapsProvider ncpClientId={NAVER_MAP_CLIENT_ID}>
       <HelmetProvider>
-        <Suspense fallback={loadingMarkup}>
-          <RouterProvider router={router} />
-        </Suspense>
+        {/* RouterProvider는 Suspense 밖으로 이동 */}
+        <RouterProvider router={router} />
       </HelmetProvider>
     </NavermapsProvider>
   </React.StrictMode>
