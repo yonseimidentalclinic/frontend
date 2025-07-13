@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '/src/services/api.js'; // 경로 수정
-import Editor from '/src/components/Editor.jsx'; // 경로 수정
+import api from '/src/services/api.js';
+import Editor from '/src/components/Editor.jsx';
 
 const AdminNoticeWritePage = () => {
   const [title, setTitle] = useState('');
@@ -29,38 +29,16 @@ const AdminNoticeWritePage = () => {
       <h1 className="text-3xl font-bold mb-6">공지사항 작성</h1>
       <form onSubmit={handleSubmit}>
         <div className="mb-6">
-          <label htmlFor="title" className="block text-lg font-medium text-gray-700 mb-2">
-            제목
-          </label>
-          <input
-            type="text"
-            id="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="제목을 입력하세요"
-          />
+          <label htmlFor="title" className="block text-lg font-medium text-gray-700 mb-2">제목</label>
+          <input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded-md" />
         </div>
         <div className="mb-6">
-          <label className="block text-lg font-medium text-gray-700 mb-2">
-            내용
-          </label>
+          <label className="block text-lg font-medium text-gray-700 mb-2">내용</label>
           <Editor value={content} onChange={setContent} />
         </div>
-        <div className="flex justify-end space-x-4">
-          <button
-            type="button"
-            onClick={() => navigate('/admin/notices')}
-            className="px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
-          >
-            취소
-          </button>
-          <button
-            type="submit"
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          >
-            등록
-          </button>
+        <div className="flex justify-end space-x-4 mt-8">
+          <button type="button" onClick={() => navigate('/admin/notices')} className="px-6 py-2 bg-gray-500 text-white rounded-md">취소</button>
+          <button type="submit" className="px-6 py-2 bg-blue-600 text-white rounded-md">등록</button>
         </div>
       </form>
     </div>
@@ -68,4 +46,3 @@ const AdminNoticeWritePage = () => {
 };
 
 export default AdminNoticeWritePage;
-
