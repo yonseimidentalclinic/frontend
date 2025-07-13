@@ -7,8 +7,8 @@ function AdminLayout() {
   const handleLogout = () => {
     // localStorage에 저장된 토큰을 삭제합니다.
     localStorage.removeItem('adminToken');
-    // 로그인 페이지로 이동시킵니다.
-    navigate('/admin/login');
+    // 병원 홈페이지 메인 화면으로 이동시킵니다.
+    navigate('/');
   };
 
   // NavLink에서 활성화된 메뉴 스타일
@@ -39,8 +39,13 @@ function AdminLayout() {
           >
             상담 관리
           </NavLink>
-          {/* 앞으로 추가될 메뉴들 */}
-          {/* <NavLink to="/admin/notices" style={({ isActive }) => (isActive ? activeLinkStyle : undefined)} className="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">공지사항 관리</NavLink> */}
+          <NavLink 
+            to="/admin/notices" 
+            style={({ isActive }) => (isActive ? activeLinkStyle : undefined)} 
+            className="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700"
+          >
+            공지사항 관리
+          </NavLink>
         </nav>
         <div className="p-4 border-t border-gray-700">
           <button

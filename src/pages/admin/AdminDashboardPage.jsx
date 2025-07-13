@@ -21,7 +21,7 @@ function AdminDashboardPage() {
         const apiUrl = `${import.meta.env.VITE_API_URL}/api/admin/dashboard`;
         const response = await axios.get(apiUrl, {
           headers: {
-            'Authorization': `Bearer ${token}` // 헤더에 인증 토큰을 포함하여 보냅니다.
+            'Authorization': `Bearer ${token}`
           }
         });
         setDashboardData(response.data);
@@ -45,34 +45,56 @@ function AdminDashboardPage() {
       </Helmet>
       <div>
         <h1 className="text-3xl font-bold text-gray-800 mb-8">관리자 대시보드</h1>
+        
+        {/* 바로가기 버튼 섹션 추가 */}
+        <div className="mb-8 p-6 bg-white rounded-lg shadow-md">
+            <h2 className="text-xl font-bold mb-4">빠른 작업</h2>
+            <div className="flex space-x-4">
+                <Link to="/admin/notices/new" className="bg-blue-600 text-white font-semibold py-2 px-6 rounded hover:bg-blue-700 transition duration-300">
+                    새 공지사항 작성
+                </Link>
+                <Link to="/admin/consultations" className="bg-green-600 text-white font-semibold py-2 px-6 rounded hover:bg-green-700 transition duration-300">
+                    상담글 전체보기
+                </Link>
+            </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* 최신 온라인 상담 */}
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h2 className="text-xl font-bold mb-4">최신 온라인 상담</h2>
-            <ul>
-              {dashboardData?.latestConsultations.map(item => (
-                <li key={item.id} className="border-b py-2">
-                  <Link to={`/consultations/${item.id}`} className="hover:text-blue-600">
-                    <p className="font-semibold">{item.title}</p>
-                    <p className="text-sm text-gray-500">{item.author} - {new Date(item.created_at).toLocaleDateString()}</p>
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            {dashboardData?.latestConsultations.length > 0 ? (
+              <ul>
+                {dashboardData.latestConsultations.map(item => (
+                  <li key={item.id} className="border-b last:border-b-0 py-2">
+                    <Link to={`/admin/consultations/${item.id}`} className="hover:text-blue-600 group">
+                      <p className="font-semibold group-hover:underline">{item.title}</p>
+                      <p className="text-sm text-gray-500">{item.author} - {new Date(item.created_at).toLocaleDateString()}</p>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-500">최근 상담 내역이 없습니다.</p>
+            )}
           </div>
           {/* 최신 공지사항 */}
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h2 className="text-xl font-bold mb-4">최신 공지사항</h2>
-            <ul>
-              {dashboardData?.latestNotices.map(item => (
-                <li key={item.id} className="border-b py-2">
-                  <Link to={`/notices/${item.id}`} className="hover:text-blue-600">
-                    <p className="font-semibold">{item.title}</p>
-                    <p className="text-sm text-gray-500">{new Date(item.created_at).toLocaleDateString()}</p>
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            {dashboardData?.latestNotices.length > 0 ? (
+              <ul>
+                {dashboardData.latestNotices.map(item => (
+                  <li key={item.id} className="border-b last:border-b-0 py-2">
+                    <Link to={`/notices/${item.id}`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 group">
+                      <p className="font-semibold group-hover:underline">{item.title}</p>
+                      <p className="text-sm text-gray-500">{new Date(item.created_at).toLocaleDateString()}</p>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-500">최근 공지사항이 없습니다.</p>
+            )}
           </div>
         </div>
       </div>
