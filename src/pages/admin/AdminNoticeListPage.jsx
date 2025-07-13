@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import api from '../../services/api';
-import Pagination from '../../components/Pagination'; // 페이지네이션 컴포넌트 경로는 실제에 맞게
+import api from '/src/services/api.js'; // 경로 수정
+import Pagination from '/src/components/Pagination.jsx'; // 경로 수정
 
 const AdminNoticeListPage = () => {
   const [notices, setNotices] = useState([]);
@@ -24,12 +24,10 @@ const AdminNoticeListPage = () => {
   }, [currentPage]);
 
   const handleDelete = async (id) => {
-    // 실제 운영에서는 커스텀 모달로 "정말 삭제하시겠습니까?"를 확인해야 합니다.
     if (window.confirm('정말로 이 공지사항을 삭제하시겠습니까?')) {
       try {
         await api.delete(`/notices/${id}`);
         alert('공지사항이 삭제되었습니다.');
-        // 현재 페이지의 아이템이 모두 삭제되면 이전 페이지로 이동
         if (notices.length === 1 && currentPage > 1) {
           setCurrentPage(currentPage - 1);
         } else {

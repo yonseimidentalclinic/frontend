@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../../services/api';
-import Pagination from '../../components/Pagination';
+import api from '/src/services/api.js'; // 경로 수정
+import Pagination from '/src/components/Pagination.jsx'; // 경로 수정
 
 const AdminConsultationListPage = () => {
   const [consultations, setConsultations] = useState([]);

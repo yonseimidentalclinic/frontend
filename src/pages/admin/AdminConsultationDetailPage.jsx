@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import api from '../../services/api';
-import Editor from '../../components/Editor';
+import api from '/src/services/api.js'; // 경로 수정
+import Editor from '/src/components/Editor.jsx'; // 경로 수정
 
 const AdminConsultationDetailPage = () => {
   const { id } = useParams();
@@ -39,15 +39,13 @@ const AdminConsultationDetailPage = () => {
     }
     try {
       if (consultation.reply) {
-        // 답변 수정
         await api.put(`/consultations/replies/${consultation.reply.id}`, { content: replyContent });
         alert('답변이 성공적으로 수정되었습니다.');
       } else {
-        // 새 답변 등록
         await api.post(`/consultations/${id}/reply`, { content: replyContent });
         alert('답변이 성공적으로 등록되었습니다.');
       }
-      fetchConsultation(); // 최신 상태로 다시 불러오기
+      fetchConsultation(); 
     } catch (error) {
       console.error('답변 처리 실패:', error);
       alert('답변 처리에 실패했습니다.');
@@ -71,7 +69,6 @@ const AdminConsultationDetailPage = () => {
         <div className="text-sm text-gray-500 mb-4">
           <span>작성자: {consultation.author}</span> | <span>작성일: {new Date(consultation.createdAt).toLocaleString()}</span>
         </div>
-        {/* 질문 내용 렌더링 */}
         <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: consultation.content }} />
       </div>
 

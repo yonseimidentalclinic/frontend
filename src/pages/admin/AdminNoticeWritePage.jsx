@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../../services/api'; // api 모듈 경로는 실제 프로젝트에 맞게 조정하세요.
-import Editor from '../../components/Editor'; // 새로 만든 에디터 컴포넌트
+import api from '/src/services/api.js'; // 경로 수정
+import Editor from '/src/components/Editor.jsx'; // 경로 수정
 
 const AdminNoticeWritePage = () => {
   const [title, setTitle] = useState('');
@@ -45,7 +45,6 @@ const AdminNoticeWritePage = () => {
           <label className="block text-lg font-medium text-gray-700 mb-2">
             내용
           </label>
-          {/* 여기가 핵심! 기존 textarea를 Editor 컴포넌트로 교체 */}
           <Editor value={content} onChange={setContent} />
         </div>
         <div className="flex justify-end space-x-4">
@@ -69,3 +68,4 @@ const AdminNoticeWritePage = () => {
 };
 
 export default AdminNoticeWritePage;
+

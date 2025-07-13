@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
-import Editor from '../components/Editor';
+import api from '/src/services/api.js'; // 경로 수정
+import Editor from '/src/components/Editor.jsx'; // 경로 수정
 
 const PostWritePage = () => {
   const [title, setTitle] = useState('');
