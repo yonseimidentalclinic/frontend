@@ -1,20 +1,19 @@
+// 파일 경로: src/main.jsx
+
 import React, { Suspense, lazy } from 'react';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { NavermapsProvider } from 'react-naver-maps';
 
-import App from '/src/App.jsx'; // 절대 경로
-import '/src/index.css'; // 절대 경로
+import App from '/src/App.jsx';
+import '/src/index.css';
 
-// 로딩 스피너 컴포넌트 import
-import LoadingSpinner from '/src/components/LoadingSpinner.jsx'; // 절대 경로
+import LoadingSpinner from '/src/components/LoadingSpinner.jsx';
+import AdminLayout from '/src/components/AdminLayout.jsx';
+import PrivateRoute from '/src/components/PrivateRoute.jsx';
 
-// 레이아웃 및 보안 컴포넌트
-import AdminLayout from '/src/components/AdminLayout.jsx'; // 절대 경로
-import PrivateRoute from '/src/components/PrivateRoute.jsx'; // 절대 경로
-
-// 사용자 페이지 (Lazy Loading)
+// 모든 페이지 컴포넌트를 Lazy Loading 합니다.
 const HomePage = lazy(() => import('/src/pages/HomePage.jsx'));
 const AboutPage = lazy(() => import('/src/pages/AboutPage.jsx'));
 const ServicesPage = lazy(() => import('/src/pages/ServicesPage.jsx'));
@@ -29,7 +28,6 @@ const PostListPage = lazy(() => import('/src/pages/PostListPage.jsx'));
 const PostDetailPage = lazy(() => import('/src/pages/PostDetailPage.jsx'));
 const PostWritePage = lazy(() => import('/src/pages/PostWritePage.jsx'));
 
-// 관리자 페이지 (Lazy Loading)
 const AdminLoginPage = lazy(() => import('/src/pages/AdminLoginPage.jsx'));
 const AdminDashboardPage = lazy(() => import('/src/pages/admin/AdminDashboardPage.jsx'));
 const AdminConsultationListPage = lazy(() => import('/src/pages/admin/AdminConsultationListPage.jsx'));
@@ -39,7 +37,6 @@ const AdminNoticeWritePage = lazy(() => import('/src/pages/admin/AdminNoticeWrit
 const AdminNoticeEditPage = lazy(() => import('/src/pages/admin/AdminNoticeEditPage.jsx'));
 const AdminPostListPage = lazy(() => import('/src/pages/admin/AdminPostListPage.jsx'));
 
-// Suspense로 각 페이지를 감싸는 헬퍼 함수
 const createSuspenseElement = (Component) => (
   <Suspense fallback={<LoadingSpinner />}>
     <Component />
@@ -47,7 +44,6 @@ const createSuspenseElement = (Component) => (
 );
 
 const router = createBrowserRouter([
-  // 사용자 사이트 라우트
   {
     path: '/',
     element: <App />,
@@ -67,7 +63,6 @@ const router = createBrowserRouter([
       { path: 'location', element: createSuspenseElement(LocationPage) },
     ],
   },
-  // 관리자 사이트 라우트
   {
     path: '/admin',
     children: [
@@ -96,7 +91,6 @@ const router = createBrowserRouter([
 const NAVER_MAP_CLIENT_ID = import.meta.env.VITE_NAVER_MAP_CLIENT_ID;
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  // <React.StrictMode> 태그를 제거하여 에디터 호환성 문제를 해결합니다.
   <NavermapsProvider ncpClientId={NAVER_MAP_CLIENT_ID}>
     <HelmetProvider>
       <RouterProvider router={router} />
