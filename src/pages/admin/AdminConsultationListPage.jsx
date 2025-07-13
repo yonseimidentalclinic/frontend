@@ -9,19 +9,16 @@ function AdminConsultationListPage() {
   const [pagination, setPagination] = useState(null);
   const [loading, setLoading] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
-  
-  // 검색어를 관리하기 위한 state
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
 
+  const token = localStorage.getItem('adminToken');
   const currentPage = parseInt(searchParams.get('page') || '1', 10);
   const currentSearch = searchParams.get('search') || '';
 
   useEffect(() => {
     const fetchConsultations = async () => {
       setLoading(true);
-      const token = localStorage.getItem('adminToken');
       try {
-        // API 요청 시 현재 페이지 번호와 검색어를 함께 보냅니다.
         const apiUrl = `${import.meta.env.VITE_API_URL}/api/admin/consultations?page=${currentPage}&search=${currentSearch}`;
         const response = await axios.get(apiUrl, { headers: { 'Authorization': `Bearer ${token}` } });
         setConsultations(response.data.data);
@@ -33,16 +30,15 @@ function AdminConsultationListPage() {
       }
     };
     fetchConsultations();
-  }, [currentPage, currentSearch]); // 페이지나 검색어가 바뀔 때마다 데이터를 다시 불러옵니다.
+  }, [currentPage, currentSearch]);
 
   const handlePageChange = (pageNumber) => {
     setSearchParams({ page: pageNumber, search: currentSearch });
   };
 
-  // 검색 실행 함수
   const handleSearch = (e) => {
     e.preventDefault();
-    setSearchParams({ page: 1, search: searchTerm }); // 검색 시에는 항상 1페이지부터 보여줍니다.
+    setSearchParams({ page: 1, search: searchTerm });
   };
 
   if (loading) return <div>로딩 중...</div>;
@@ -52,7 +48,6 @@ function AdminConsultationListPage() {
       <Helmet><title>상담 관리 | 연세미치과</title></Helmet>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">온라인 상담 관리</h1>
-        {/* 검색 폼 */}
         <form onSubmit={handleSearch} className="flex gap-2">
           <input 
             type="text"
@@ -97,7 +92,6 @@ function AdminConsultationListPage() {
           </tbody>
         </table>
       </div>
-      {/* Pagination 컴포넌트 */}
       {pagination && (
         <Pagination
           currentPage={pagination.currentPage}

@@ -1,25 +1,37 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { Helmet } from 'react-helmet-async';
+import Pagination from '../../components/Pagination';
 
 function AdminNoticeListPage() {
   const [notices, setNotices] = useState([]);
+  const [pagination, setPagination] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
+  
   const token = localStorage.getItem('adminToken');
+  const currentPage = parseInt(searchParams.get('page') || '1', 10);
+  const currentSearch = searchParams.get('search') || '';
 
   const fetchNotices = async () => {
+    setLoading(true);
     try {
-      const apiUrl = `${import.meta.env.VITE_API_URL}/api/notices`;
-      const response = await axios.get(apiUrl);
-      setNotices(response.data);
+      const apiUrl = `${import.meta.env.VITE_API_URL}/api/admin/notices?page=${currentPage}&search=${currentSearch}`;
+      const response = await axios.get(apiUrl, { headers: { 'Authorization': `Bearer ${token}` } });
+      setNotices(response.data.data);
+      setPagination(response.data.pagination);
     } catch (error) {
       console.error("Failed to fetch notices", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchNotices();
-  }, []);
+  }, [currentPage, currentSearch]);
 
   const handleDelete = async (id) => {
     if (window.confirm('정말로 이 공지사항을 삭제하시겠습니까?')) {
@@ -35,6 +47,17 @@ function AdminNoticeListPage() {
     }
   };
 
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setSearchParams({ page: 1, search: searchTerm });
+  };
+
+  const handlePageChange = (pageNumber) => {
+    setSearchParams({ page: pageNumber, search: currentSearch });
+  };
+
+  if (loading) return <div>로딩 중...</div>;
+
   return (
     <>
       <Helmet><title>공지사항 관리 | 연세미치과</title></Helmet>
@@ -42,6 +65,16 @@ function AdminNoticeListPage() {
         <h1 className="text-2xl font-bold">공지사항 관리</h1>
         <Link to="/admin/notices/new" className="bg-blue-600 text-white font-semibold py-2 px-4 rounded hover:bg-blue-700">새 글 작성</Link>
       </div>
+      <form onSubmit={handleSearch} className="flex gap-2 mb-6">
+          <input 
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="제목 또는 내용으로 검색"
+            className="px-3 py-2 border rounded w-full"
+          />
+          <button type="submit" className="bg-gray-600 text-white font-semibold py-2 px-4 rounded hover:bg-gray-700 flex-shrink-0">검색</button>
+      </form>
       <div className="bg-white shadow-md rounded-lg overflow-hidden">
         <table className="min-w-full">
           <thead className="bg-gray-50">
@@ -65,6 +98,13 @@ function AdminNoticeListPage() {
           </tbody>
         </table>
       </div>
+      {pagination && (
+        <Pagination
+          currentPage={pagination.currentPage}
+          totalPages={pagination.totalPages}
+          onPageChange={handlePageChange}
+        />
+      )}
     </>
   );
 }
