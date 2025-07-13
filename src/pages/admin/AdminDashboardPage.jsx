@@ -46,12 +46,11 @@ function AdminDashboardPage() {
       <div>
         <h1 className="text-3xl font-bold text-gray-800 mb-8">관리자 대시보드</h1>
         
-        {/* 바로가기 버튼 섹션 추가 */}
         <div className="mb-8 p-6 bg-white rounded-lg shadow-md">
             <h2 className="text-xl font-bold mb-4">빠른 작업</h2>
-            <div className="flex space-x-4">
+            <div className="flex flex-wrap gap-4">
                 <Link to="/admin/notices/new" className="bg-blue-600 text-white font-semibold py-2 px-6 rounded hover:bg-blue-700 transition duration-300">
-                    새 공지사항 작성
+                    새 병원소식 작성
                 </Link>
                 <Link to="/admin/consultations" className="bg-green-600 text-white font-semibold py-2 px-6 rounded hover:bg-green-700 transition duration-300">
                     상담글 전체보기
@@ -60,7 +59,6 @@ function AdminDashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* 최신 온라인 상담 */}
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h2 className="text-xl font-bold mb-4">최신 온라인 상담</h2>
             {dashboardData?.latestConsultations.length > 0 ? (
@@ -78,7 +76,6 @@ function AdminDashboardPage() {
               <p className="text-gray-500">최근 상담 내역이 없습니다.</p>
             )}
           </div>
-          {/* 최신 공지사항 */}
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h2 className="text-xl font-bold mb-4">최신 공지사항</h2>
             {dashboardData?.latestNotices.length > 0 ? (

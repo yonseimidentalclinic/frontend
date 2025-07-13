@@ -2,7 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
-import { NavermapsProvider } from 'react-naver-maps'; // 1. 네이버 지도 Provider를 불러옵니다.
+import { NavermapsProvider } from 'react-naver-maps';
 
 import App from './App.jsx';
 import './index.css';
@@ -34,6 +34,7 @@ const AdminConsultationDetailPage = lazy(() => import('./pages/admin/AdminConsul
 const AdminNoticeListPage = lazy(() => import('./pages/admin/AdminNoticeListPage.jsx'));
 const AdminNoticeWritePage = lazy(() => import('./pages/admin/AdminNoticeWritePage.jsx'));
 const AdminNoticeEditPage = lazy(() => import('./pages/admin/AdminNoticeEditPage.jsx'));
+const AdminPostListPage = lazy(() => import('./pages/admin/AdminPostListPage.jsx'));
 
 
 const router = createBrowserRouter([
@@ -51,10 +52,10 @@ const router = createBrowserRouter([
       { path: 'consultations', element: <ConsultationListPage /> },
       { path: 'consultations/write', element: <ConsultationWritePage /> },
       { path: 'consultations/:id', element: <ConsultationDetailPage /> },
-      { path: 'location', element: <LocationPage /> },
       { path: 'posts', element: <PostListPage /> },
       { path: 'posts/write', element: <PostWritePage /> },
       { path: 'posts/:id', element: <PostDetailPage /> },
+      { path: 'location', element: <LocationPage /> },
     ],
   },
   // 관리자 사이트 라우트
@@ -74,6 +75,7 @@ const router = createBrowserRouter([
               { path: 'notices', element: <AdminNoticeListPage /> },
               { path: 'notices/new', element: <AdminNoticeWritePage /> },
               { path: 'notices/edit/:id', element: <AdminNoticeEditPage /> },
+              { path: 'posts', element: <AdminPostListPage /> },
             ],
           },
         ],
@@ -88,12 +90,10 @@ const loadingMarkup = (
   </div>
 );
 
-// 2. 환경 변수에서 네이버 클라이언트 ID를 가져옵니다.
 const NAVER_MAP_CLIENT_ID = import.meta.env.VITE_NAVER_MAP_CLIENT_ID;
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    {/* 3. NavermapsProvider로 전체 앱을 감싸고, Client ID를 전달합니다. */}
     <NavermapsProvider ncpClientId={NAVER_MAP_CLIENT_ID}>
       <HelmetProvider>
         <Suspense fallback={loadingMarkup}>

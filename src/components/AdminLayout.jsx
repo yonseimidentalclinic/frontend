@@ -46,6 +46,13 @@ function AdminLayout() {
           >
             공지사항 관리
           </NavLink>
+          <NavLink 
+            to="/admin/posts" 
+            style={({ isActive }) => (isActive ? activeLinkStyle : undefined)} 
+            className="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700"
+          >
+            자유게시판 관리
+          </NavLink>
         </nav>
         <div className="p-4 border-t border-gray-700">
           <button

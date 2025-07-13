@@ -15,8 +15,7 @@ function AdminConsultationListPage() {
   const currentPage = parseInt(searchParams.get('page') || '1', 10);
   const currentSearch = searchParams.get('search') || '';
 
-  useEffect(() => {
-    const fetchConsultations = async () => {
+  const fetchConsultations = async () => {
       setLoading(true);
       try {
         const apiUrl = `${import.meta.env.VITE_API_URL}/api/admin/consultations?page=${currentPage}&search=${currentSearch}`;
@@ -29,8 +28,24 @@ function AdminConsultationListPage() {
         setLoading(false);
       }
     };
+
+  useEffect(() => {
     fetchConsultations();
   }, [currentPage, currentSearch]);
+
+  const handleDelete = async (id) => {
+    if (window.confirm('정말로 이 상담글을 삭제하시겠습니까?')) {
+      try {
+        const apiUrl = `${import.meta.env.VITE_API_URL}/api/admin/consultations/${id}`;
+        await axios.delete(apiUrl, { headers: { 'Authorization': `Bearer ${token}` } });
+        alert('삭제되었습니다.');
+        fetchConsultations(); // 삭제 후 목록을 다시 불러옵니다.
+      } catch (error) {
+        alert('삭제에 실패했습니다.');
+        console.error("Failed to delete consultation", error);
+      }
+    }
+  };
 
   const handlePageChange = (pageNumber) => {
     setSearchParams({ page: pageNumber, search: currentSearch });
@@ -67,6 +82,7 @@ function AdminConsultationListPage() {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">제목</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">작성자</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">작성일</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">관리</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -87,6 +103,9 @@ function AdminConsultationListPage() {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.author}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(item.created_at).toLocaleDateString()}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <button onClick={() => handleDelete(item.id)} className="text-red-600 hover:text-red-900">삭제</button>
+                </td>
               </tr>
             ))}
           </tbody>
