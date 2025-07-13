@@ -1,66 +1,109 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { Helmet } from 'react-helmet-async';
+import api from '../services/api';
+import Editor from '../components/Editor';
 
-function ConsultationWritePage() {
-  const [formData, setFormData] = useState({
-    author: '',
-    password: '',
-    title: '',
-    content: '',
-    is_secret: false,
-  });
-  const [error, setError] = useState('');
+const ConsultationWritePage = () => {
+  const [title, setTitle] = useState('');
+  const [author, setAuthor] = useState('');
+  const [password, setPassword] = useState('');
+  const [content, setContent] = useState('');
+  const [isSecret, setIsSecret] = useState(true);
   const navigate = useNavigate();
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prevState => ({
-      ...prevState,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    if (!title.trim() || !author.trim() || !password.trim() || !content.trim()) {
+      alert('모든 필드를 입력해주세요.');
+      return;
+    }
     try {
-      const apiUrl = `${import.meta.env.VITE_API_URL}/api/consultations`;
-      const response = await axios.post(apiUrl, formData);
-      if (response.data.success) {
-        // 글쓰기 성공 시, 상세 페이지로 이동
-        navigate(`/consultations/${response.data.consultationId}`);
-      }
-    } catch (err) {
-      setError(err.response?.data?.message || '글 등록 중 오류가 발생했습니다.');
+      await api.post('/consultations', { title, author, password, content, isSecret });
+      alert('상담글이 성공적으로 등록되었습니다. 관리자 답변 후 목록에서 확인하실 수 있습니다.');
+      navigate('/consultations');
+    } catch (error) {
+      console.error('상담글 등록 실패:', error);
+      alert('상담글 등록에 실패했습니다.');
     }
   };
 
   return (
-    <>
-      <Helmet>
-        <title>상담 글쓰기 | 연세미치과</title>
-      </Helmet>
-      <div className="max-w-2xl mx-auto bg-white p-8 shadow-lg rounded-lg">
-        <h1 className="text-2xl font-bold mb-6">상담 글쓰기</h1>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input type="text" name="author" placeholder="작성자" required onChange={handleChange} className="w-full p-2 border rounded" />
-          <input type="password" name="password" placeholder="비밀번호 (4자리 이상)" required onChange={handleChange} className="w-full p-2 border rounded" />
-          <input type="text" name="title" placeholder="제목" required onChange={handleChange} className="w-full p-2 border rounded" />
-          <textarea name="content" placeholder="내용" required rows="10" onChange={handleChange} className="w-full p-2 border rounded" />
-          <div className="flex items-center">
-            <input type="checkbox" name="is_secret" id="is_secret" onChange={handleChange} className="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-            <label htmlFor="is_secret" className="ml-2 block text-sm text-gray-900">비밀글로 설정</label>
+    <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+      <h1 className="text-3xl font-bold text-gray-800 mb-6">온라인 상담 작성</h1>
+      <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-lg p-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div>
+            <label htmlFor="author" className="block text-sm font-medium text-gray-700 mb-1">작성자</label>
+            <input
+              type="text"
+              id="author"
+              value={author}
+              onChange={(e) => setAuthor(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+              placeholder="이름"
+            />
           </div>
-          {error && <p className="text-red-500 text-sm">{error}</p>}
-          <button type="submit" className="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded hover:bg-blue-700">
-            작성 완료
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">비밀번호</label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+              placeholder="상담글 확인 시 필요"
+            />
+          </div>
+        </div>
+        <div className="mb-6">
+          <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">제목</label>
+          <input
+            type="text"
+            id="title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+            placeholder="제목을 입력하세요"
+          />
+        </div>
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-1">상담 내용</label>
+          <Editor value={content} onChange={setContent} />
+        </div>
+        <div className="mb-6">
+          <div className="flex items-center">
+            <input
+              id="isSecret"
+              name="isSecret"
+              type="checkbox"
+              checked={isSecret}
+              onChange={(e) => setIsSecret(e.target.checked)}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label htmlFor="isSecret" className="ml-2 block text-sm text-gray-900">
+              비밀글로 작성하기 (관리자만 볼 수 있습니다)
+            </label>
+          </div>
+        </div>
+        <div className="flex justify-end space-x-4">
+          <button
+            type="button"
+            onClick={() => navigate('/consultations')}
+            className="px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+          >
+            취소
           </button>
-        </form>
-      </div>
-    </>
+          <button
+            type="submit"
+            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          >
+            상담 신청하기
+          </button>
+        </div>
+      </form>
+    </div>
   );
-}
+};
 
 export default ConsultationWritePage;
+

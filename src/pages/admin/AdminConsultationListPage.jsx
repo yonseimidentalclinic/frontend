@@ -1,125 +1,100 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import axios from 'axios';
-import { Helmet } from 'react-helmet-async';
+import { useNavigate } from 'react-router-dom';
+import api from '../../services/api';
 import Pagination from '../../components/Pagination';
 
-function AdminConsultationListPage() {
+const AdminConsultationListPage = () => {
   const [consultations, setConsultations] = useState([]);
-  const [pagination, setPagination] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const navigate = useNavigate();
 
-  const token = localStorage.getItem('adminToken');
-  const currentPage = parseInt(searchParams.get('page') || '1', 10);
-  const currentSearch = searchParams.get('search') || '';
-
-  const fetchConsultations = async () => {
-      setLoading(true);
-      try {
-        const apiUrl = `${import.meta.env.VITE_API_URL}/api/admin/consultations?page=${currentPage}&search=${currentSearch}`;
-        const response = await axios.get(apiUrl, { headers: { 'Authorization': `Bearer ${token}` } });
-        setConsultations(response.data.data);
-        setPagination(response.data.pagination);
-      } catch (error) {
-        console.error("Failed to fetch consultations", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchConsultations = async (page) => {
+    try {
+      const response = await api.get(`/consultations?page=${page}&limit=10`);
+      setConsultations(response.data.consultations);
+      setTotalPages(response.data.totalPages);
+    } catch (error) {
+      console.error('상담 목록 로딩 실패:', error);
+    }
+  };
 
   useEffect(() => {
-    fetchConsultations();
-  }, [currentPage, currentSearch]);
+    fetchConsultations(currentPage);
+  }, [currentPage]);
 
   const handleDelete = async (id) => {
-    if (window.confirm('정말로 이 상담글을 삭제하시겠습니까?')) {
+    if (window.confirm('이 상담글을 정말로 삭제하시겠습니까? 답변도 함께 삭제됩니다.')) {
       try {
-        const apiUrl = `${import.meta.env.VITE_API_URL}/api/admin/consultations/${id}`;
-        await axios.delete(apiUrl, { headers: { 'Authorization': `Bearer ${token}` } });
-        alert('삭제되었습니다.');
-        fetchConsultations(); // 삭제 후 목록을 다시 불러옵니다.
+        await api.delete(`/consultations/${id}`);
+        alert('상담글이 삭제되었습니다.');
+        if (consultations.length === 1 && currentPage > 1) {
+          setCurrentPage(currentPage - 1);
+        } else {
+          fetchConsultations(currentPage);
+        }
       } catch (error) {
+        console.error('상담글 삭제 실패:', error);
         alert('삭제에 실패했습니다.');
-        console.error("Failed to delete consultation", error);
       }
     }
   };
 
-  const handlePageChange = (pageNumber) => {
-    setSearchParams({ page: pageNumber, search: currentSearch });
-  };
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    setSearchParams({ page: 1, search: searchTerm });
-  };
-
-  if (loading) return <div>로딩 중...</div>;
-
   return (
-    <>
-      <Helmet><title>상담 관리 | 연세미치과</title></Helmet>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">온라인 상담 관리</h1>
-        <form onSubmit={handleSearch} className="flex gap-2">
-          <input 
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="제목 또는 작성자로 검색"
-            className="px-3 py-2 border rounded"
-          />
-          <button type="submit" className="bg-gray-600 text-white font-semibold py-2 px-4 rounded hover:bg-gray-700">검색</button>
-        </form>
-      </div>
+    <div className="p-8">
+      <h1 className="text-3xl font-bold mb-6">온라인 상담 관리</h1>
       <div className="bg-white shadow-md rounded-lg overflow-hidden">
         <table className="min-w-full">
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-100">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">상태</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">제목</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">작성자</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">작성일</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">관리</th>
+              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">답변상태</th>
+              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">관리</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {consultations.map(item => (
-              <tr key={item.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {item.reply ? (
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">답변 완료</span>
+          <tbody className="divide-y divide-gray-200">
+            {consultations.map((consultation) => (
+              <tr key={consultation.id}>
+                <td className="px-6 py-4 whitespace-nowrap">{consultation.id}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{consultation.title}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{consultation.author}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{new Date(consultation.createdAt).toLocaleDateString()}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-center">
+                  {consultation.reply ? (
+                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                      답변 완료
+                    </span>
                   ) : (
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">대기중</span>
+                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                      대기중
+                    </span>
                   )}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <Link to={`/admin/consultations/${item.id}`} className="text-sm font-medium text-blue-600 hover:text-blue-900">
-                    {item.title}
-                    {item.is_secret && ' 🔒'}
-                  </Link>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.author}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(item.created_at).toLocaleDateString()}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <button onClick={() => handleDelete(item.id)} className="text-red-600 hover:text-red-900">삭제</button>
+                <td className="px-6 py-4 whitespace-nowrap text-center space-x-2">
+                  <button
+                    onClick={() => navigate(`/admin/consultations/${consultation.id}`)}
+                    className="px-3 py-1 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600"
+                  >
+                    답변/보기
+                  </button>
+                  <button
+                    onClick={() => handleDelete(consultation.id)}
+                    className="px-3 py-1 bg-red-500 text-white text-sm rounded-md hover:bg-red-600"
+                  >
+                    삭제
+                  </button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      {pagination && (
-        <Pagination
-          currentPage={pagination.currentPage}
-          totalPages={pagination.totalPages}
-          onPageChange={handlePageChange}
-        />
-      )}
-    </>
+      <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+    </div>
   );
-}
+};
 
 export default AdminConsultationListPage;

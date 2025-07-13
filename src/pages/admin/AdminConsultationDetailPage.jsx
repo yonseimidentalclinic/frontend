@@ -1,79 +1,103 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import axios from 'axios';
-import { Helmet } from 'react-helmet-async';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import api from '../../services/api';
+import Editor from '../../components/Editor';
 
-function AdminConsultationDetailPage() {
+const AdminConsultationDetailPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [consultation, setConsultation] = useState(null);
-  const [reply, setReply] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [replyContent, setReplyContent] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchConsultation = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const response = await api.get(`/consultations/${id}`);
+      setConsultation(response.data);
+      if (response.data.reply) {
+        setReplyContent(response.data.reply.content);
+      }
+    } catch (error) {
+      console.error('상담 내용 로딩 실패:', error);
+      alert('상담 내용을 불러오는 데 실패했습니다.');
+      navigate('/admin/consultations');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [id, navigate]);
 
   useEffect(() => {
-    const fetchConsultation = async () => {
-      const token = localStorage.getItem('adminToken');
-      try {
-        const apiUrl = `${import.meta.env.VITE_API_URL}/api/admin/consultations/${id}`;
-        const response = await axios.get(apiUrl, { headers: { 'Authorization': `Bearer ${token}` } });
-        setConsultation(response.data);
-        setReply(response.data.reply || '');
-      } catch (error) {
-        console.error("Failed to fetch consultation details", error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchConsultation();
-  }, [id]);
+  }, [fetchConsultation]);
 
-  const handleReplySubmit = async (e) => {
+  const handleSubmitReply = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem('adminToken');
+    if (!replyContent.trim()) {
+      alert('답변 내용을 입력해주세요.');
+      return;
+    }
     try {
-      const apiUrl = `${import.meta.env.VITE_API_URL}/api/admin/consultations/${id}/reply`;
-      await axios.post(apiUrl, { reply }, { headers: { 'Authorization': `Bearer ${token}` } });
-      alert('답변이 성공적으로 등록되었습니다.');
-      // Optionally, refresh the data
-      const updatedResponse = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/consultations/${id}`, { headers: { 'Authorization': `Bearer ${token}` } });
-      setConsultation(updatedResponse.data);
+      if (consultation.reply) {
+        // 답변 수정
+        await api.put(`/consultations/replies/${consultation.reply.id}`, { content: replyContent });
+        alert('답변이 성공적으로 수정되었습니다.');
+      } else {
+        // 새 답변 등록
+        await api.post(`/consultations/${id}/reply`, { content: replyContent });
+        alert('답변이 성공적으로 등록되었습니다.');
+      }
+      fetchConsultation(); // 최신 상태로 다시 불러오기
     } catch (error) {
-      alert('답변 등록에 실패했습니다.');
-      console.error("Failed to submit reply", error);
+      console.error('답변 처리 실패:', error);
+      alert('답변 처리에 실패했습니다.');
     }
   };
-  
-  if (loading) return <div>로딩 중...</div>;
-  if (!consultation) return <div>상담 내용을 찾을 수 없습니다.</div>;
+
+  if (isLoading) {
+    return <div className="p-8">로딩 중...</div>;
+  }
+
+  if (!consultation) {
+    return <div className="p-8">상담 내용을 찾을 수 없습니다.</div>;
+  }
 
   return (
-    <>
-      <Helmet><title>'{consultation.title}' 상담 상세 | 연세미치과</title></Helmet>
-      <div className="bg-white p-8 rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold mb-2">{consultation.title}</h1>
-        <div className="text-sm text-gray-500 mb-6 pb-4 border-b">
-          <span>작성자: {consultation.author}</span> | <span>작성일: {new Date(consultation.created_at).toLocaleDateString()}</span>
+    <div className="p-8">
+      <h1 className="text-3xl font-bold mb-6">온라인 상담 상세</h1>
+      
+      <div className="bg-white shadow-md rounded-lg p-6 mb-8">
+        <h2 className="text-2xl font-semibold mb-2">{consultation.title}</h2>
+        <div className="text-sm text-gray-500 mb-4">
+          <span>작성자: {consultation.author}</span> | <span>작성일: {new Date(consultation.createdAt).toLocaleString()}</span>
         </div>
-        <div className="mb-8">
-          <h3 className="font-semibold mb-2">상담 내용</h3>
-          <p className="text-gray-700 whitespace-pre-wrap">{consultation.content}</p>
-        </div>
-        <form onSubmit={handleReplySubmit}>
-          <h3 className="font-semibold mb-2">답변 작성</h3>
-          <textarea
-            value={reply}
-            onChange={(e) => setReply(e.target.value)}
-            rows="8"
-            className="w-full p-2 border rounded"
-            placeholder="답변을 입력하세요..."
-          />
-          <div className="flex justify-end mt-4">
-            <Link to="/admin/consultations" className="bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded mr-2">목록으로</Link>
-            <button type="submit" className="bg-blue-600 text-white font-semibold py-2 px-4 rounded">답변 저장</button>
+        {/* 질문 내용 렌더링 */}
+        <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: consultation.content }} />
+      </div>
+
+      <div className="bg-white shadow-md rounded-lg p-6">
+        <h3 className="text-xl font-bold mb-4">답변 작성 및 수정</h3>
+        <form onSubmit={handleSubmitReply}>
+          <Editor value={replyContent} onChange={setReplyContent} />
+          <div className="flex justify-end space-x-4 mt-4">
+            <button
+              type="button"
+              onClick={() => navigate('/admin/consultations')}
+              className="px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+            >
+              목록으로
+            </button>
+            <button
+              type="submit"
+              className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+            >
+              {consultation.reply ? '답변 수정' : '답변 등록'}
+            </button>
           </div>
         </form>
       </div>
-    </>
+    </div>
   );
-}
+};
 
 export default AdminConsultationDetailPage;

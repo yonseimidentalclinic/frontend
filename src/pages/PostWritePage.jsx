@@ -1,49 +1,92 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { Helmet } from 'react-helmet-async';
+import api from '../services/api';
+import Editor from '../components/Editor';
 
-function PostWritePage() {
-  const [formData, setFormData] = useState({ author: '', title: '', content: '' });
-  const [error, setError] = useState('');
+const PostWritePage = () => {
+  const [title, setTitle] = useState('');
+  const [author, setAuthor] = useState('');
+  const [password, setPassword] = useState('');
+  const [content, setContent] = useState('');
   const navigate = useNavigate();
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prevState => ({ ...prevState, [name]: value }));
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    if (!title.trim() || !author.trim() || !password.trim() || !content.trim()) {
+      alert('모든 필드를 입력해주세요.');
+      return;
+    }
     try {
-      const apiUrl = `${import.meta.env.VITE_API_URL}/api/posts`;
-      const response = await axios.post(apiUrl, formData);
-      if (response.data.success) {
-        navigate(`/posts/${response.data.postId}`);
-      }
-    } catch (err) {
-      setError(err.response?.data?.message || '글 등록 중 오류가 발생했습니다.');
+      await api.post('/posts', { title, author, password, content });
+      alert('게시글이 성공적으로 등록되었습니다.');
+      navigate('/posts');
+    } catch (error) {
+      console.error('게시글 등록 실패:', error);
+      alert('게시글 등록에 실패했습니다.');
     }
   };
 
   return (
-    <>
-      <Helmet><title>새 글 작성 | 자유게시판</title></Helmet>
-      <div className="max-w-2xl mx-auto bg-white p-8 shadow-lg rounded-lg">
-        <h1 className="text-2xl font-bold mb-6">자유게시판 글쓰기</h1>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input type="text" name="author" placeholder="작성자" required onChange={handleChange} className="w-full p-2 border rounded" />
-          <input type="text" name="title" placeholder="제목" required onChange={handleChange} className="w-full p-2 border rounded" />
-          <textarea name="content" placeholder="내용" required rows="10" onChange={handleChange} className="w-full p-2 border rounded" />
-          {error && <p className="text-red-500 text-sm">{error}</p>}
-          <button type="submit" className="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded hover:bg-blue-700">
+    <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+      <h1 className="text-3xl font-bold text-gray-800 mb-6">자유게시판 글쓰기</h1>
+      <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-lg p-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div>
+            <label htmlFor="author" className="block text-sm font-medium text-gray-700 mb-1">작성자</label>
+            <input
+              type="text"
+              id="author"
+              value={author}
+              onChange={(e) => setAuthor(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+              placeholder="이름"
+            />
+          </div>
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">비밀번호</label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+              placeholder="게시글 수정/삭제 시 필요"
+            />
+          </div>
+        </div>
+        <div className="mb-6">
+          <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">제목</label>
+          <input
+            type="text"
+            id="title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+            placeholder="제목을 입력하세요"
+          />
+        </div>
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-1">내용</label>
+          <Editor value={content} onChange={setContent} />
+        </div>
+        <div className="flex justify-end space-x-4">
+          <button
+            type="button"
+            onClick={() => navigate('/posts')}
+            className="px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+          >
+            취소
+          </button>
+          <button
+            type="submit"
+            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          >
             작성 완료
           </button>
-        </form>
-      </div>
-    </>
+        </div>
+      </form>
+    </div>
   );
-}
+};
 
 export default PostWritePage;
