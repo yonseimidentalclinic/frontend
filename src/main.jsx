@@ -22,6 +22,9 @@ const ConsultationListPage = lazy(() => import('./pages/ConsultationListPage.jsx
 const ConsultationWritePage = lazy(() => import('./pages/ConsultationWritePage.jsx'));
 const ConsultationDetailPage = lazy(() => import('./pages/ConsultationDetailPage.jsx'));
 const LocationPage = lazy(() => import('./pages/LocationPage.jsx'));
+const PostListPage = lazy(() => import('./pages/PostListPage.jsx'));
+const PostDetailPage = lazy(() => import('./pages/PostDetailPage.jsx'));
+const PostWritePage = lazy(() => import('./pages/PostWritePage.jsx'));
 
 // 관리자 페이지
 const AdminLoginPage = lazy(() => import('./pages/AdminLoginPage.jsx'));
@@ -49,6 +52,9 @@ const router = createBrowserRouter([
       { path: 'consultations/write', element: <ConsultationWritePage /> },
       { path: 'consultations/:id', element: <ConsultationDetailPage /> },
       { path: 'location', element: <LocationPage /> },
+      { path: 'posts', element: <PostListPage /> },
+      { path: 'posts/write', element: <PostWritePage /> },
+      { path: 'posts/:id', element: <PostDetailPage /> },
     ],
   },
   // 관리자 사이트 라우트

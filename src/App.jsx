@@ -31,6 +31,7 @@ function App() {
             <Link to="/services" className="text-gray-600 hover:text-blue-500">진료안내</Link>
             <Link to="/notices" className="text-gray-600 hover:text-blue-500">병원소식</Link>
             <Link to="/consultations" className="text-gray-600 hover:text-blue-500">온라인 상담</Link>
+            <Link to="/posts" className="text-gray-600 hover:text-blue-500">자유게시판</Link>
             <Link to="/location" className="text-gray-600 hover:text-blue-500">오시는 길</Link>
           </div>
 
@@ -48,6 +49,7 @@ function App() {
             <Link to="/services" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">진료안내</Link>
             <Link to="/notices" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">병원소식</Link>
             <Link to="/consultations" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">온라인 상담</Link>
+            <Link to="/posts" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">자유게시판</Link>
             <Link to="/location" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">오시는 길</Link>
           </div>
         )}
