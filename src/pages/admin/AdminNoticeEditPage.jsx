@@ -1,55 +1,63 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { Helmet } from 'react-helmet-async';
-import AdminNoticeForm from '../../components/AdminNoticeForm';
+import { useNavigate, useParams } from 'react-router-dom';
+import api from '/src/services/api.js';
+import Editor from '/src/components/Editor.jsx';
 
-function AdminNoticeEditPage() {
-  const { id } = useParams();
+const AdminNoticeEditPage = () => {
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
   const navigate = useNavigate();
-  const token = localStorage.getItem('adminToken');
-  const [initialData, setInitialData] = useState(null);
+  const { id } = useParams();
 
   useEffect(() => {
     const fetchNotice = async () => {
       try {
-        // 수정할 공지사항의 기존 데이터를 불러옵니다.
-        const apiUrl = `${import.meta.env.VITE_API_URL}/api/notices/${id}`;
-        const response = await axios.get(apiUrl);
-        setInitialData({ title: response.data.title, content: response.data.content });
+        const response = await api.get(`/notices/${id}`);
+        setTitle(response.data.title);
+        setContent(response.data.content);
       } catch (error) {
-        console.error("Failed to fetch notice", error);
+        console.error('공지사항 불러오기 실패:', error);
         alert('공지사항 정보를 불러오는 데 실패했습니다.');
       }
     };
     fetchNotice();
   }, [id]);
 
-  const handleSubmit = async (formData) => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!title.trim() || !content.trim()) {
+      alert('제목과 내용을 모두 입력해주세요.');
+      return;
+    }
     try {
-      // 수정한 내용을 백엔드로 보내 업데이트를 요청합니다.
-      const apiUrl = `${import.meta.env.VITE_API_URL}/api/admin/notices/${id}`;
-      await axios.put(apiUrl, formData, { headers: { 'Authorization': `Bearer ${token}` } });
+      await api.put(`/notices/${id}`, { title, content });
       alert('공지사항이 성공적으로 수정되었습니다.');
-      navigate('/admin/notices'); // 수정 후 목록 페이지로 이동
+      navigate('/admin/notices');
     } catch (error) {
-      alert('수정에 실패했습니다.');
-      console.error("Failed to update notice", error);
+      console.error('공지사항 수정 실패:', error);
+      alert('공지사항 수정에 실패했습니다.');
     }
   };
 
-  // 데이터를 불러오는 동안 로딩 메시지를 보여줍니다.
-  if (!initialData) return <div>로딩 중...</div>;
-
   return (
-    <>
-      <Helmet><title>공지사항 수정 | 연세미치과</title></Helmet>
-      <h1 className="text-2xl font-bold mb-6">공지사항 수정</h1>
-      <div className="bg-white p-8 rounded-lg shadow-md">
-        <AdminNoticeForm initialData={initialData} onSubmit={handleSubmit} isEditing={true} />
-      </div>
-    </>
+    <div className="p-8">
+      <h1 className="text-3xl font-bold mb-6">공지사항 수정</h1>
+      <form onSubmit={handleSubmit}>
+        <div className="mb-6">
+          <label htmlFor="title" className="block text-lg font-medium text-gray-700 mb-2">제목</label>
+          <input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded-md" />
+        </div>
+        <div className="mb-6">
+          <label className="block text-lg font-medium text-gray-700 mb-2">내용</label>
+          <Editor value={content} onChange={setContent} />
+        </div>
+        <div className="flex justify-end space-x-4 mt-8">
+          <button type="button" onClick={() => navigate('/admin/notices')} className="px-6 py-2 bg-gray-500 text-white rounded-md">취소</button>
+          <button type="submit" className="px-6 py-2 bg-blue-600 text-white rounded-md">수정 완료</button>
+        </div>
+      </form>
+    </div>
   );
-}
+};
 
 export default AdminNoticeEditPage;
