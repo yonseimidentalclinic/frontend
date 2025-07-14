@@ -12,44 +12,52 @@ const AdminConsultationListPage = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  const fetchConsultations = async (page) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await api.get(`/consultations?page=${page}&limit=10`);
-      if (Array.isArray(response.data.consultations)) {
-        setConsultations(response.data.consultations);
-        setTotalPages(response.data.totalPages);
-      } else {
-        setConsultations([]);
-        setError('상담 데이터를 불러오는 데 실패했습니다.');
-      }
-    } catch (err) {
-      console.error('상담 목록 로딩 실패:', err);
-      setError('서버와 통신 중 오류가 발생했습니다.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchConsultations = async (page) => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response = await api.get(`/consultations?page=${page}&limit=10`);
+        if (response.data && Array.isArray(response.data.consultations)) {
+          setConsultations(response.data.consultations);
+          setTotalPages(response.data.totalPages);
+        } else {
+          setConsultations([]);
+          setTotalPages(0);
+          setError('상담 데이터를 불러오는 데 실패했습니다.');
+        }
+      } catch (err) {
+        console.error('상담 목록 로딩 실패:', err);
+        setError('서버와 통신 중 오류가 발생했습니다.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
     fetchConsultations(currentPage);
   }, [currentPage]);
 
   const handleDelete = async (id) => {
-    if (window.confirm('이 상담글을 정말로 삭제하시겠습니까? 답변도 함께 삭제됩니다.')) {
+    if (window.confirm('이 상담글을 정말로 삭제하시겠습니까?')) {
       try {
         await api.delete(`/consultations/${id}`);
         alert('상담글이 삭제되었습니다.');
-        fetchConsultations(currentPage);
+        if (consultations.length === 1 && currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        } else {
+            const fetchConsultations = async (page) => {
+                const response = await api.get(`/consultations?page=${page}&limit=10`);
+                setConsultations(response.data.consultations);
+                setTotalPages(response.data.totalPages);
+            };
+            fetchConsultations(currentPage);
+        }
       } catch (err) {
-        console.error('상담글 삭제 실패:', err);
         alert('삭제에 실패했습니다.');
       }
     }
   };
 
-  if (isLoading) return <LoadingSpinner />;
+  if (isLoading) return <div className="p-8 flex justify-center"><LoadingSpinner /></div>;
   if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
 
   return (
@@ -76,39 +84,21 @@ const AdminConsultationListPage = () => {
                 <td className="px-6 py-4">{new Date(consultation.createdAt).toLocaleDateString()}</td>
                 <td className="px-6 py-4 text-center">
                   {consultation.replyId ? (
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                      답변 완료
-                    </span>
+                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">답변 완료</span>
                   ) : (
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                      대기중
-                    </span>
+                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">대기중</span>
                   )}
                 </td>
                 <td className="px-6 py-4 text-center space-x-2">
-                  <button
-                    onClick={() => navigate(`/admin/consultations/${consultation.id}`)}
-                    className="px-3 py-1 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600"
-                  >
-                    답변/보기
-                  </button>
-                  <button
-                    onClick={() => handleDelete(consultation.id)}
-                    className="px-3 py-1 bg-red-500 text-white text-sm rounded-md hover:bg-red-600"
-                  >
-                    삭제
-                  </button>
+                  <button onClick={() => navigate(`/admin/consultations/${consultation.id}`)} className="px-3 py-1 bg-blue-500 text-white rounded-md">답변/보기</button>
+                  <button onClick={() => handleDelete(consultation.id)} className="px-3 py-1 bg-red-500 text-white rounded-md">삭제</button>
                 </td>
               </tr>
-            )) : (
-              <tr>
-                <td colSpan="6" className="text-center py-10 text-gray-500">접수된 상담글이 없습니다.</td>
-              </tr>
-            )}
+            )) : <tr><td colSpan="6" className="text-center py-10">상담글이 없습니다.</td></tr>}
           </tbody>
         </table>
       </div>
-      <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+      {totalPages > 1 && <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />}
     </div>
   );
 };

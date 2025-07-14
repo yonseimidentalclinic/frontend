@@ -10,28 +10,27 @@ const AdminPostListPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchPosts = async (page) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      // 관리자 전용 API 호출로 변경
-      const response = await api.get(`/admin/posts?page=${page}&limit=10`);
-      if (Array.isArray(response.data.posts)) {
-        setPosts(response.data.posts);
-        setTotalPages(response.data.totalPages);
-      } else {
-        setPosts([]);
-        setError('게시글 데이터를 불러오는 데 실패했습니다.');
-      }
-    } catch (err) {
-      console.error('게시글 로딩 실패:', err);
-      setError('서버와 통신 중 오류가 발생했습니다.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchPosts = async (page) => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response = await api.get(`/admin/posts?page=${page}&limit=10`);
+        if (response.data && Array.isArray(response.data.posts)) {
+          setPosts(response.data.posts);
+          setTotalPages(response.data.totalPages);
+        } else {
+          setPosts([]);
+          setTotalPages(0);
+          setError('게시글 데이터를 불러오는 데 실패했습니다.');
+        }
+      } catch (err) {
+        console.error('게시글 로딩 실패:', err);
+        setError('서버와 통신 중 오류가 발생했습니다.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
     fetchPosts(currentPage);
   }, [currentPage]);
 
@@ -40,15 +39,23 @@ const AdminPostListPage = () => {
       try {
         await api.delete(`/posts/${id}`);
         alert('게시글이 삭제되었습니다.');
-        fetchPosts(currentPage);
+        if (posts.length === 1 && currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        } else {
+            const fetchPosts = async (page) => {
+                const response = await api.get(`/admin/posts?page=${page}&limit=10`);
+                setPosts(response.data.posts);
+                setTotalPages(response.data.totalPages);
+            };
+            fetchPosts(currentPage);
+        }
       } catch (err) {
-        console.error('게시글 삭제 실패:', err);
         alert('삭제에 실패했습니다.');
       }
     }
   };
 
-  if (isLoading) return <LoadingSpinner />;
+  if (isLoading) return <div className="p-8 flex justify-center"><LoadingSpinner /></div>;
   if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
 
   return (
@@ -73,25 +80,17 @@ const AdminPostListPage = () => {
                 <td className="px-6 py-4">{post.author}</td>
                 <td className="px-6 py-4">{new Date(post.createdAt).toLocaleDateString()}</td>
                 <td className="px-6 py-4 text-center">
-                  <button
-                    onClick={() => handleDelete(post.id)}
-                    className="px-3 py-1 bg-red-500 text-white text-sm rounded-md hover:bg-red-600"
-                  >
-                    삭제
-                  </button>
+                  <button onClick={() => handleDelete(post.id)} className="px-3 py-1 bg-red-500 text-white rounded-md">삭제</button>
                 </td>
               </tr>
-            )) : (
-              <tr>
-                <td colSpan="5" className="text-center py-10 text-gray-500">게시글이 없습니다.</td>
-              </tr>
-            )}
+            )) : <tr><td colSpan="5" className="text-center py-10">게시글이 없습니다.</td></tr>}
           </tbody>
         </table>
       </div>
-      <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+      {totalPages > 1 && <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />}
     </div>
   );
 };
 
 export default AdminPostListPage;
+
