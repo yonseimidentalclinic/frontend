@@ -1,62 +1,46 @@
-import React, { useState, useEffect } from 'react';
+// =================================================================
+// 프론트엔드 관리자 대시보드 페이지 (AdminDashboardPage.jsx)
+// 파일 경로: /src/pages/admin/AdminDashboardPage.jsx
+// =================================================================
+
+import React from 'react';
 import { Link } from 'react-router-dom';
-import api from '/src/services/api.js';
-import LoadingSpinner from '/src/components/LoadingSpinner.jsx';
+import { Megaphone, Newspaper, MessageSquare } from 'lucide-react';
 
 const AdminDashboardPage = () => {
-  const [data, setData] = useState({ notices: [], consultations: [] });
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const response = await api.get('/admin/dashboard');
-        if (response.data && Array.isArray(response.data.notices) && Array.isArray(response.data.consultations)) {
-            setData(response.data);
-        } else {
-            setError('대시보드 데이터를 불러오는 데 실패했습니다.');
-        }
-      } catch (err) {
-        console.error('대시보드 데이터 로딩 실패:', err);
-        setError('서버와 통신 중 오류가 발생했습니다.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
-
-  if (isLoading) return <div className="p-8 flex justify-center"><LoadingSpinner /></div>;
-  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
+  const stats = [
+    { name: '공지사항 관리', href: '/admin/notices', icon: Megaphone },
+    { name: '자유게시판 관리', href: '/admin/posts', icon: Newspaper },
+    { name: '온라인상담 관리', href: '/admin/consultations', icon: MessageSquare },
+  ];
 
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-6">대시보드</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4">최신 공지사항</h2>
-          <ul>
-            {data.notices.length > 0 ? data.notices.map(notice => (
-              <li key={notice.id} className="border-b py-2 flex justify-between">
-                <Link to={`/notices/${notice.id}`} className="text-blue-600 hover:underline">{notice.title}</Link>
-                <span className="text-sm text-gray-500">{new Date(notice.createdAt).toLocaleDateString()}</span>
-              </li>
-            )) : <p className="text-gray-500">최신 공지사항이 없습니다.</p>}
-          </ul>
+    <div className="p-6 bg-gray-50 min-h-screen">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-3xl font-bold text-gray-800 mb-6">관리자 대시보드</h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {stats.map((item) => (
+            <Link
+              key={item.name}
+              to={item.href}
+              className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 flex items-center"
+            >
+              <div className="bg-blue-100 p-4 rounded-full">
+                <item.icon className="h-8 w-8 text-blue-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-2xl font-bold text-gray-900">{item.name}</p>
+                <p className="text-gray-500">바로가기 &rarr;</p>
+              </div>
+            </Link>
+          ))}
         </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4">최신 온라인 상담</h2>
-          <ul>
-            {data.consultations.length > 0 ? data.consultations.map(consult => (
-              <li key={consult.id} className="border-b py-2 flex justify-between">
-                <Link to={`/admin/consultations/${consult.id}`} className="text-blue-600 hover:underline">{consult.title}</Link>
-                <span className="text-sm text-gray-500">{new Date(consult.createdAt).toLocaleDateString()}</span>
-              </li>
-            )) : <p className="text-gray-500">최신 상담글이 없습니다.</p>}
-          </ul>
+        <div className="mt-10 bg-white p-8 rounded-lg shadow-md">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">환영합니다!</h2>
+          <p className="text-gray-600">
+            이곳에서 홈페이지의 주요 콘텐츠를 관리할 수 있습니다. <br />
+            왼쪽 메뉴를 통해 공지사항, 자유게시판, 온라인 상담 내역을 확인하고 관리해주세요.
+          </p>
         </div>
       </div>
     </div>

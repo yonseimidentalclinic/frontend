@@ -1,115 +1,43 @@
-import React, { useState } from 'react';
-import { Helmet } from 'react-helmet-async';
+// =================================================================
+// 프론트엔드 진료안내 페이지 (ServicesPage.jsx)
+// 파일 경로: /src/pages/ServicesPage.jsx
+// =================================================================
 
-// ... (이전과 동일한 servicesData 객체) ...
-const servicesData = {
-  implant: {
-    title: '디지털 임플란트',
-    description: '3D CT와 구강 스캐너를 이용한 정밀 진단으로, 최소 절개와 빠른 회복이 가능한 디지털 임플지 임플란트입니다.',
-    imageUrl: 'https://placehold.co/800x400/dbeafe/1e3a8a?text=임플란트+시술',
-    details: [
-      {
-        title: '정확한 식립 위치 계획',
-        content: '컴퓨터 모의 수술을 통해 신경 위치, 골조직 등을 미리 파악하여 가장 안전하고 정확한 위치에 임플란트를 식립합니다.'
-      },
-      {
-        title: '최소 절개 및 통증 감소',
-        content: '네비게이션 임플란트 방식을 통해 잇몸 절개를 최소화하여 출혈과 통증이 적고 회복이 빠릅니다.'
-      },
-      {
-        title: '맞춤형 보철물 제작',
-        content: '환자 개개인의 구강 구조에 꼭 맞는 맞춤형 보철물을 제작하여 뛰어난 심미성과 저작 기능을 제공합니다.'
-      }
-    ]
-  },
-  orthodontics: {
-    title: '투명교정 & 설측교정',
-    description: '눈에 잘 띄지 않는 장치를 사용하여 심미성을 높인 교정 치료로, 자신감 있는 교정 기간을 보낼 수 있습니다.',
-    imageUrl: 'https://placehold.co/800x400/dbeafe/1e3a8a?text=치아교정',
-    details: [
-      {
-        title: '인비절라인 투명교정',
-        content: '탈부착이 가능한 투명한 교정 장치로, 위생적이고 심미성이 뛰어나며 중요한 날에는 잠시 빼놓을 수 있습니다.'
-      },
-      {
-        title: '클리피씨(Clippy-C) 교정',
-        content: '치아 색과 유사한 브라켓과 자가결찰 방식을 사용하여 통증이 적고 치료 기간을 단축시키는 효과가 있습니다.'
-      },
-      {
-        title: '설측교정',
-        content: '교정 장치를 치아 안쪽에 부착하여 겉으로 전혀 보이지 않아 다른 사람 모르게 교정이 가능합니다.'
-      }
-    ]
-  },
-  whitening: {
-    title: '전문가 치아미백',
-    description: '안전성이 입증된 고농도 미백제를 사용하여 치과에서 직접 시술하는 방식으로, 빠르고 효과적인 미백 효과를 볼 수 있습니다.',
-    imageUrl: 'https://placehold.co/800x400/dbeafe/1e3a8a?text=치아미백',
-    details: [
-      {
-        title: '원데이 미백 프로그램',
-        content: '단 하루의 내원으로도 만족스러운 미백 효과를 얻을 수 있어 결혼이나 면접 등 중요한 일정을 앞둔 분들께 추천합니다.'
-      },
-      {
-        title: '안전한 시술',
-        content: '치과 의사의 정확한 진단 하에 잇몸 보호제를 도포한 후 안전하게 시술하여 시린 증상과 부작용을 최소화합니다.'
-      },
-      {
-        title: '효과적인 색소 분해',
-        content: '특수 광선을 미백제에 조사하여 활성화시켜 치아 깊숙이 침투한 색소를 효과적으로 분해하고 제거합니다.'
-      }
-    ]
-  }
-};
+import React from 'react';
 
+const services = [
+  { name: '임플란트', description: '자연치아와 가장 유사한 기능과 심미성을 회복하는 치료입니다. 3D CT를 이용한 정밀 진단으로 안전하고 정확한 시술을 약속합니다.' },
+  { name: '치아교정', description: '삐뚤어진 치아를 가지런히 만들어 기능적, 심미적 문제를 개선합니다. 소아 교정부터 성인 교정까지 다양한 프로그램을 제공합니다.' },
+  { name: '심미보철', description: '라미네이트, 올세라믹 등을 통해 변색되거나 손상된 치아를 아름답게 복원합니다. 자연스러운 색과 모양을 재현합니다.' },
+  { name: '충치치료', description: '초기 충치부터 신경치료까지, 자연치아를 최대한 보존하는 원칙으로 통증 없이 편안하게 치료합니다.' },
+  { name: '잇몸치료', description: '스케일링부터 잇몸 수술까지, 잇몸 질환의 원인을 찾아 근본적으로 치료하고 건강한 잇몸을 되찾아 드립니다.' },
+  { name: '소아치과', description: '아이들의 눈높이에 맞춘 진료 환경에서 충치 예방과 치료를 통해 평생의 구강 건강의 기초를 다집니다.' },
+];
 
-function ServicesPage() {
-  const [activeTab, setActiveTab] = useState('implant');
-  const activeService = servicesData[activeTab];
-
-  const tabButtonClasses = (tabName) => 
-    `px-4 sm:px-6 py-3 text-base sm:text-lg font-semibold rounded-t-lg focus:outline-none whitespace-nowrap ` +
-    (activeTab === tabName 
-      ? 'bg-white text-blue-600 border-b-2 border-blue-600' 
-      : 'bg-gray-100 text-gray-500 hover:bg-gray-200');
-
+const ServicesPage = () => {
   return (
-    <>
-      <Helmet>
-        <title>진료안내 | 연세미치과</title>
-        <meta name="description" content="연세미치과의 전문적인 진료 과목을 안내합니다. 디지털 임플란트, 투명교정, 전문가 치아미백 등 환자 맞춤형 진료를 제공합니다." />
-      </Helmet>
-      <div>
-        {/* ... (이전과 동일한 페이지 내용) ... */}
-        <div className="border-b border-gray-200">
-          <nav className="flex space-x-2 overflow-x-auto" aria-label="Tabs">
-            <button onClick={() => setActiveTab('implant')} className={tabButtonClasses('implant')}>
-              임플란트
-            </button>
-            <button onClick={() => setActiveTab('orthodontics')} className={tabButtonClasses('orthodontics')}>
-              치아교정
-            </button>
-            <button onClick={() => setActiveTab('whitening')} className={tabButtonClasses('whitening')}>
-              치아미백
-            </button>
-          </nav>
+    <div className="bg-gray-50">
+      <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:py-24 lg:px-8">
+        <div className="text-center">
+          <h2 className="text-base font-semibold text-blue-600 tracking-wide uppercase">Our Services</h2>
+          <p className="mt-1 text-4xl font-extrabold text-gray-900 sm:text-5xl sm:tracking-tight lg:text-6xl">
+            전문 진료 과목
+          </p>
+          <p className="max-w-xl mt-5 mx-auto text-xl text-gray-500">
+            연세미치과는 각 분야별 전문 의료진이 협력하여 종합적인 치과 진료를 제공합니다.
+          </p>
         </div>
-        <div className="mt-8 bg-white p-6 md:p-8 rounded-b-lg shadow-lg">
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4">{activeService.title}</h2>
-          <p className="text-gray-600 mb-8">{activeService.description}</p>
-          <img src={activeService.imageUrl} alt={activeService.title} className="rounded-lg mb-8 w-full" />
-          <div className="space-y-6">
-            {activeService.details.map((detail, index) => (
-              <div key={index}>
-                <h3 className="text-lg md:text-xl font-bold text-blue-600 mb-2">{detail.title}</h3>
-                <p className="text-gray-700">{detail.content}</p>
-              </div>
-            ))}
-          </div>
+        <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          {services.map((service) => (
+            <div key={service.name} className="bg-white p-8 shadow-lg rounded-lg">
+              <h3 className="text-xl font-bold text-gray-900">{service.name}</h3>
+              <p className="mt-4 text-base text-gray-500">{service.description}</p>
+            </div>
+          ))}
         </div>
       </div>
-    </>
+    </div>
   );
-}
+};
 
 export default ServicesPage;

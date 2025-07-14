@@ -1,68 +1,84 @@
+// =================================================================
+// 프론트엔드 병원소개 페이지 (AboutPage.jsx)
+// 파일 경로: /src/pages/AboutPage.jsx
+// =================================================================
+
 import React from 'react';
-import { Helmet } from 'react-helmet-async';
+import { Camera, Heart, Users } from 'lucide-react';
 
-// ... (이전과 동일한 DoctorProfile 컴포넌트) ...
-const DoctorProfile = ({ name, specialty, imageUrl, bio }) => (
-  <div className="flex flex-col md:flex-row items-center text-center md:text-left bg-white p-6 rounded-lg shadow-md gap-6">
-    <img 
-      src={imageUrl} 
-      alt={`${name} 원장 사진`} 
-      className="w-32 h-32 rounded-full object-cover flex-shrink-0"
-      onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/128x128/e2e8f0/64748b?text=Image'; }}
-    />
-    <div>
-      <h3 className="text-2xl font-bold text-blue-600">{name}</h3>
-      <p className="text-md font-semibold text-gray-500 mb-2">{specialty}</p>
-      <p className="text-gray-700">{bio}</p>
-    </div>
-  </div>
-);
-
-
-function AboutPage() {
+const AboutPage = () => {
   return (
-    <>
-      <Helmet>
-        <title>병원소개 | 연세미치과</title>
-        <meta name="description" content="연세미치과의 진료 철학과 의료진을 소개합니다. 환자 한 분 한 분을 소중히 여기는 마음으로 진료에 임하겠습니다." />
-      </Helmet>
-      <div className="space-y-12 md:space-y-16">
-        {/* ... (이전과 동일한 페이지 내용) ... */}
-        <section>
-          <h2 className="text-3xl font-bold text-center text-gray-800 mb-10">인사말</h2>
-          <div className="bg-white p-6 md:p-10 rounded-lg shadow-lg">
-            <p className="text-5xl text-blue-500 font-serif leading-tight mb-4">“</p>
-            <p className="text-lg text-gray-700 mb-4">
-              저희 연세미치과 홈페이지를 찾아주신 모든 분들께 진심으로 감사드립니다.
-            </p>
-            <p className="text-gray-600 leading-relaxed">
-              언제나 환자분들의 입장에서 먼저 생각하고, 불필요한 과잉 진료 없이 정직하고 양심적인 진료를 약속드립니다. 저희는 단순한 치과 치료를 넘어, 환자분들의 평생 구강 건강을 함께 책임지는 든든한 동반자가 되고자 합니다. 최신 디지털 장비와 끊임없는 연구를 통해 보다 정확하고 편안한 진료를 제공하기 위해 항상 노력하겠습니다.
-            </p>
-            <p className="text-right mt-6 font-semibold text-gray-800">연세미치과 원장 박건현</p>
-          </div>
-        </section>
-        <section>
-          <h2 className="text-3xl font-bold text-center text-gray-800 mb-10">의료진 소개</h2>
-          <div className="space-y-8">
-            <DoctorProfile 
-              name="박건현 원장"
-              specialty="통합치의학과 전문의"
-              imageUrl="https://placehold.co/128x128/a3e635/44403c?text=원장님"
-              bio="연세대학교 치과대학 졸업. 보건복지부 인증 통합치의학과 전문의. 다수의 임플란트 및 보철 치료 경험을 바탕으로 환자 맞춤형 진료를 제공합니다."
-            />
-          </div>
-        </section>
-        <section>
-          <h2 className="text-3xl font-bold text-center text-gray-800 mb-10">병원 둘러보기</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <img src="https://placehold.co/600x400/bfdbfe/1e3a8a?text=대기실" alt="병원 대기실" className="rounded-lg shadow-md w-full h-full object-cover" />
-            <img src="https://placehold.co/600x400/bfdbfe/1e3a8a?text=진료실" alt="병원 진료실" className="rounded-lg shadow-md w-full h-full object-cover" />
-            <img src="https://placehold.co/600x400/bfdbfe/1e3a8a?text=상담실" alt="병원 상담실" className="rounded-lg shadow-md w-full h-full object-cover" />
-          </div>
-        </section>
+    <div className="bg-white">
+      <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:py-24 lg:px-8">
+        <div className="text-center">
+          <h2 className="text-base font-semibold text-blue-600 tracking-wide uppercase">About Us</h2>
+          <p className="mt-1 text-4xl font-extrabold text-gray-900 sm:text-5xl sm:tracking-tight lg:text-6xl">
+            연세미치과 이야기
+          </p>
+          <p className="max-w-xl mt-5 mx-auto text-xl text-gray-500">
+            환자 한 분 한 분의 건강한 미소를 위해, 저희는 보이지 않는 곳까지 정성을 다합니다.
+          </p>
+        </div>
       </div>
-    </>
+
+      <div className="py-16 bg-gray-50 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 space-y-8 sm:px-6 lg:px-8">
+          <div className="text-base max-w-prose mx-auto lg:max-w-none">
+            <h3 className="text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+              우리의 진료 철학
+            </h3>
+          </div>
+          <div className="lg:grid lg:grid-cols-2 lg:gap-8 lg:items-start">
+            <div className="relative z-10">
+              <div className="prose prose-indigo text-gray-500 mx-auto lg:max-w-none">
+                <p>
+                  연세미치과는 단순히 아픈 곳을 치료하는 것을 넘어, 환자분들의 삶의 질을 높이는 것을 목표로 합니다. 저희는 과잉 진료를 지양하고, 꼭 필요한 치료만을 정직하게 권해드립니다. 모든 진료는 과학적 근거에 기반하여 이루어지며, 환자분과의 충분한 소통을 통해 가장 적합한 치료 계획을 함께 만들어갑니다.
+                </p>
+                <ul className="mt-8 space-y-4">
+                  <li className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <Heart className="h-6 w-6 text-blue-500" />
+                    </div>
+                    <p className="ml-3">
+                      <strong>환자 중심:</strong> 모든 의사결정의 중심에는 환자가 있습니다.
+                    </p>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <Users className="h-6 w-6 text-blue-500" />
+                    </div>
+                    <p className="ml-3">
+                      <strong>전문 의료진:</strong> 분야별 전문성을 갖춘 의료진이 협력하여 최상의 결과를 만듭니다.
+                    </p>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <Camera className="h-6 w-6 text-blue-500" />
+                    </div>
+                    <p className="ml-3">
+                      <strong>첨단 장비:</strong> 디지털 장비를 활용하여 정확하고 안전한 진료를 약속합니다.
+                    </p>
+                  </li>
+                </ul>
+                <p className="mt-8">
+                  언제나 편안하고 신뢰할 수 있는 진료 환경을 제공하기 위해, 연세미치과의 모든 구성원은 끊임없이 배우고 노력하겠습니다.
+                </p>
+              </div>
+            </div>
+            <div className="mt-12 relative text-base max-w-prose mx-auto lg:mt-0 lg:max-w-none">
+              <img
+                className="w-full rounded-lg shadow-lg"
+                src="https://images.unsplash.com/photo-1583912267595-b58f2c39a4f2?q=80&w=2070&auto=format&fit=crop"
+                alt="진료실 이미지"
+                width={1184}
+                height={1376}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
-}
+};
 
 export default AboutPage;
