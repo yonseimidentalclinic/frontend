@@ -104,3 +104,5 @@ const AdminConsultationListPage = () => {
 };
 
 export default AdminConsultationListPage;
+
+// src/pages/ConsultationDetailPage.jsx

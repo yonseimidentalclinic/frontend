@@ -41,7 +41,6 @@ const AdminNoticeListPage = () => {
       try {
         await api.delete(`/notices/${id}`);
         alert('공지사항이 삭제되었습니다.');
-        // 목록 새로고침
         if (notices.length === 1 && currentPage > 1) {
           setCurrentPage(currentPage - 1);
         } else {

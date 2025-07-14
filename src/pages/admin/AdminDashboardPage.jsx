@@ -14,7 +14,6 @@ const AdminDashboardPage = () => {
       setError(null);
       try {
         const response = await api.get('/admin/dashboard');
-        // 데이터가 올바른 형식인지 확인
         if (response.data && Array.isArray(response.data.notices) && Array.isArray(response.data.consultations)) {
             setData(response.data);
         } else {
