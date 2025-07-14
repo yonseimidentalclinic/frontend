@@ -1,99 +1,102 @@
+// =================================================================
+// 프론트엔드 메인 페이지 (HomePage.jsx)
+// 파일 경로: /src/pages/HomePage.jsx
+// 주요 개선사항:
+// 1. 컴포넌트 이름을 App.jsx와 일치하는 'HomePage'로 수정
+// =================================================================
+
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
+import { Stethoscope, Heart, Smile } from 'lucide-react';
 
-// 아이콘 컴포넌트
-const ImplantIcon = () => (
-  <svg className="w-12 h-12 mx-auto text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-);
-const OrthodonticsIcon = () => (
-  <svg className="w-12 h-12 mx-auto text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-);
-const WhiteningIcon = () => (
-  <svg className="w-12 h-12 mx-auto text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-12v4m-2-2h4m5 4v4m-2-2h4M5 21a7 7 0 0114 0H5z"></path></svg>
-);
-
-
-function HomePage() {
+const HomePage = () => { // 컴포넌트 이름을 HomePage로 수정
   return (
-    <>
-      <Helmet>
-        <title>연세미치과 - 일산 주엽동 임플란트, 치아교정 전문</title>
-        <meta name="description" content="일산 주엽동에 위치한 연세미치과입니다. 최고의 의료진과 최첨단 장비로 임플란트, 치아교정, 치아미백 등 편안하고 정직한 진료를 약속합니다." />
-      </Helmet>
-      <div className="space-y-12 md:space-y-16">
-        {/* 1. 히어로 섹션 */}
-        <section className="text-center bg-blue-50 p-6 md:p-12 rounded-lg">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-            환자 한 분 한 분의 미소를 소중히 여기는
+    <div className="bg-white">
+      {/* Hero Section */}
+      <div className="relative bg-blue-50">
+        <div className="max-w-7xl mx-auto py-24 px-4 sm:py-32 sm:px-6 lg:px-8">
+          <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl">
+            <span className="block">환자 중심의 진료,</span>
+            <span className="block text-blue-600">연세미치과가 함께합니다.</span>
           </h1>
-          <p className="text-4xl md:text-5xl font-extrabold text-blue-600 mb-6">
-            연세미치과
+          <p className="mt-6 max-w-lg mx-auto text-xl text-gray-500 sm:max-w-3xl">
+            최고의 의료진과 최첨단 장비로 환자 한 분 한 분의 미소를 되찾아 드리는 것에 최선을 다합니다.
           </p>
-          <p className="text-base md:text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-            최고의 의료진과 최첨단 장비를 통해 정확하고 편안한 진료를 약속드립니다.
-          </p>
-          <Link 
-            to="/contact" 
-            className="inline-block bg-blue-600 text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 transition duration-300"
-          >
-            온라인 상담 문의하기
-          </Link>
-        </section>
+          <div className="mt-10 max-w-sm mx-auto sm:max-w-none sm:flex sm:justify-center">
+            <div className="space-y-4 sm:space-y-0 sm:mx-auto sm:inline-grid sm:grid-cols-2 sm:gap-5">
+              <Link
+                to="/about"
+                className="flex items-center justify-center px-4 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 sm:px-8"
+              >
+                병원소개
+              </Link>
+              <Link
+                to="/location"
+                className="flex items-center justify-center px-4 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-blue-600 bg-white hover:bg-gray-50 sm:px-8"
+              >
+                오시는 길
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        {/* 2. 핵심 진료과목 소개 */}
-        <section>
-          <div className="flex justify-center items-center mb-10">
-            <h2 className="text-3xl font-bold text-gray-800">핵심 진료과목</h2>
-            {/* '더보기' 버튼 추가 */}
-            <Link to="/services" className="ml-4 text-sm font-semibold text-blue-600 hover:text-blue-800">
-              더보기 &rarr;
-            </Link>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-white p-8 rounded-lg shadow-md text-center">
-              <ImplantIcon />
-              <h3 className="text-xl font-bold mt-4 mb-2">임플란트</h3>
-              <p className="text-gray-600">
-                자연치아와 거의 흡사한 기능과 형태로 상실된 치아를 대체합니다.
-              </p>
-            </div>
-            <div className="bg-white p-8 rounded-lg shadow-md text-center">
-              <OrthodonticsIcon />
-              <h3 className="text-xl font-bold mt-4 mb-2">치아교정</h3>
-              <p className="text-gray-600">
-                삐뚤어진 치열을 바로잡아 건강한 교합과 아름다운 미소를 찾아드립니다.
-              </p>
-            </div>
-            <div className="bg-white p-8 rounded-lg shadow-md text-center">
-              <WhiteningIcon />
-              <h3 className="text-xl font-bold mt-4 mb-2">치아미백</h3>
-              <p className="text-gray-600">
-                변색된 치아를 밝고 환하게 만들어 자신감 있는 미소를 되찾아 드립니다.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* 3. 병원 소식 */}
-        <section>
-          <div className="flex justify-center items-center mb-10">
-            <h2 className="text-3xl font-bold text-gray-800">병원 소식</h2>
-            {/* '더보기' 버튼 추가 */}
-            <Link to="/notices" className="ml-4 text-sm font-semibold text-blue-600 hover:text-blue-800">
-              더보기 &rarr;
-            </Link>
-          </div>
-          <div className="bg-white p-6 md:p-8 rounded-lg shadow-md max-w-3xl mx-auto">
-            {/* 실제 데이터는 공지사항 페이지에서 보여주므로, 여기서는 간단한 안내 문구로 대체할 수 있습니다. */}
-            <p className="text-center text-gray-500">
-              병원의 최신 소식과 이벤트는 '병원소식' 게시판에서 확인하실 수 있습니다.
+      {/* Features Section */}
+      <div className="bg-gray-50 py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="lg:text-center">
+            <h2 className="text-base text-blue-600 font-semibold tracking-wide uppercase">Our Values</h2>
+            <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+              연세미치과의 약속
+            </p>
+            <p className="mt-4 max-w-2xl text-xl text-gray-500 lg:mx-auto">
+              저희는 아래 세 가지 가치를 바탕으로 환자분들을 대합니다.
             </p>
           </div>
-        </section>
-      </div>
-    </>
-  );
-}
 
-export default HomePage;
+          <div className="mt-10">
+            <dl className="space-y-10 md:space-y-0 md:grid md:grid-cols-3 md:gap-x-8 md:gap-y-10">
+              <div className="relative">
+                <dt>
+                  <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-blue-500 text-white">
+                    <Stethoscope className="h-6 w-6" />
+                  </div>
+                  <p className="ml-16 text-lg leading-6 font-medium text-gray-900">전문적인 진료</p>
+                </dt>
+                <dd className="mt-2 ml-16 text-base text-gray-500">
+                  분야별 최고의 의료진이 검증된 기술과 최신 장비를 통해 정확하고 안전한 진료를 제공합니다.
+                </dd>
+              </div>
+
+              <div className="relative">
+                <dt>
+                  <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-blue-500 text-white">
+                    <Heart className="h-6 w-6" />
+                  </div>
+                  <p className="ml-16 text-lg leading-6 font-medium text-gray-900">따뜻한 공감</p>
+                </dt>
+                <dd className="mt-2 ml-16 text-base text-gray-500">
+                  환자분의 마음에 공감하며, 작은 불편함까지도 세심하게 살피는 따뜻한 소통을 약속합니다.
+                </dd>
+              </div>
+
+              <div className="relative">
+                <dt>
+                  <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-blue-500 text-white">
+                    <Smile className="h-6 w-6" />
+                  </div>
+                  <p className="ml-16 text-lg leading-6 font-medium text-gray-900">만족스러운 결과</p>
+                </dt>
+                <dd className="mt-2 ml-16 text-base text-gray-500">
+                  과잉 진료 없이 꼭 필요한 치료만을 정직하게 시행하여, 건강하고 아름다운 미소를 되찾아 드립니다.
+                </dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default HomePage; // export 이름도 HomePage로 수정
