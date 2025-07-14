@@ -2,8 +2,8 @@
 // 프론트엔드 최종 라우팅 설정 (App.jsx)
 // 최종 업데이트: 2025년 7월 14일
 // 주요 개선사항:
-// 1. 실제 파일 경로와 일치하도록 모든 import 경로 수정 (HomePage, AdminLoginPage 등)
-// 2. 모든 페이지에 대한 라우트를 최종적으로 확정
+// 1. 실제 파일 경로와 일치하도록 모든 import 경로를 './' 기준으로 수정
+// 2. HomePage, AdminLoginPage 등 모든 컴포넌트의 경로를 최종 확정
 // =================================================================
 
 import React from 'react';
@@ -14,8 +14,8 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import AdminSidebar from './components/AdminSidebar';
 
-// 사용자 페이지 컴포넌트 임포트 (경로 수정)
-import HomePage from './pages/HomePage'; // MainPage -> HomePage
+// 사용자 페이지 컴포넌트 임포트 (경로 최종 수정)
+import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import ServicesPage from './pages/ServicesPage';
 import NoticeListPage from './pages/NoticeListPage';
@@ -29,8 +29,8 @@ import PostWritePage from './pages/PostWritePage';
 import PostDetailPage from './pages/PostDetailPage';
 import LocationPage from './pages/LocationPage';
 
-// 관리자 페이지 컴포넌트 임포트 (경로 수정)
-import AdminLoginPage from './pages/AdminLoginPage'; // admin 폴더 밖으로 이동
+// 관리자 페이지 컴포넌트 임포트 (경로 최종 수정)
+import AdminLoginPage from './pages/AdminLoginPage';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import AdminNoticesListPage from './pages/admin/AdminNoticesListPage';
 import AdminNoticeWritePage from './pages/admin/AdminNoticeWritePage';
@@ -41,7 +41,6 @@ import AdminConsultationReplyPage from './pages/admin/AdminConsultationReplyPage
 
 // --- 레이아웃 컴포넌트 ---
 
-// 1. 사용자 페이지용 레이아웃
 const MainLayout = () => (
   <div className="flex flex-col min-h-screen">
     <Header />
@@ -52,7 +51,6 @@ const MainLayout = () => (
   </div>
 );
 
-// 2. 관리자 페이지용 레이아웃
 const AdminLayout = () => (
   <div className="flex h-screen bg-gray-100">
     <AdminSidebar />
@@ -64,7 +62,6 @@ const AdminLayout = () => (
   </div>
 );
 
-// 3. 관리자 페이지 보안을 위한 보호막 컴포넌트
 const ProtectedRoute = () => {
   const isAuthenticated = !!localStorage.getItem('accessToken');
   return isAuthenticated ? <AdminLayout /> : <Navigate to="/admin/login" />;
@@ -79,7 +76,7 @@ function App() {
       <Routes>
         {/* 사용자 페이지 라우트 */}
         <Route element={<MainLayout />}>
-          <Route path="/" element={<HomePage />} /> {/* MainPage -> HomePage */}
+          <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/news" element={<NoticeListPage />} />
@@ -109,7 +106,7 @@ function App() {
           <Route path="consultations/reply/:id" element={<AdminConsultationReplyPage />} />
         </Route>
 
-        {/* 404 Not Found 페이지 (일치하는 주소가 없을 때) */}
+        {/* 404 Not Found 페이지 */}
         <Route path="*" element={
           <div className="flex items-center justify-center h-screen">
             <div className="text-center">
