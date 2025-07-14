@@ -2,21 +2,20 @@
 // 프론트엔드 최종 라우팅 설정 (App.jsx)
 // 최종 업데이트: 2025년 7월 14일
 // 주요 개선사항:
-// 1. 모든 사용자 및 관리자 페이지에 대한 라우트(주소)를 완벽하게 설정
-// 2. 사용자용 레이아웃과 관리자용 레이아웃을 분리하여 코드 구조 개선
-// 3. 관리자 페이지는 로그인을 해야만 접속할 수 있도록 보안 라우팅 적용
+// 1. 실제 파일 경로와 일치하도록 모든 import 경로 수정 (HomePage, AdminLoginPage 등)
+// 2. 모든 페이지에 대한 라우트를 최종적으로 확정
 // =================================================================
 
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Outlet, Link } from 'react-router-dom';
 
 // 공용 컴포넌트
 import Header from './components/Header';
 import Footer from './components/Footer';
 import AdminSidebar from './components/AdminSidebar';
 
-// 사용자 페이지 컴포넌트 임포트
-import MainPage from './pages/MainPage';
+// 사용자 페이지 컴포넌트 임포트 (경로 수정)
+import HomePage from './pages/HomePage'; // MainPage -> HomePage
 import AboutPage from './pages/AboutPage';
 import ServicesPage from './pages/ServicesPage';
 import NoticeListPage from './pages/NoticeListPage';
@@ -30,8 +29,8 @@ import PostWritePage from './pages/PostWritePage';
 import PostDetailPage from './pages/PostDetailPage';
 import LocationPage from './pages/LocationPage';
 
-// 관리자 페이지 컴포넌트 임포트
-import AdminLoginPage from './pages/admin/AdminLoginPage';
+// 관리자 페이지 컴포넌트 임포트 (경로 수정)
+import AdminLoginPage from './pages/AdminLoginPage'; // admin 폴더 밖으로 이동
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import AdminNoticesListPage from './pages/admin/AdminNoticesListPage';
 import AdminNoticeWritePage from './pages/admin/AdminNoticeWritePage';
@@ -47,7 +46,7 @@ const MainLayout = () => (
   <div className="flex flex-col min-h-screen">
     <Header />
     <main className="flex-grow">
-      <Outlet /> {/* 이 부분에 각 페이지 내용이 렌더링됩니다. */}
+      <Outlet />
     </main>
     <Footer />
   </div>
@@ -59,7 +58,7 @@ const AdminLayout = () => (
     <AdminSidebar />
     <div className="flex-1 flex flex-col overflow-hidden">
       <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
-        <Outlet /> {/* 이 부분에 각 관리자 페이지 내용이 렌더링됩니다. */}
+        <Outlet />
       </main>
     </div>
   </div>
@@ -80,7 +79,7 @@ function App() {
       <Routes>
         {/* 사용자 페이지 라우트 */}
         <Route element={<MainLayout />}>
-          <Route path="/" element={<MainPage />} />
+          <Route path="/" element={<HomePage />} /> {/* MainPage -> HomePage */}
           <Route path="/about" element={<AboutPage />} />
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/news" element={<NoticeListPage />} />
