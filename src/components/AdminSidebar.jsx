@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Megaphone, Newspaper, MessageSquare, LogOut } from 'lucide-react';
+import { LayoutDashboard, Megaphone, Newspaper, MessageSquare, LogOut,UserSquare } from 'lucide-react';
 
 const AdminSidebar = () => {
   const navigate = useNavigate();
@@ -39,6 +39,14 @@ const AdminSidebar = () => {
         >
           <LayoutDashboard className="w-5 h-5 mr-3" />
           대시보드
+        </NavLink>
+        {/* [핵심 추가] 의료진 관리 메뉴 */}
+        <NavLink
+          to="/admin/doctors"
+          className={({ isActive }) => `${commonLinkClass} ${isActive ? activeLinkClass : ''}`}
+        >
+          <UserSquare className="w-5 h-5 mr-3" />
+          의료진 관리
         </NavLink>
         <NavLink
           to="/admin/notices"
