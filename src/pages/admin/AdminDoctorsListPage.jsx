@@ -1,9 +1,8 @@
 // =================================================================
-// 관리자 의료진 관리 페이지 (AdminDoctorsListPage.jsx) - 최종 완성본
+// 관리자 의료진 관리 페이지 (AdminDoctorsListPage.jsx) - 최종 진단 코드
 // 최종 업데이트: 2025년 7월 15일
 // 주요 개선사항:
-// 1. FileReader의 결과값을 가장 안정적인 event.target.result로 받아오도록 수정하여 타이밍 오류 원천 차단
-// 2. 불필요한 진단용 코드를 모두 제거
+// 1. 이미지 파일을 읽는 모든 단계에 상세한 알림(alert)을 추가하여 오류 지점을 정확히 추적
 // =================================================================
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -43,31 +42,39 @@ const AdminDoctorsListPage = () => {
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if (!file) return;
-
+    if (!file) {
+      alert('[진단 1] 파일을 선택하지 않았습니다.');
+      return;
+    }
+    
+    alert(`[진단 2] 파일 선택됨: ${file.name}`);
     const reader = new FileReader();
 
-    // [핵심 수정] 파일 읽기가 성공적으로 완료되면, event 객체를 통해 결과에 접근합니다.
-    // 이것이 가장 표준적이고 안정적인 방법입니다.
     reader.onload = (event) => {
       try {
+        alert('[진단 3] 파일 읽기 성공!');
         const imageData = event.target?.result;
         if (typeof imageData === 'string' && imageData.length > 0) {
           setFormState(prev => ({ ...prev, imageData: imageData }));
+          alert('[진단 4] 이미지 미리보기 준비 완료!');
         } else {
-          alert('이미지를 처리하는 중 오류가 발생했습니다. 다른 파일을 선택해 주세요.');
+          alert('[진단 오류 A] 파일은 읽었으나 결과가 비어있습니다.');
         }
       } catch (error) {
-        console.error("Error inside FileReader onload:", error);
-        alert('이미지 처리 중 예기치 않은 오류가 발생했습니다.');
+        alert(`[진단 오류 B] 이미지 처리 중 예기치 않은 오류가 발생했습니다: ${error.message}`);
       }
     };
 
     reader.onerror = () => {
-      alert('이미지 파일을 읽는 중 오류가 발생했습니다.');
+      alert('[진단 오류 C] 이미지 파일을 읽는 중 오류가 발생했습니다.');
     };
 
-    reader.readAsDataURL(file);
+    try {
+      reader.readAsDataURL(file);
+      alert('[진단 2-1] 파일 읽기 명령을 실행했습니다.');
+    } catch (error) {
+      alert(`[진단 오류 D] 파일 읽기 시작부터 오류가 발생했습니다: ${error.message}`);
+    }
   };
 
   const resetForm = () => {
