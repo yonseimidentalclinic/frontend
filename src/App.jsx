@@ -1,9 +1,8 @@
 // =================================================================
 // 프론트엔드 최종 라우팅 설정 (App.jsx)
-// 최종 업데이트: 2025년 7월 15일
 // 주요 개선사항:
-// 1. AdminLoginPage.jsx의 경로를 실제 파일 위치에 맞게 최종 수정
-// 2. 모든 컴포넌트의 import 경로를 다시 한번 점검 및 확정
+// 1. 모든 컴포넌트의 import 경로를 실제 파일 구조에 맞게 최종 수정
+// 2. 생략된 부분 없이 모든 코드를 포함하여 복사/붙여넣기 용이하도록 제공
 // =================================================================
 
 import React from 'react';
@@ -30,39 +29,42 @@ import PostDetailPage from './pages/PostDetailPage.jsx';
 import LocationPage from './pages/LocationPage.jsx';
 
 // 관리자 페이지 컴포넌트 임포트
-// [핵심 수정] AdminLoginPage의 경로를 원장님께서 알려주신 'src/pages/'로 바로잡았습니다.
-import AdminLoginPage from './pages/AdminLoginPage.jsx'; 
+import AdminLoginPage from './pages/AdminLoginPage.jsx';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage.jsx';
 import AdminNoticeListPage from './pages/admin/AdminNoticeListPage.jsx';
 import AdminNoticeWritePage from './pages/admin/AdminNoticeWritePage.jsx';
 import AdminNoticeEditPage from './pages/admin/AdminNoticeEditPage.jsx';
 import AdminPostListPage from './pages/admin/AdminPostListPage.jsx';
+import AdminPostEditPage from './pages/admin/AdminPostEditPage.jsx';
 import AdminConsultationListPage from './pages/admin/AdminConsultationListPage.jsx';
 import AdminConsultationReplyPage from './pages/admin/AdminConsultationReplyPage.jsx';
 
-// --- 레이아웃 컴포넌트 ---
+// --- 레이아웃 및 보호막 컴포넌트 ---
 
+// 1. 사용자 페이지용 레이아웃
 const MainLayout = () => (
   <div className="flex flex-col min-h-screen">
     <Header />
     <main className="flex-grow">
-      <Outlet />
+      <Outlet /> {/* 이 부분에 각 페이지 내용이 렌더링됩니다. */}
     </main>
     <Footer />
   </div>
 );
 
+// 2. 관리자 페이지용 레이아웃
 const AdminLayout = () => (
   <div className="flex h-screen bg-gray-100">
     <AdminSidebar />
     <div className="flex-1 flex flex-col overflow-hidden">
       <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
-        <Outlet />
+        <Outlet /> {/* 이 부분에 각 관리자 페이지 내용이 렌더링됩니다. */}
       </main>
     </div>
   </div>
 );
 
+// 3. 관리자 페이지 보안을 위한 보호막 컴포넌트
 const ProtectedRoute = () => {
   const isAuthenticated = !!localStorage.getItem('accessToken');
   return isAuthenticated ? <AdminLayout /> : <Navigate to="/admin/login" />;
@@ -104,6 +106,7 @@ function App() {
           <Route path="notices/write" element={<AdminNoticeWritePage />} />
           <Route path="notices/edit/:id" element={<AdminNoticeEditPage />} />
           <Route path="posts" element={<AdminPostListPage />} />
+          <Route path="posts/edit/:id" element={<AdminPostEditPage />} />
           <Route path="consultations" element={<AdminConsultationListPage />} />
           <Route path="consultations/reply/:id" element={<AdminConsultationReplyPage />} />
         </Route>
