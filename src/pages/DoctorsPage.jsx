@@ -1,9 +1,7 @@
 // =================================================================
 // 사용자용 의료진 소개 페이지 (DoctorsPage.jsx)
-// 파일 경로: /src/pages/DoctorsPage.jsx
-// 주요 기능:
-// 1. 서버에서 의료진 목록을 불러와 화면에 표시
-// 2. 각 의료진의 사진, 이름, 직책, 이력을 카드 형태로 보여줌
+// 주요 개선사항:
+// 1. 이미지 URL(imageUrl) 대신 이미지 데이터(imageData)를 사용하도록 수정
 // =================================================================
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -41,9 +39,7 @@ const DoctorsPage = () => {
       <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:py-24 lg:px-8">
         <div className="text-center">
           <h2 className="text-base font-semibold text-blue-600 tracking-wide uppercase">Our Team</h2>
-          <p className="mt-1 text-4xl font-extrabold text-gray-900 sm:text-5xl sm:tracking-tight lg:text-6xl">
-            연세미치과 의료진
-          </p>
+          <p className="mt-1 text-4xl font-extrabold text-gray-900 sm:text-5xl">연세미치과 의료진</p>
           <p className="max-w-xl mt-5 mx-auto text-xl text-gray-500">
             풍부한 경험과 따뜻한 마음으로 최상의 진료를 약속합니다.
           </p>
@@ -57,7 +53,8 @@ const DoctorsPage = () => {
               <li key={doctor.id}>
                 <div className="space-y-4">
                   <div className="aspect-w-3 aspect-h-2">
-                    <img className="object-cover shadow-lg rounded-lg w-full h-80" src={doctor.imageUrl || 'https://placehold.co/400x500?text=No+Image'} alt={doctor.name} />
+                    {/* [핵심 수정] imageUrl 대신 imageData 사용 */}
+                    <img className="object-cover shadow-lg rounded-lg w-full h-80" src={doctor.imageData || 'https://placehold.co/400x500?text=No+Image'} alt={doctor.name} />
                   </div>
                   <div className="space-y-2">
                     <div className="text-lg leading-6 font-medium space-y-1">

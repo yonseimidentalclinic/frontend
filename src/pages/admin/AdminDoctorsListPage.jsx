@@ -1,15 +1,14 @@
 // =================================================================
 // 관리자 의료진 관리 페이지 (AdminDoctorsListPage.jsx)
-// 파일 경로: /src/pages/admin/AdminDoctorsListPage.jsx
-// 주요 기능:
-// 1. 의료진 목록을 불러와서 표시
-// 2. 새 의료진 정보를 입력하고 추가하는 폼 제공
-// 3. 기존 의료진 정보를 수정하고 삭제하는 기능
+// 주요 개선사항:
+// 1. 이미지 URL 입력창을 파일 업로드 버튼으로 변경
+// 2. 이미지 선택 시, 파일을 Base64 데이터로 변환하여 상태에 저장
+// 3. 이미지 미리보기 기능 추가
 // =================================================================
 
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { Plus, Edit, Trash2, X } from 'lucide-react';
+import { Plus, Edit, Trash2, X, Upload } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -18,14 +17,8 @@ const AdminDoctorsListPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // 폼 상태 관리
-  const [formState, setFormState] = useState({
-    id: null,
-    name: '',
-    position: '',
-    history: '',
-    imageUrl: '',
-  });
+  const initialFormState = { id: null, name: '', position: '', history: '', imageData: '' };
+  const [formState, setFormState] = useState(initialFormState);
 
   const fetchDoctors = useCallback(async () => {
     setIsLoading(true);
@@ -48,9 +41,19 @@ const AdminDoctorsListPage = () => {
     setFormState(prev => ({ ...prev, [name]: value }));
   };
 
-  const resetForm = () => {
-    setFormState({ id: null, name: '', position: '', history: '', imageUrl: '' });
+  // [핵심 추가] 파일 선택 시 이미지를 Base64 데이터로 변환하는 함수
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onloadend = () => {
+        setFormState(prev => ({ ...prev, imageData: reader.result }));
+      };
+    }
   };
+
+  const resetForm = () => setFormState(initialFormState);
 
   const handleEditClick = (doctor) => {
     setFormState({
@@ -58,30 +61,25 @@ const AdminDoctorsListPage = () => {
       name: doctor.name,
       position: doctor.position,
       history: doctor.history,
-      imageUrl: doctor.imageUrl,
+      imageData: doctor.imageData,
     });
-    window.scrollTo(0, 0); // 수정 시 화면 상단으로 이동
+    window.scrollTo(0, 0);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { id, name, position, history, imageUrl } = formState;
-    if (!name || !position) {
-      alert('이름과 직책은 필수 항목입니다.');
-      return;
-    }
+    const { id, name, position, history, imageData } = formState;
+    if (!name || !position) return alert('이름과 직책은 필수 항목입니다.');
 
     const token = localStorage.getItem('accessToken');
     const headers = { Authorization: `Bearer ${token}` };
-    const data = { name, position, history, imageUrl };
+    const data = { name, position, history, imageData };
 
     try {
       if (id) {
-        // 수정
         await axios.put(`${API_URL}/api/admin/doctors/${id}`, data, { headers });
         alert('성공적으로 수정되었습니다.');
       } else {
-        // 추가
         await axios.post(`${API_URL}/api/admin/doctors`, data, { headers });
         alert('새로운 의료진이 추가되었습니다.');
       }
@@ -96,9 +94,7 @@ const AdminDoctorsListPage = () => {
     if (window.confirm('정말로 이 정보를 삭제하시겠습니까?')) {
       try {
         const token = localStorage.getItem('accessToken');
-        await axios.delete(`${API_URL}/api/admin/doctors/${id}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        await axios.delete(`${API_URL}/api/admin/doctors/${id}`, { headers });
         alert('성공적으로 삭제되었습니다.');
         fetchDoctors();
       } catch (err) {
@@ -112,36 +108,37 @@ const AdminDoctorsListPage = () => {
       <div className="max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-800 mb-6">의료진 관리</h1>
 
-        {/* 추가/수정 폼 */}
         <div className="bg-white p-8 rounded-lg shadow-md mb-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
-            {formState.id ? <Edit className="mr-2" /> : <Plus className="mr-2" />}
-            {formState.id ? '의료진 정보 수정' : '새 의료진 추가'}
-          </h2>
+          <h2 className="text-2xl font-bold mb-4">{formState.id ? '정보 수정' : '새 의료진 추가'}</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <input name="name" value={formState.name} onChange={handleInputChange} placeholder="이름 (예: 홍길동)" className="w-full p-2 border rounded" />
-              <input name="position" value={formState.position} onChange={handleInputChange} placeholder="직책 (예: 대표원장)" className="w-full p-2 border rounded" />
+              <input name="name" value={formState.name} onChange={handleInputChange} placeholder="이름" className="w-full p-2 border rounded" />
+              <input name="position" value={formState.position} onChange={handleInputChange} placeholder="직책" className="w-full p-2 border rounded" />
             </div>
-            <input name="imageUrl" value={formState.imageUrl} onChange={handleInputChange} placeholder="사진 이미지 URL" className="w-full p-2 border rounded" />
-            <textarea name="history" value={formState.history} onChange={handleInputChange} placeholder="주요 이력 (한 줄에 하나씩 입력)" rows="4" className="w-full p-2 border rounded"></textarea>
+            {/* [핵심 수정] 파일 업로드 필드 */}
+            <div className="flex items-center gap-4">
+              <label htmlFor="imageUpload" className="cursor-pointer bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center">
+                <Upload className="w-4 h-4 mr-2" />
+                사진 선택
+              </label>
+              <input id="imageUpload" type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+              {formState.imageData && <img src={formState.imageData} alt="미리보기" className="w-20 h-20 object-cover rounded" />}
+            </div>
+            <textarea name="history" value={formState.history} onChange={handleInputChange} placeholder="주요 이력 (한 줄에 하나씩)" rows="4" className="w-full p-2 border rounded"></textarea>
             <div className="flex justify-end gap-4">
-              {formState.id && <button type="button" onClick={resetForm} className="bg-gray-300 px-4 py-2 rounded-md flex items-center"><X className="mr-1 w-4 h-4" />수정 취소</button>}
-              <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center">
-                <Plus className="mr-1 w-4 h-4" />{formState.id ? '정보 저장' : '추가하기'}
-              </button>
+              {formState.id && <button type="button" onClick={resetForm} className="bg-gray-300 px-4 py-2 rounded-md">취소</button>}
+              <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-md">{formState.id ? '저장' : '추가'}</button>
             </div>
           </form>
         </div>
 
-        {/* 의료진 목록 */}
         <div className="bg-white rounded-lg shadow-md">
           {isLoading && <p className="p-4 text-center">로딩 중...</p>}
           {error && <p className="p-4 text-center text-red-500">{error}</p>}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
             {doctors.map(doctor => (
               <div key={doctor.id} className="border rounded-lg p-4 flex flex-col">
-                <img src={doctor.imageUrl || 'https://placehold.co/300x300?text=No+Image'} alt={doctor.name} className="w-full h-48 object-cover rounded-md mb-4" />
+                <img src={doctor.imageData || 'https://placehold.co/300x300?text=No+Image'} alt={doctor.name} className="w-full h-48 object-cover rounded-md mb-4" />
                 <h3 className="text-xl font-bold">{doctor.name}</h3>
                 <p className="text-blue-600 mb-2">{doctor.position}</p>
                 <div className="text-sm text-gray-600 flex-grow whitespace-pre-wrap">
