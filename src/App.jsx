@@ -1,8 +1,8 @@
 // =================================================================
 // 프론트엔드 최종 라우팅 설정 (App.jsx)
-// 최종 업데이트: 2025년 7월 14일
+// 최종 업데이트: 2025년 7월 15일
 // 주요 개선사항:
-// 1. 실제 파일 이름(단수형)과 일치하도록 관리자 목록 페이지의 import 경로를 모두 수정
+// 1. 관리자 대시보드 경로를 /admin과 /admin/dashboard 모두 허용하도록 수정
 // =================================================================
 
 import React from 'react';
@@ -28,14 +28,14 @@ import PostWritePage from './pages/PostWritePage.jsx';
 import PostDetailPage from './pages/PostDetailPage.jsx';
 import LocationPage from './pages/LocationPage.jsx';
 
-// 관리자 페이지 컴포넌트 임포트 (파일 이름 최종 수정)
+// 관리자 페이지 컴포넌트 임포트
 import AdminLoginPage from './pages/AdminLoginPage.jsx';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage.jsx';
-import AdminNoticeListPage from './pages/admin/AdminNoticeListPage.jsx'; // Notices -> Notice
+import AdminNoticeListPage from './pages/admin/AdminNoticeListPage.jsx';
 import AdminNoticeWritePage from './pages/admin/AdminNoticeWritePage.jsx';
 import AdminNoticeEditPage from './pages/admin/AdminNoticeEditPage.jsx';
-import AdminPostListPage from './pages/admin/AdminPostListPage.jsx'; // Posts -> Post
-import AdminConsultationListPage from './pages/admin/AdminConsultationListPage.jsx'; // Consultations -> Consultation
+import AdminPostListPage from './pages/admin/AdminPostListPage.jsx';
+import AdminConsultationListPage from './pages/admin/AdminConsultationListPage.jsx';
 import AdminConsultationReplyPage from './pages/admin/AdminConsultationReplyPage.jsx';
 
 // --- 레이아웃 컴포넌트 ---
@@ -93,10 +93,12 @@ function App() {
           <Route path="/location" element={<LocationPage />} />
         </Route>
 
-        {/* 관리자 페이지 라우트 (컴포넌트 이름 최종 수정) */}
+        {/* 관리자 페이지 라우트 */}
         <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route path="/admin" element={<ProtectedRoute />}>
           <Route index element={<AdminDashboardPage />} />
+          {/* [핵심 수정] /admin/dashboard 경로도 허용합니다. */}
+          <Route path="dashboard" element={<AdminDashboardPage />} />
           <Route path="notices" element={<AdminNoticeListPage />} />
           <Route path="notices/write" element={<AdminNoticeWritePage />} />
           <Route path="notices/edit/:id" element={<AdminNoticeEditPage />} />

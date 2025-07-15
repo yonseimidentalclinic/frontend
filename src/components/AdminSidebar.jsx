@@ -1,10 +1,8 @@
 // =================================================================
 // 프론트엔드 관리자 메뉴 컴포넌트 (AdminSidebar.jsx)
-// 파일 경로: /src/components/AdminSidebar.jsx
-// 주요 기능:
-// 1. 관리자 페이지의 모든 메뉴 링크 제공
-// 2. 현재 접속한 페이지 메뉴를 시각적으로 표시 (NavLink 사용)
-// 3. 로그아웃 기능 구현
+// 최종 업데이트: 2025년 7월 15일
+// 주요 개선사항:
+// 1. 대시보드 링크를 '/admin'으로 명확히 수정
 // =================================================================
 
 import React from 'react';
@@ -31,9 +29,10 @@ const AdminSidebar = () => {
         <p className="text-sm text-gray-400">관리자 페이지</p>
       </div>
       <nav className="flex-grow px-4 py-4">
+        {/* [핵심 수정] 대시보드 링크를 /admin 으로 명확히 합니다. */}
         <NavLink
           to="/admin"
-          end // 정확히 /admin 경로에만 active 스타일 적용
+          end
           className={({ isActive }) => `${commonLinkClass} ${isActive ? activeLinkClass : ''}`}
         >
           <LayoutDashboard className="w-5 h-5 mr-3" />
