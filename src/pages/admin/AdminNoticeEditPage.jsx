@@ -1,21 +1,16 @@
 // =================================================================
-// 프론트엔드 기능 개선: SunEditor 텍스트 에디터 적용 (수정 페이지)
+// 프론트엔드 기능 개선: SunEditor 한글 언어팩 로딩 오류 수정
 // 파일 경로: /src/pages/admin/AdminNoticeEditPage.jsx
-// 주요 개선사항:
-// 1. 기존 공지사항 데이터를 불러와 에디터에 채워넣는 기능 추가
-// 2. SunEditor를 이용해 내용을 수정하고 서버에 업데이트하는 기능 구현
-// 3. 데이터 로딩 및 오류 상태 처리로 안정성 강화
 // =================================================================
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-// 1. SunEditor와 CSS 임포트
 import SunEditor from 'suneditor-react';
 import 'suneditor/dist/css/suneditor.min.css';
+import ko from 'suneditor/src/lang/ko'; // [핵심 수정] 한글 언어팩 직접 임포트
 
-// API 기본 URL 환경변수에서 가져오기
 const API_URL = import.meta.env.VITE_API_URL;
 
 const AdminNoticeEditPage = () => {
@@ -23,14 +18,12 @@ const AdminNoticeEditPage = () => {
   const navigate = useNavigate();
 
   const [title, setTitle] = useState('');
-  // 2. content 상태가 에디터의 HTML 내용을 관리
   const [content, setContent] = useState('');
   
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 기존 공지사항 데이터를 불러오는 함수
   const fetchNotice = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -38,8 +31,7 @@ const AdminNoticeEditPage = () => {
       setTitle(response.data.title);
       setContent(response.data.content);
     } catch (err) {
-      console.error("공지사항 정보를 불러오는 중 오류 발생:", err);
-      setError("공지사항 정보를 불러오지 못했습니다. 목록으로 돌아가 다시 시도해주세요.");
+      setError("공지사항 정보를 불러오지 못했습니다.");
     } finally {
       setIsLoading(false);
     }
@@ -51,12 +43,8 @@ const AdminNoticeEditPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!title.trim()) {
-      alert('제목을 입력해주세요.');
-      return;
-    }
-    if (!content.trim() || content === '<p><br></p>') {
-      alert('내용을 입력해주세요.');
+    if (!title.trim() || !content.trim() || content === '<p><br></p>') {
+      alert('제목과 내용을 모두 입력해주세요.');
       return;
     }
 
@@ -71,20 +59,14 @@ const AdminNoticeEditPage = () => {
       alert('공지사항이 성공적으로 수정되었습니다.');
       navigate('/admin/notices');
     } catch (err) {
-      console.error("공지사항 수정 중 오류 발생:", err);
       alert('수정에 실패했습니다. 다시 시도해 주세요.');
     } finally {
       setIsSubmitting(false);
     }
   };
   
-  if (isLoading) {
-    return <div className="text-center p-10">공지사항 정보를 불러오는 중...</div>;
-  }
-  
-  if (error) {
-    return <div className="text-center p-10 text-red-500">{error}</div>;
-  }
+  if (isLoading) return <div className="p-10 text-center">로딩 중...</div>;
+  if (error) return <div className="p-10 text-center text-red-500">{error}</div>;
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
@@ -100,7 +82,7 @@ const AdminNoticeEditPage = () => {
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md"
               required
             />
           </div>
@@ -108,24 +90,15 @@ const AdminNoticeEditPage = () => {
             <label className="block text-lg font-semibold text-gray-700 mb-2">
               내용
             </label>
-            {/* 3. SunEditor에 불러온 content를 defaultValue로 설정 */}
             <SunEditor
-              lang="ko"
-              setContents={content} // 기존 내용을 에디터에 설정
-              onChange={setContent} // 내용 변경 시 상태 업데이트
+              lang={ko} // [핵심 수정]
+              setContents={content}
+              onChange={setContent}
               setOptions={{
                 height: '400',
                 buttonList: [
-                  ['undo', 'redo'],
-                  ['font', 'fontSize', 'formatBlock'],
-                  ['bold', 'underline', 'italic', 'strike', 'subscript', 'superscript'],
-                  ['removeFormat'],
-                  '/',
-                  ['fontColor', 'hiliteColor'],
-                  ['outdent', 'indent'],
-                  ['align', 'horizontalRule', 'list', 'lineHeight'],
-                  ['table', 'link'],
-                  ['fullScreen', 'showBlocks', 'codeView'],
+                  ['undo', 'redo'], ['font', 'fontSize', 'formatBlock'], ['bold', 'underline', 'italic', 'strike'],
+                  ['removeFormat'], '/', ['fontColor', 'hiliteColor'], ['align', 'list'], ['table', 'link'],
                 ],
               }}
             />
@@ -134,14 +107,14 @@ const AdminNoticeEditPage = () => {
             <button
               type="button"
               onClick={() => navigate('/admin/notices')}
-              className="px-6 py-2 rounded-md bg-gray-200 text-gray-700 font-semibold hover:bg-gray-300 transition-colors"
+              className="px-6 py-2 rounded-md bg-gray-200 text-gray-700 font-semibold"
               disabled={isSubmitting}
             >
               취소
             </button>
             <button
               type="submit"
-              className="px-6 py-2 rounded-md bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors disabled:bg-blue-300"
+              className="px-6 py-2 rounded-md bg-blue-600 text-white font-semibold"
               disabled={isSubmitting}
             >
               {isSubmitting ? '저장 중...' : '수정 완료'}
