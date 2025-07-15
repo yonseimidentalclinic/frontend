@@ -2,7 +2,7 @@
 // 프론트엔드 관리자 메뉴 컴포넌트 (AdminSidebar.jsx)
 // 최종 업데이트: 2025년 7월 15일
 // 주요 개선사항:
-// 1. 대시보드 링크를 '/admin'으로 명확히 수정
+// 1. 로그아웃 시, 관리자 로그인 페이지가 아닌 홈페이지의 메인('/')으로 이동하도록 수정
 // =================================================================
 
 import React from 'react';
@@ -15,7 +15,8 @@ const AdminSidebar = () => {
   const handleLogout = () => {
     if (window.confirm('정말로 로그아웃하시겠습니까?')) {
       localStorage.removeItem('accessToken');
-      navigate('/admin/login');
+      // [핵심 수정] 로그아웃 후 이동할 경로를 '/admin/login'에서 '/'로 변경합니다.
+      navigate('/');
     }
   };
 
@@ -29,7 +30,6 @@ const AdminSidebar = () => {
         <p className="text-sm text-gray-400">관리자 페이지</p>
       </div>
       <nav className="flex-grow px-4 py-4">
-        {/* [핵심 수정] 대시보드 링크를 /admin 으로 명확히 합니다. */}
         <NavLink
           to="/admin"
           end
