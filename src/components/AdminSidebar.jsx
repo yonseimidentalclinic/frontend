@@ -15,8 +15,10 @@ const AdminSidebar = () => {
   const handleLogout = () => {
     if (window.confirm('정말로 로그아웃하시겠습니까?')) {
       localStorage.removeItem('accessToken');
-      // [핵심 수정] 로그아웃 후 이동할 경로를 '/admin/login'에서 '/'로 변경합니다.
-      navigate('/');
+            // [핵심 수정] React Router의 navigate 대신,
+      // window.location.href를 사용하여 페이지를 완전히 새로고침하며 이동합니다.
+      // 이렇게 하면 앱의 상태가 깨끗하게 초기화되어 안정적으로 홈으로 이동할 수 있습니다.
+      window.location.href = '/';
     }
   };
 
