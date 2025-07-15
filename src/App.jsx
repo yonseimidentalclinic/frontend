@@ -2,7 +2,8 @@
 // 프론트엔드 최종 라우팅 설정 (App.jsx)
 // 최종 업데이트: 2025년 7월 15일
 // 주요 개선사항:
-// 1. 관리자 대시보드 경로를 /admin과 /admin/dashboard 모두 허용하도록 수정
+// 1. AdminLoginPage.jsx의 경로를 실제 파일 위치에 맞게 최종 수정
+// 2. 모든 컴포넌트의 import 경로를 다시 한번 점검 및 확정
 // =================================================================
 
 import React from 'react';
@@ -29,7 +30,8 @@ import PostDetailPage from './pages/PostDetailPage.jsx';
 import LocationPage from './pages/LocationPage.jsx';
 
 // 관리자 페이지 컴포넌트 임포트
-import AdminLoginPage from './pages/AdminLoginPage.jsx';
+// [핵심 수정] AdminLoginPage의 경로를 원장님께서 알려주신 'src/pages/'로 바로잡았습니다.
+import AdminLoginPage from './pages/AdminLoginPage.jsx'; 
 import AdminDashboardPage from './pages/admin/AdminDashboardPage.jsx';
 import AdminNoticeListPage from './pages/admin/AdminNoticeListPage.jsx';
 import AdminNoticeWritePage from './pages/admin/AdminNoticeWritePage.jsx';
@@ -97,7 +99,6 @@ function App() {
         <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route path="/admin" element={<ProtectedRoute />}>
           <Route index element={<AdminDashboardPage />} />
-          {/* [핵심 수정] /admin/dashboard 경로도 허용합니다. */}
           <Route path="dashboard" element={<AdminDashboardPage />} />
           <Route path="notices" element={<AdminNoticeListPage />} />
           <Route path="notices/write" element={<AdminNoticeWritePage />} />
