@@ -1,7 +1,9 @@
 // =================================================================
 // 진단용 관리자 의료진 관리 페이지 (AdminDoctorsListPage.jsx)
-// 주요 기능:
-// 1. 의료진 추가, 수정, 삭제 등 모든 과정과 서버 통신 내용을 콘솔에 상세히 기록
+// 최종 업데이트: 2025년 7월 15일
+// 주요 개선사항:
+// 1. FileReader의 onloadend 이벤트를 onload로 변경하여 이미지 로딩 안정성 확보
+// 2. reader.result가 null인 경우를 대비한 방어 코드 추가
 // =================================================================
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -48,14 +50,25 @@ const AdminDoctorsListPage = () => {
     if (file) {
       console.log('[진단] 이미지 파일 선택됨:', { name: file.name, type: file.type, size: file.size });
       const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onloadend = () => {
-        console.log('[진단] 이미지 파일 Base64 변환 완료. 데이터 길이:', reader.result.length);
-        setFormState(prev => ({ ...prev, imageData: reader.result }));
+      
+      // [핵심 수정] onloadend 대신 onload를 사용합니다.
+      // onload는 파일 읽기가 '성공적으로' 완료되었을 때만 실행됩니다.
+      reader.onload = () => {
+        // [핵심 수정] reader.result가 유효한 값인지 한번 더 확인합니다.
+        if (reader.result) {
+          console.log('[진단] 이미지 파일 Base64 변환 완료. 데이터 길이:', reader.result.length);
+          setFormState(prev => ({ ...prev, imageData: reader.result }));
+        } else {
+          console.error('[진단] 파일은 읽었으나 결과가 없습니다.');
+        }
       };
+      
       reader.onerror = (error) => {
         console.error('[진단] 이미지 파일 읽기 오류:', error);
+        alert('이미지 파일을 읽는 중 오류가 발생했습니다.');
       };
+
+      reader.readAsDataURL(file);
     }
   };
 
@@ -91,7 +104,6 @@ const AdminDoctorsListPage = () => {
 
     console.log(`[진단] 의료진 정보 ${action}을(를) 시작합니다.`);
     console.log(`[진단] 요청 URL: ${method.toUpperCase()} ${url}`);
-    console.log('[진단] 서버로 보낼 데이터 (이미지는 축약):', { name, position, history, imageData: imageData ? imageData.substring(0, 50) + '...' : 'No Image' });
     
     try {
       const response = await axios({ method, url, data, headers });
@@ -103,7 +115,6 @@ const AdminDoctorsListPage = () => {
       console.error(`[진단] ${action} 실패! 전체 에러 객체:`, err);
       if (err.response) {
         console.error('[진단] 서버 에러 응답 데이터:', err.response.data);
-        console.error('[진단] 서버 에러 응답 상태:', err.response.status);
       }
       alert('작업에 실패했습니다. 개발자 콘솔을 확인해주세요.');
     }
@@ -114,7 +125,6 @@ const AdminDoctorsListPage = () => {
     if (window.confirm('정말로 이 정보를 삭제하시겠습니까?')) {
       const token = localStorage.getItem('accessToken');
       const url = `${API_URL}/api/admin/doctors/${doctorId}`;
-      console.log(`[진단] 삭제 요청 URL: DELETE ${url}`);
       try {
         await axios.delete(url, { headers: { Authorization: `Bearer ${token}` } });
         console.log('[진단] 삭제 성공!');
@@ -122,10 +132,6 @@ const AdminDoctorsListPage = () => {
         fetchDoctors();
       } catch (err) {
         console.error('[진단] 삭제 실패! 전체 에러 객체:', err);
-        if (err.response) {
-            console.error('[진단] 서버 에러 응답 데이터:', err.response.data);
-            console.error('[진단] 서버 에러 응답 상태:', err.response.status);
-        }
         alert('삭제에 실패했습니다. 개발자 콘솔을 확인해주세요.');
       }
     }
