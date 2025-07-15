@@ -2,7 +2,7 @@
 // 프론트엔드 최종 라우팅 설정 (App.jsx)
 // 최종 업데이트: 2025년 7월 14일
 // 주요 개선사항:
-// 1. 모든 import 경로에 .jsx 확장자를 명시하여 빌드 오류 해결
+// 1. 실제 파일 이름(단수형)과 일치하도록 관리자 목록 페이지의 import 경로를 모두 수정
 // =================================================================
 
 import React from 'react';
@@ -13,7 +13,7 @@ import Header from './components/Header.jsx';
 import Footer from './components/Footer.jsx';
 import AdminSidebar from './components/AdminSidebar.jsx';
 
-// 사용자 페이지 컴포넌트 임포트 (확장자 추가)
+// 사용자 페이지 컴포넌트 임포트
 import HomePage from './pages/HomePage.jsx';
 import AboutPage from './pages/AboutPage.jsx';
 import ServicesPage from './pages/ServicesPage.jsx';
@@ -28,14 +28,14 @@ import PostWritePage from './pages/PostWritePage.jsx';
 import PostDetailPage from './pages/PostDetailPage.jsx';
 import LocationPage from './pages/LocationPage.jsx';
 
-// 관리자 페이지 컴포넌트 임포트 (확장자 추가)
+// 관리자 페이지 컴포넌트 임포트 (파일 이름 최종 수정)
 import AdminLoginPage from './pages/AdminLoginPage.jsx';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage.jsx';
-import AdminNoticesListPage from './pages/admin/AdminNoticesListPage.jsx';
+import AdminNoticeListPage from './pages/admin/AdminNoticeListPage.jsx'; // Notices -> Notice
 import AdminNoticeWritePage from './pages/admin/AdminNoticeWritePage.jsx';
 import AdminNoticeEditPage from './pages/admin/AdminNoticeEditPage.jsx';
-import AdminPostsListPage from './pages/admin/AdminPostsListPage.jsx';
-import AdminConsultationsListPage from './pages/admin/AdminConsultationsListPage.jsx';
+import AdminPostListPage from './pages/admin/AdminPostListPage.jsx'; // Posts -> Post
+import AdminConsultationListPage from './pages/admin/AdminConsultationListPage.jsx'; // Consultations -> Consultation
 import AdminConsultationReplyPage from './pages/admin/AdminConsultationReplyPage.jsx';
 
 // --- 레이아웃 컴포넌트 ---
@@ -93,15 +93,15 @@ function App() {
           <Route path="/location" element={<LocationPage />} />
         </Route>
 
-        {/* 관리자 페이지 라우트 */}
+        {/* 관리자 페이지 라우트 (컴포넌트 이름 최종 수정) */}
         <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route path="/admin" element={<ProtectedRoute />}>
           <Route index element={<AdminDashboardPage />} />
-          <Route path="notices" element={<AdminNoticesListPage />} />
+          <Route path="notices" element={<AdminNoticeListPage />} />
           <Route path="notices/write" element={<AdminNoticeWritePage />} />
           <Route path="notices/edit/:id" element={<AdminNoticeEditPage />} />
-          <Route path="posts" element={<AdminPostsListPage />} />
-          <Route path="consultations" element={<AdminConsultationsListPage />} />
+          <Route path="posts" element={<AdminPostListPage />} />
+          <Route path="consultations" element={<AdminConsultationListPage />} />
           <Route path="consultations/reply/:id" element={<AdminConsultationReplyPage />} />
         </Route>
 
