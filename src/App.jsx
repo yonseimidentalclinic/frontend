@@ -2,42 +2,41 @@
 // 프론트엔드 최종 라우팅 설정 (App.jsx)
 // 최종 업데이트: 2025년 7월 14일
 // 주요 개선사항:
-// 1. 실제 파일 경로와 일치하도록 모든 import 경로를 './' 기준으로 수정
-// 2. HomePage, AdminLoginPage 등 모든 컴포넌트의 경로를 최종 확정
+// 1. 모든 import 경로에 .jsx 확장자를 명시하여 빌드 오류 해결
 // =================================================================
 
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet, Link } from 'react-router-dom';
 
 // 공용 컴포넌트
-import Header from './components/Header';
-import Footer from './components/Footer';
-import AdminSidebar from './components/AdminSidebar';
+import Header from './components/Header.jsx';
+import Footer from './components/Footer.jsx';
+import AdminSidebar from './components/AdminSidebar.jsx';
 
-// 사용자 페이지 컴포넌트 임포트 (경로 최종 수정)
-import HomePage from './pages/HomePage';
-import AboutPage from './pages/AboutPage';
-import ServicesPage from './pages/ServicesPage';
-import NoticeListPage from './pages/NoticeListPage';
-import NoticeDetailPage from './pages/NoticeDetailPage';
-import ConsultationListPage from './pages/ConsultationListPage';
-import ConsultationWritePage from './pages/ConsultationWritePage';
-import ConsultationDetailPage from './pages/ConsultationDetailPage';
-import ConsultationVerifyPage from './pages/ConsultationVerifyPage';
-import PostListPage from './pages/PostListPage';
-import PostWritePage from './pages/PostWritePage';
-import PostDetailPage from './pages/PostDetailPage';
-import LocationPage from './pages/LocationPage';
+// 사용자 페이지 컴포넌트 임포트 (확장자 추가)
+import HomePage from './pages/HomePage.jsx';
+import AboutPage from './pages/AboutPage.jsx';
+import ServicesPage from './pages/ServicesPage.jsx';
+import NoticeListPage from './pages/NoticeListPage.jsx';
+import NoticeDetailPage from './pages/NoticeDetailPage.jsx';
+import ConsultationListPage from './pages/ConsultationListPage.jsx';
+import ConsultationWritePage from './pages/ConsultationWritePage.jsx';
+import ConsultationDetailPage from './pages/ConsultationDetailPage.jsx';
+import ConsultationVerifyPage from './pages/ConsultationVerifyPage.jsx';
+import PostListPage from './pages/PostListPage.jsx';
+import PostWritePage from './pages/PostWritePage.jsx';
+import PostDetailPage from './pages/PostDetailPage.jsx';
+import LocationPage from './pages/LocationPage.jsx';
 
-// 관리자 페이지 컴포넌트 임포트 (경로 최종 수정)
-import AdminLoginPage from './pages/AdminLoginPage';
-import AdminDashboardPage from './pages/admin/AdminDashboardPage';
-import AdminNoticesListPage from './pages/admin/AdminNoticesListPage';
-import AdminNoticeWritePage from './pages/admin/AdminNoticeWritePage';
-import AdminNoticeEditPage from './pages/admin/AdminNoticeEditPage';
-import AdminPostsListPage from './pages/admin/AdminPostsListPage';
-import AdminConsultationsListPage from './pages/admin/AdminConsultationsListPage';
-import AdminConsultationReplyPage from './pages/admin/AdminConsultationReplyPage';
+// 관리자 페이지 컴포넌트 임포트 (확장자 추가)
+import AdminLoginPage from './pages/AdminLoginPage.jsx';
+import AdminDashboardPage from './pages/admin/AdminDashboardPage.jsx';
+import AdminNoticesListPage from './pages/admin/AdminNoticesListPage.jsx';
+import AdminNoticeWritePage from './pages/admin/AdminNoticeWritePage.jsx';
+import AdminNoticeEditPage from './pages/admin/AdminNoticeEditPage.jsx';
+import AdminPostsListPage from './pages/admin/AdminPostsListPage.jsx';
+import AdminConsultationsListPage from './pages/admin/AdminConsultationsListPage.jsx';
+import AdminConsultationReplyPage from './pages/admin/AdminConsultationReplyPage.jsx';
 
 // --- 레이아웃 컴포넌트 ---
 
