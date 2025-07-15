@@ -21,6 +21,7 @@ const Header = () => {
 
   const navLinks = [
     { to: "/about", text: "병원소개" },
+    { to: "/doctors", text: "의료진 소개" },
     { to: "/services", text: "진료안내" },
     { to: "/news", text: "병원소식" },
     { to: "/consultation", text: "온라인 상담" },
@@ -32,7 +33,8 @@ const Header = () => {
     <header className="bg-white shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
-          {/* 로고 */}
+          
+          {/* 로고 */} 
           <div className="flex-shrink-0">
             <Link to="/" className="text-2xl font-bold text-blue-600">
               연세미치과

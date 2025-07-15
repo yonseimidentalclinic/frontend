@@ -17,6 +17,7 @@ import AdminSidebar from './components/AdminSidebar.jsx';
 // 사용자 페이지 컴포넌트 임포트
 import HomePage from './pages/HomePage.jsx';
 import AboutPage from './pages/AboutPage.jsx';
+import DoctorsPage from './pages/DoctorsPage.jsx';
 import ServicesPage from './pages/ServicesPage.jsx';
 import NoticeListPage from './pages/NoticeListPage.jsx';
 import NoticeDetailPage from './pages/NoticeDetailPage.jsx';
@@ -32,6 +33,7 @@ import LocationPage from './pages/LocationPage.jsx';
 // 관리자 페이지 컴포넌트 임포트
 import AdminLoginPage from './pages/AdminLoginPage.jsx';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage.jsx';
+import AdminDoctorsListPage from './pages/admin/AdminDoctorsListPage.jsx';
 import AdminNoticeListPage from './pages/admin/AdminNoticeListPage.jsx';
 import AdminNoticeWritePage from './pages/admin/AdminNoticeWritePage.jsx';
 import AdminNoticeEditPage from './pages/admin/AdminNoticeEditPage.jsx';
@@ -80,6 +82,7 @@ function App() {
         <Route element={<MainLayout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/doctors" element={<DoctorsPage />} />
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/news" element={<NoticeListPage />} />
           <Route path="/news/:id" element={<NoticeDetailPage />} />
@@ -101,6 +104,7 @@ function App() {
         <Route path="/admin" element={<ProtectedRoute />}>
           <Route index element={<AdminDashboardPage />} />
           <Route path="dashboard" element={<AdminDashboardPage />} />
+          <Route path="doctors" element={<AdminDoctorsListPage />} />
           <Route path="notices" element={<AdminNoticeListPage />} />
           <Route path="notices/write" element={<AdminNoticeWritePage />} />
           <Route path="notices/edit/:id" element={<AdminNoticeEditPage />} />
