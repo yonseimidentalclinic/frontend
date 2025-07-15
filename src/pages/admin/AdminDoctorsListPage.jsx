@@ -1,8 +1,9 @@
 // =================================================================
-// 진단용 관리자 의료진 관리 페이지 (AdminDoctorsListPage.jsx)
+// 관리자 의료진 관리 페이지 (AdminDoctorsListPage.jsx) - 최종 완성본
 // 최종 업데이트: 2025년 7월 15일
 // 주요 개선사항:
 // 1. FileReader의 결과값을 가장 안정적인 event.target.result로 받아오도록 수정하여 타이밍 오류 원천 차단
+// 2. 불필요한 진단용 코드를 모두 제거
 // =================================================================
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -42,26 +43,31 @@ const AdminDoctorsListPage = () => {
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      
-      // [핵심 수정] 파일 읽기가 성공적으로 완료되면, event 객체를 통해 결과에 접근합니다.
-      // 이것이 가장 표준적이고 안정적인 방법입니다.
-      reader.onload = (event) => {
-        const imageData = event.target.result;
-        if (imageData) {
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    // [핵심 수정] 파일 읽기가 성공적으로 완료되면, event 객체를 통해 결과에 접근합니다.
+    // 이것이 가장 표준적이고 안정적인 방법입니다.
+    reader.onload = (event) => {
+      try {
+        const imageData = event.target?.result;
+        if (typeof imageData === 'string' && imageData.length > 0) {
           setFormState(prev => ({ ...prev, imageData: imageData }));
         } else {
-          alert('이미지를 처리하는 중 오류가 발생했습니다. 다른 파일을 시도해주세요.');
+          alert('이미지를 처리하는 중 오류가 발생했습니다. 다른 파일을 선택해 주세요.');
         }
-      };
-      
-      reader.onerror = (error) => {
-        alert('이미지 파일을 읽는 중 오류가 발생했습니다.');
-      };
+      } catch (error) {
+        console.error("Error inside FileReader onload:", error);
+        alert('이미지 처리 중 예기치 않은 오류가 발생했습니다.');
+      }
+    };
 
-      reader.readAsDataURL(file);
-    }
+    reader.onerror = () => {
+      alert('이미지 파일을 읽는 중 오류가 발생했습니다.');
+    };
+
+    reader.readAsDataURL(file);
   };
 
   const resetForm = () => {
@@ -97,6 +103,7 @@ const AdminDoctorsListPage = () => {
       resetForm();
       fetchDoctors();
     } catch (err) {
+      console.error(`${action} 실패:`, err);
       alert('작업에 실패했습니다. 다시 시도해 주세요.');
     }
   };
@@ -110,6 +117,7 @@ const AdminDoctorsListPage = () => {
         alert('성공적으로 삭제되었습니다.');
         fetchDoctors();
       } catch (err) {
+        console.error('삭제 실패:', err);
         alert('삭제에 실패했습니다.');
       }
     }
