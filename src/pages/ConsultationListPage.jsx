@@ -1,41 +1,39 @@
 // =================================================================
-// 프론트엔드 안정화 코드: 사용자용 온라인 상담 목록 페이지
-// 파일 경로: /src/pages/ConsultationListPage.jsx
+// 프론트엔드 온라인 상담 목록 페이지 (ConsultationListPage.jsx)
+// 최종 업데이트: 2025년 7월 15일
 // 주요 개선사항:
-// 1. 로딩, 데이터, 오류 상태를 분리하여 안정적인 UI 제공
-// 2. 답변상태(답변완료/대기), 비밀글 여부 아이콘 표시
-// 3. 사용자가 비밀글 클릭 시 비밀번호 확인 페이지로 이동
+// 1. 서버에서 비정상적인 데이터가 와도 앱이 멈추지 않도록 안정성 강화
 // =================================================================
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { Lock } from 'lucide-react';
 
-// API 기본 URL 환경변수에서 가져오기
 const API_URL = import.meta.env.VITE_API_URL;
 
 const ConsultationListPage = () => {
-  // 1. 상태 관리
   const [consultations, setConsultations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
 
-  // 날짜 포맷팅 함수
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
     return new Date(dateString).toLocaleDateString('ko-KR', options);
   };
 
-  // 2. 데이터 fetching 함수
   const fetchConsultations = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const response = await axios.get(`${API_URL}/api/consultations`);
-      const sorted = response.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-      setConsultations(sorted);
+      // [핵심 수정] 서버에서 받은 데이터가 배열(목록) 형태일 때만 상태를 업데이트합니다.
+      if (Array.isArray(response.data)) {
+        setConsultations(response.data);
+      } else {
+        console.error("API did not return an array for consultations:", response.data);
+        setConsultations([]);
+      }
     } catch (err) {
       console.error("상담 목록을 불러오는 중 오류가 발생했습니다:", err);
       setError("상담 목록을 불러오는 데 실패했습니다. 잠시 후 다시 시도해 주세요.");
@@ -48,7 +46,6 @@ const ConsultationListPage = () => {
     fetchConsultations();
   }, [fetchConsultations]);
   
-  // 3. 조건부 렌더링 로직
   const renderContent = () => {
     if (loading) {
       return <div className="text-center py-20 text-gray-500">상담 목록을 불러오는 중입니다...</div>;
@@ -121,8 +118,6 @@ const ConsultationListPage = () => {
       </div>
 
       {renderContent()}
-
-      {/* TODO: 페이지네이션 컴포넌트 추가 위치 */}
     </div>
   );
 };

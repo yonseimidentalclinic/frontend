@@ -1,40 +1,38 @@
 // =================================================================
-// 프론트엔드 안정화 코드: 사용자용 자유게시판 목록 페이지
-// 파일 경로: /src/pages/PostListPage.jsx
+// 프론트엔드 자유게시판 목록 페이지 (PostListPage.jsx)
+// 최종 업데이트: 2025년 7월 15일
 // 주요 개선사항:
-// 1. 로딩, 데이터, 오류 상태를 분리하여 사용자 경험 향상
-// 2. 데이터 로딩 중/실패/없을 경우에 대한 명확한 UI 제공
-// 3. 페이지네이션 기능 추가를 위한 기반 마련 (현재는 모든 목록 표시)
+// 1. 서버에서 비정상적인 데이터가 와도 앱이 멈추지 않도록 안정성 강화
 // =================================================================
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 
-// API 기본 URL 환경변수에서 가져오기
 const API_URL = import.meta.env.VITE_API_URL;
 
 const PostListPage = () => {
-  // 1. 상태 관리
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // 날짜 포맷팅 함수
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
     return new Date(dateString).toLocaleDateString('ko-KR', options);
   };
 
-  // 2. 데이터 fetching 함수
   const fetchPosts = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const response = await axios.get(`${API_URL}/api/posts`);
-      // 백엔드에서 이미 정렬했지만, 한 번 더 최신순으로 정렬
-      const sortedPosts = response.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-      setPosts(sortedPosts);
+      // [핵심 수정] 서버에서 받은 데이터가 배열(목록) 형태일 때만 상태를 업데이트합니다.
+      if (Array.isArray(response.data)) {
+        setPosts(response.data);
+      } else {
+        console.error("API did not return an array for posts:", response.data);
+        setPosts([]);
+      }
     } catch (err) {
       console.error("게시글 목록을 불러오는 중 오류가 발생했습니다:", err);
       setError("게시판을 불러오는 데 실패했습니다. 잠시 후 다시 시도해 주세요.");
@@ -47,7 +45,6 @@ const PostListPage = () => {
     fetchPosts();
   }, [fetchPosts]);
 
-  // 3. 조건부 렌더링 로직
   const renderContent = () => {
     if (loading) {
       return <div className="text-center py-20 text-gray-500">게시글을 불러오는 중입니다...</div>;
@@ -105,8 +102,6 @@ const PostListPage = () => {
       </div>
 
       {renderContent()}
-
-      {/* TODO: 페이지네이션 컴포넌트 추가 위치 */}
     </div>
   );
 };
