@@ -2,8 +2,7 @@
 // 관리자 의료진 관리 페이지 (AdminDoctorsListPage.jsx) - 최종 완성본
 // 최종 업데이트: 2025년 7월 15일
 // 주요 개선사항:
-// 1. FileReader의 onloadend 이벤트를 사용하여 '조용한 오류'까지 감지하고 처리하도록 안정성 대폭 강화
-// 2. 불필요한 진단용 코드를 모두 제거하고 최종 코드로 정리
+// 1. 이미지 선택 후, input의 값을 초기화하여 동일한 파일을 다시 선택할 때 발생하는 오류를 원천 차단
 // =================================================================
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -47,16 +46,13 @@ const AdminDoctorsListPage = () => {
 
     const reader = new FileReader();
 
-    // [핵심 수정] onloadend는 성공/실패 여부와 관계없이 파일 읽기가 끝나면 항상 실행됩니다.
     reader.onloadend = (event) => {
-      // event.target.error를 통해 오류 발생 여부를 먼저 확인합니다.
       if (event.target.error) {
         console.error("File reading error:", event.target.error);
         alert('이미지 파일을 읽는 중 오류가 발생했습니다. 다른 파일을 선택해 주세요.');
         return;
       }
       
-      // 오류가 없을 때만 결과값을 사용합니다.
       const imageData = event.target.result;
       if (typeof imageData === 'string' && imageData.length > 0) {
         setFormState(prev => ({ ...prev, imageData }));
@@ -66,6 +62,9 @@ const AdminDoctorsListPage = () => {
     };
 
     reader.readAsDataURL(file);
+
+    // [핵심 수정] 파일을 읽은 후, input의 값을 초기화하여 다음 선택에 문제가 없도록 합니다.
+    e.target.value = null;
   };
 
   const resetForm = () => {
