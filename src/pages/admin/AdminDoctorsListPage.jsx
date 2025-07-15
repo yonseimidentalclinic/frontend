@@ -2,8 +2,7 @@
 // 진단용 관리자 의료진 관리 페이지 (AdminDoctorsListPage.jsx)
 // 최종 업데이트: 2025년 7월 15일
 // 주요 개선사항:
-// 1. FileReader의 onloadend 이벤트를 onload로 변경하여 이미지 로딩 안정성 확보
-// 2. reader.result가 null인 경우를 대비한 방어 코드 추가
+// 1. FileReader의 결과값을 가장 안정적인 event.target.result로 받아오도록 수정하여 타이밍 오류 원천 차단
 // =================================================================
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -21,15 +20,11 @@ const AdminDoctorsListPage = () => {
   const [formState, setFormState] = useState(initialFormState);
 
   const fetchDoctors = useCallback(async () => {
-    console.log('[진단] 의료진 목록 불러오기를 시작합니다...');
     setIsLoading(true);
     try {
       const response = await axios.get(`${API_URL}/api/doctors`);
-      console.log('[진단] 서버로부터 받은 의료진 목록:', response.data);
       setDoctors(Array.isArray(response.data) ? response.data : []);
-      console.log('[진단] 의료진 목록 상태 업데이트 완료.');
     } catch (err) {
-      console.error('[진단] 의료진 목록 불러오기 실패! 에러:', err);
       setError('의료진 정보를 불러오는 데 실패했습니다.');
     } finally {
       setIsLoading(false);
@@ -48,23 +43,20 @@ const AdminDoctorsListPage = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      console.log('[진단] 이미지 파일 선택됨:', { name: file.name, type: file.type, size: file.size });
       const reader = new FileReader();
       
-      // [핵심 수정] onloadend 대신 onload를 사용합니다.
-      // onload는 파일 읽기가 '성공적으로' 완료되었을 때만 실행됩니다.
-      reader.onload = () => {
-        // [핵심 수정] reader.result가 유효한 값인지 한번 더 확인합니다.
-        if (reader.result) {
-          console.log('[진단] 이미지 파일 Base64 변환 완료. 데이터 길이:', reader.result.length);
-          setFormState(prev => ({ ...prev, imageData: reader.result }));
+      // [핵심 수정] 파일 읽기가 성공적으로 완료되면, event 객체를 통해 결과에 접근합니다.
+      // 이것이 가장 표준적이고 안정적인 방법입니다.
+      reader.onload = (event) => {
+        const imageData = event.target.result;
+        if (imageData) {
+          setFormState(prev => ({ ...prev, imageData: imageData }));
         } else {
-          console.error('[진단] 파일은 읽었으나 결과가 없습니다.');
+          alert('이미지를 처리하는 중 오류가 발생했습니다. 다른 파일을 시도해주세요.');
         }
       };
       
       reader.onerror = (error) => {
-        console.error('[진단] 이미지 파일 읽기 오류:', error);
         alert('이미지 파일을 읽는 중 오류가 발생했습니다.');
       };
 
@@ -73,12 +65,10 @@ const AdminDoctorsListPage = () => {
   };
 
   const resetForm = () => {
-    console.log('[진단] 폼을 초기화합니다.');
     setFormState(initialFormState);
   };
 
   const handleEditClick = (doctor) => {
-    console.log('[진단] 수정 버튼 클릭. 대상 의료진:', doctor);
     setFormState({
       id: doctor.id,
       name: doctor.name,
@@ -97,42 +87,30 @@ const AdminDoctorsListPage = () => {
     const token = localStorage.getItem('accessToken');
     const headers = { Authorization: `Bearer ${token}` };
     const data = { name, position, history, imageData };
-
     const action = id ? '수정' : '추가';
     const url = id ? `${API_URL}/api/admin/doctors/${id}` : `${API_URL}/api/admin/doctors`;
     const method = id ? 'put' : 'post';
-
-    console.log(`[진단] 의료진 정보 ${action}을(를) 시작합니다.`);
-    console.log(`[진단] 요청 URL: ${method.toUpperCase()} ${url}`);
     
     try {
-      const response = await axios({ method, url, data, headers });
-      console.log(`[진단] ${action} 성공! 서버 응답:`, response.data);
+      await axios({ method, url, data, headers });
       alert(`성공적으로 ${action}되었습니다.`);
       resetForm();
       fetchDoctors();
     } catch (err) {
-      console.error(`[진단] ${action} 실패! 전체 에러 객체:`, err);
-      if (err.response) {
-        console.error('[진단] 서버 에러 응답 데이터:', err.response.data);
-      }
-      alert('작업에 실패했습니다. 개발자 콘솔을 확인해주세요.');
+      alert('작업에 실패했습니다. 다시 시도해 주세요.');
     }
   };
 
   const handleDelete = async (doctorId) => {
-    console.log(`[진단] 삭제 버튼 클릭. 대상 ID:`, doctorId);
     if (window.confirm('정말로 이 정보를 삭제하시겠습니까?')) {
       const token = localStorage.getItem('accessToken');
       const url = `${API_URL}/api/admin/doctors/${doctorId}`;
       try {
         await axios.delete(url, { headers: { Authorization: `Bearer ${token}` } });
-        console.log('[진단] 삭제 성공!');
         alert('성공적으로 삭제되었습니다.');
         fetchDoctors();
       } catch (err) {
-        console.error('[진단] 삭제 실패! 전체 에러 객체:', err);
-        alert('삭제에 실패했습니다. 개발자 콘솔을 확인해주세요.');
+        alert('삭제에 실패했습니다.');
       }
     }
   };
