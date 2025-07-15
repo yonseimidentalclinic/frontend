@@ -1,9 +1,7 @@
 // =================================================================
-// 관리자 의료진 관리 페이지 (AdminDoctorsListPage.jsx)
-// 주요 개선사항:
-// 1. 이미지 URL 입력창을 파일 업로드 버튼으로 변경
-// 2. 이미지 선택 시, 파일을 Base64 데이터로 변환하여 상태에 저장
-// 3. 이미지 미리보기 기능 추가
+// 진단용 관리자 의료진 관리 페이지 (AdminDoctorsListPage.jsx)
+// 주요 기능:
+// 1. 의료진 추가, 수정, 삭제 등 모든 과정과 서버 통신 내용을 콘솔에 상세히 기록
 // =================================================================
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -21,11 +19,15 @@ const AdminDoctorsListPage = () => {
   const [formState, setFormState] = useState(initialFormState);
 
   const fetchDoctors = useCallback(async () => {
+    console.log('[진단] 의료진 목록 불러오기를 시작합니다...');
     setIsLoading(true);
     try {
       const response = await axios.get(`${API_URL}/api/doctors`);
-      setDoctors(response.data);
+      console.log('[진단] 서버로부터 받은 의료진 목록:', response.data);
+      setDoctors(Array.isArray(response.data) ? response.data : []);
+      console.log('[진단] 의료진 목록 상태 업데이트 완료.');
     } catch (err) {
+      console.error('[진단] 의료진 목록 불러오기 실패! 에러:', err);
       setError('의료진 정보를 불러오는 데 실패했습니다.');
     } finally {
       setIsLoading(false);
@@ -41,21 +43,29 @@ const AdminDoctorsListPage = () => {
     setFormState(prev => ({ ...prev, [name]: value }));
   };
 
-  // [핵심 추가] 파일 선택 시 이미지를 Base64 데이터로 변환하는 함수
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      console.log('[진단] 이미지 파일 선택됨:', { name: file.name, type: file.type, size: file.size });
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onloadend = () => {
+        console.log('[진단] 이미지 파일 Base64 변환 완료. 데이터 길이:', reader.result.length);
         setFormState(prev => ({ ...prev, imageData: reader.result }));
+      };
+      reader.onerror = (error) => {
+        console.error('[진단] 이미지 파일 읽기 오류:', error);
       };
     }
   };
 
-  const resetForm = () => setFormState(initialFormState);
+  const resetForm = () => {
+    console.log('[진단] 폼을 초기화합니다.');
+    setFormState(initialFormState);
+  };
 
   const handleEditClick = (doctor) => {
+    console.log('[진단] 수정 버튼 클릭. 대상 의료진:', doctor);
     setFormState({
       id: doctor.id,
       name: doctor.name,
@@ -75,30 +85,48 @@ const AdminDoctorsListPage = () => {
     const headers = { Authorization: `Bearer ${token}` };
     const data = { name, position, history, imageData };
 
+    const action = id ? '수정' : '추가';
+    const url = id ? `${API_URL}/api/admin/doctors/${id}` : `${API_URL}/api/admin/doctors`;
+    const method = id ? 'put' : 'post';
+
+    console.log(`[진단] 의료진 정보 ${action}을(를) 시작합니다.`);
+    console.log(`[진단] 요청 URL: ${method.toUpperCase()} ${url}`);
+    console.log('[진단] 서버로 보낼 데이터 (이미지는 축약):', { name, position, history, imageData: imageData ? imageData.substring(0, 50) + '...' : 'No Image' });
+    
     try {
-      if (id) {
-        await axios.put(`${API_URL}/api/admin/doctors/${id}`, data, { headers });
-        alert('성공적으로 수정되었습니다.');
-      } else {
-        await axios.post(`${API_URL}/api/admin/doctors`, data, { headers });
-        alert('새로운 의료진이 추가되었습니다.');
-      }
+      const response = await axios({ method, url, data, headers });
+      console.log(`[진단] ${action} 성공! 서버 응답:`, response.data);
+      alert(`성공적으로 ${action}되었습니다.`);
       resetForm();
       fetchDoctors();
     } catch (err) {
-      alert('작업에 실패했습니다. 다시 시도해 주세요.');
+      console.error(`[진단] ${action} 실패! 전체 에러 객체:`, err);
+      if (err.response) {
+        console.error('[진단] 서버 에러 응답 데이터:', err.response.data);
+        console.error('[진단] 서버 에러 응답 상태:', err.response.status);
+      }
+      alert('작업에 실패했습니다. 개발자 콘솔을 확인해주세요.');
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (doctorId) => {
+    console.log(`[진단] 삭제 버튼 클릭. 대상 ID:`, doctorId);
     if (window.confirm('정말로 이 정보를 삭제하시겠습니까?')) {
+      const token = localStorage.getItem('accessToken');
+      const url = `${API_URL}/api/admin/doctors/${doctorId}`;
+      console.log(`[진단] 삭제 요청 URL: DELETE ${url}`);
       try {
-        const token = localStorage.getItem('accessToken');
-        await axios.delete(`${API_URL}/api/admin/doctors/${id}`, { headers });
+        await axios.delete(url, { headers: { Authorization: `Bearer ${token}` } });
+        console.log('[진단] 삭제 성공!');
         alert('성공적으로 삭제되었습니다.');
         fetchDoctors();
       } catch (err) {
-        alert('삭제에 실패했습니다.');
+        console.error('[진단] 삭제 실패! 전체 에러 객체:', err);
+        if (err.response) {
+            console.error('[진단] 서버 에러 응답 데이터:', err.response.data);
+            console.error('[진단] 서버 에러 응답 상태:', err.response.status);
+        }
+        alert('삭제에 실패했습니다. 개발자 콘솔을 확인해주세요.');
       }
     }
   };
@@ -107,7 +135,6 @@ const AdminDoctorsListPage = () => {
     <div className="p-6 bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-800 mb-6">의료진 관리</h1>
-
         <div className="bg-white p-8 rounded-lg shadow-md mb-8">
           <h2 className="text-2xl font-bold mb-4">{formState.id ? '정보 수정' : '새 의료진 추가'}</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -115,7 +142,6 @@ const AdminDoctorsListPage = () => {
               <input name="name" value={formState.name} onChange={handleInputChange} placeholder="이름" className="w-full p-2 border rounded" />
               <input name="position" value={formState.position} onChange={handleInputChange} placeholder="직책" className="w-full p-2 border rounded" />
             </div>
-            {/* [핵심 수정] 파일 업로드 필드 */}
             <div className="flex items-center gap-4">
               <label htmlFor="imageUpload" className="cursor-pointer bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center">
                 <Upload className="w-4 h-4 mr-2" />
@@ -131,7 +157,6 @@ const AdminDoctorsListPage = () => {
             </div>
           </form>
         </div>
-
         <div className="bg-white rounded-lg shadow-md">
           {isLoading && <p className="p-4 text-center">로딩 중...</p>}
           {error && <p className="p-4 text-center text-red-500">{error}</p>}
@@ -141,9 +166,7 @@ const AdminDoctorsListPage = () => {
                 <img src={doctor.imageData || 'https://placehold.co/300x300?text=No+Image'} alt={doctor.name} className="w-full h-48 object-cover rounded-md mb-4" />
                 <h3 className="text-xl font-bold">{doctor.name}</h3>
                 <p className="text-blue-600 mb-2">{doctor.position}</p>
-                <div className="text-sm text-gray-600 flex-grow whitespace-pre-wrap">
-                  {doctor.history}
-                </div>
+                <div className="text-sm text-gray-600 flex-grow whitespace-pre-wrap">{doctor.history}</div>
                 <div className="mt-4 flex gap-2">
                   <button onClick={() => handleEditClick(doctor)} className="bg-green-500 text-white px-3 py-1 text-sm rounded flex items-center"><Edit className="mr-1 w-3 h-3" />수정</button>
                   <button onClick={() => handleDelete(doctor.id)} className="bg-red-500 text-white px-3 py-1 text-sm rounded flex items-center"><Trash2 className="mr-1 w-3 h-3" />삭제</button>
