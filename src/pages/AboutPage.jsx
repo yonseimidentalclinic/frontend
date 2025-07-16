@@ -2,12 +2,14 @@
 // 사용자용 병원소개 페이지 (AboutPage.jsx)
 // 최종 업데이트: 2025년 7월 16일
 // 주요 개선사항:
-// 1. 서버에서 병원소개 글과 병원 사진 갤러리를 모두 불러와서 표시
-// 2. 기존의 정적 내용을 동적 콘텐츠로 변경
+// 1. 페이지 번호에 따라 사진 목록을 불러오는 기능 추가
+// 2. 페이지네이션 컴포넌트를 추가하여 페이지 이동 기능 구현
 // =================================================================
 
 import React, { useState, useEffect } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import Pagination from '../components/Pagination.jsx'; // 페이지네이션 컴포넌트 임포트
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -16,18 +18,36 @@ const AboutPage = () => {
   const [photos, setPhotos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // [핵심 추가] 페이지네이션 상태 관리
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchAboutData = async () => {
+    const pageFromUrl = parseInt(searchParams.get('page') || '1', 10);
+    setCurrentPage(pageFromUrl);
+
+    const fetchAboutData = async (page) => {
+      setIsLoading(true);
       try {
-        // 병원소개글과 갤러리 사진을 동시에 요청합니다.
+        // [핵심 수정] 병원 사진 API 호출 시 페이지 번호를 함께 보냅니다.
         const [aboutRes, photosRes] = await Promise.all([
           axios.get(`${API_URL}/api/about`),
-          axios.get(`${API_URL}/api/clinic-photos`)
+          axios.get(`${API_URL}/api/clinic-photos`, { params: { page: page, limit: 8 } }) // 한 페이지에 8장씩
         ]);
 
         setAboutContent(aboutRes.data);
-        setPhotos(Array.isArray(photosRes.data) ? photosRes.data : []);
+        
+        if (photosRes.data && Array.isArray(photosRes.data.photos)) {
+          setPhotos(photosRes.data.photos);
+          setTotalPages(photosRes.data.totalPages);
+        } else {
+          setPhotos([]);
+          setTotalPages(0);
+        }
 
       } catch (err) {
         console.error("페이지 데이터를 불러오는 중 오류 발생:", err);
@@ -37,8 +57,14 @@ const AboutPage = () => {
       }
     };
 
-    fetchAboutData();
-  }, []);
+    fetchAboutData(pageFromUrl);
+  }, [searchParams]);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    navigate(`/about?page=${page}`);
+    window.scrollTo(0, 0); // 페이지 변경 시 맨 위로 스크롤
+  };
 
   if (isLoading) {
     return <div className="text-center py-20">페이지를 불러오는 중...</div>;
@@ -89,29 +115,41 @@ const AboutPage = () => {
       </div>
 
       {/* 병원 사진 갤러리 섹션 */}
-      {photos.length > 0 && (
-        <div className="py-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-3xl font-extrabold text-gray-900 text-center mb-12">
-              병원 둘러보기
-            </h2>
-            <div className="grid grid-cols-1 gap-y-10 sm:grid-cols-2 gap-x-6 lg:grid-cols-3 xl:gap-x-8">
-              {photos.map((photo) => (
-                <div key={photo.id} className="group">
-                  <div className="w-full aspect-w-1 aspect-h-1 bg-gray-200 rounded-lg overflow-hidden">
-                    <img
-                      src={photo.imageData}
-                      alt={photo.caption || '병원 사진'}
-                      className="w-full h-full object-center object-cover group-hover:opacity-75"
-                    />
+      <div className="py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-extrabold text-gray-900 text-center mb-12">
+            병원 둘러보기
+          </h2>
+          {photos.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 gap-y-10 sm:grid-cols-2 gap-x-6 lg:grid-cols-4 xl:gap-x-8">
+                {photos.map((photo) => (
+                  <div key={photo.id} className="group">
+                    <div className="w-full aspect-w-1 aspect-h-1 bg-gray-200 rounded-lg overflow-hidden">
+                      <img
+                        src={photo.imageData}
+                        alt={photo.caption || '병원 사진'}
+                        className="w-full h-full object-center object-cover group-hover:opacity-75"
+                      />
+                    </div>
+                    <h3 className="mt-4 text-sm text-gray-700">{photo.caption}</h3>
                   </div>
-                  <h3 className="mt-4 text-sm text-gray-700">{photo.caption}</h3>
-                </div>
-              ))}
-            </div>
-          </div>
+                ))}
+              </div>
+              {/* [핵심 추가] 페이지네이션 컴포넌트 렌더링 */}
+              <div className="mt-12">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                />
+              </div>
+            </>
+          ) : (
+            <p className="text-center text-gray-500">등록된 병원 사진이 없습니다.</p>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 };
