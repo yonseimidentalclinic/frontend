@@ -1,13 +1,15 @@
 // =================================================================
-// 관리자 의료진 관리 페이지 - 최종 완성본 (이미지 리사이징 적용)
+// 관리자 의료진 관리 페이지 - 최종 완성본 (이미지 리사이징 라이브러리 적용)
 // 최종 업데이트: 2025년 7월 16일
 // 주요 개선사항:
-// 1. 이미지 선택 시, 브라우저에서 자동으로 리사이징 및 압축하여 업로드 속도 및 안정성 대폭 향상
+// 1. 'browser-image-compression' 라이브러리를 사용하여 이미지 선택 시,
+//    브라우저에서 자동으로 리사이징 및 압축하여 업로드 속도 및 안정성 대폭 향상
 // =================================================================
 
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { Plus, Edit, Trash2, X, Upload } from 'lucide-react';
+import imageCompression from 'browser-image-compression'; // 이미지 압축 라이브러리 임포트
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -40,49 +42,37 @@ const AdminDoctorsListPage = () => {
     setFormState(prev => ({ ...prev, [name]: value }));
   };
 
-  // [핵심 수정] 이미지 리사이징 및 압축 기능이 포함된 핸들러
-  const handleImageChange = (e) => {
+  // [핵심 수정] 이미지 압축 라이브러리를 사용한 이미지 처리 핸들러
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
+    // 압축 옵션 설정
+    const options = {
+      maxSizeMB: 1,          // 최대 파일 크기 1MB
+      maxWidthOrHeight: 800, // 최대 너비 또는 높이 800px
+      useWebWorker: true,    // 웹 워커를 사용하여 UI 멈춤 방지
+    };
 
-    reader.onload = (event) => {
-      const img = new Image();
-      img.src = event.target.result;
+    try {
+      // 이미지 압축 실행
+      const compressedFile = await imageCompression(file, options);
 
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 800;
-        const MAX_HEIGHT = 800;
-        let width = img.width;
-        let height = img.height;
-
-        if (width > height) {
-          if (width > MAX_WIDTH) {
-            height *= MAX_WIDTH / width;
-            width = MAX_WIDTH;
-          }
-        } else {
-          if (height > MAX_HEIGHT) {
-            width *= MAX_HEIGHT / height;
-            height = MAX_HEIGHT;
-          }
-        }
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-
-        // 이미지를 JPEG 포맷, 70% 품질로 압축하여 데이터 URL을 생성합니다.
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-        setFormState(prev => ({ ...prev, imageData: dataUrl }));
+      // 압축된 파일을 Base64 데이터로 변환
+      const reader = new FileReader();
+      reader.readAsDataURL(compressedFile);
+      reader.onloadend = () => {
+        const base64data = reader.result;
+        setFormState(prev => ({ ...prev, imageData: base64data }));
       };
-    };
-    reader.onerror = () => {
-      alert('이미지 파일을 읽는 중 오류가 발생했습니다.');
-    };
+      reader.onerror = () => {
+        alert('압축된 이미지를 처리하는 중 오류가 발생했습니다.');
+      };
+
+    } catch (error) {
+      console.error('Image compression error:', error);
+      alert('이미지 압축에 실패했습니다. 다른 파일을 선택해 주세요.');
+    }
   };
 
   const resetForm = () => {
