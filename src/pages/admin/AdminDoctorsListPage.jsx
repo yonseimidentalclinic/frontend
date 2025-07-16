@@ -1,12 +1,11 @@
 // =================================================================
-// 관리자 의료진 관리 페이지 - 최종 완성본 (FormData 방식 적용)
+// 관리자 의료진 관리 페이지 - 최종 완성본 (이미지 리사이징 적용)
 // 최종 업데이트: 2025년 7월 16일
 // 주요 개선사항:
-// 1. 이미지 업로드 방식을 표준 FormData 방식으로 변경하여 안정성 및 효율성 대폭 향상
-// 2. 파일 선택 후 input 값을 초기화하여 동일 파일 재선택 오류 방지
+// 1. 이미지 선택 시, 브라우저에서 자동으로 리사이징 및 압축하여 업로드 속도 및 안정성 대폭 향상
 // =================================================================
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { Plus, Edit, Trash2, X, Upload } from 'lucide-react';
 
@@ -17,11 +16,8 @@ const AdminDoctorsListPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const initialFormState = { id: null, name: '', position: '', history: '' };
+  const initialFormState = { id: null, name: '', position: '', history: '', imageData: '' };
   const [formState, setFormState] = useState(initialFormState);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [previewImage, setPreviewImage] = useState('');
-  const fileInputRef = useRef(null); // 파일 input에 대한 참조 생성
 
   const fetchDoctors = useCallback(async () => {
     setIsLoading(true);
@@ -44,23 +40,53 @@ const AdminDoctorsListPage = () => {
     setFormState(prev => ({ ...prev, [name]: value }));
   };
 
+  // [핵심 수정] 이미지 리사이징 및 압축 기능이 포함된 핸들러
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      setSelectedFile(file);
-      // URL.createObjectURL을 사용하여 선택한 파일의 미리보기를 생성
-      setPreviewImage(URL.createObjectURL(file));
-    }
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 800;
+        const MAX_HEIGHT = 800;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // 이미지를 JPEG 포맷, 70% 품질로 압축하여 데이터 URL을 생성합니다.
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+        setFormState(prev => ({ ...prev, imageData: dataUrl }));
+      };
+    };
+    reader.onerror = () => {
+      alert('이미지 파일을 읽는 중 오류가 발생했습니다.');
+    };
   };
 
   const resetForm = () => {
     setFormState(initialFormState);
-    setSelectedFile(null);
-    setPreviewImage('');
-    // 파일 input의 값을 초기화
-    if (fileInputRef.current) {
-      fileInputRef.current.value = null;
-    }
   };
 
   const handleEditClick = (doctor) => {
@@ -69,43 +95,25 @@ const AdminDoctorsListPage = () => {
       name: doctor.name,
       position: doctor.position,
       history: doctor.history,
+      imageData: doctor.imageData, // 기존 이미지 데이터
     });
-    setSelectedFile(null);
-    setPreviewImage(doctor.imageData);
     window.scrollTo(0, 0);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { id, name, position, history } = formState;
+    const { id, name, position, history, imageData } = formState;
     if (!name || !position) return alert('이름과 직책은 필수 항목입니다.');
 
-    // [핵심 수정] FormData 객체를 사용하여 데이터를 구성합니다.
-    const formData = new FormData();
-    formData.append('name', name);
-    formData.append('position', position);
-    formData.append('history', history);
-    
-    if (selectedFile) {
-      // 새 파일이 선택된 경우에만 'image' 필드에 추가
-      formData.append('image', selectedFile);
-    } else if (id && previewImage) {
-      // 수정 모드이고 새 파일을 선택하지 않은 경우, 기존 이미지 데이터를 보냅니다.
-      formData.append('existingImageData', previewImage);
-    }
-
     const token = localStorage.getItem('accessToken');
-    const headers = { 
-      Authorization: `Bearer ${token}`,
-      // 'Content-Type'은 브라우저가 FormData를 위해 자동으로 설정하므로 여기서 지정하지 않습니다.
-    };
-    
+    const headers = { Authorization: `Bearer ${token}` };
+    const data = { name, position, history, imageData };
     const action = id ? '수정' : '추가';
     const url = id ? `${API_URL}/api/admin/doctors/${id}` : `${API_URL}/api/admin/doctors`;
     const method = id ? 'put' : 'post';
     
     try {
-      await axios({ method, url, data: formData, headers });
+      await axios({ method, url, data, headers });
       alert(`성공적으로 ${action}되었습니다.`);
       resetForm();
       fetchDoctors();
@@ -145,8 +153,8 @@ const AdminDoctorsListPage = () => {
                 <Upload className="w-4 h-4 mr-2" />
                 사진 선택
               </label>
-              <input ref={fileInputRef} id="imageUpload" type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
-              {previewImage && <img src={previewImage} alt="미리보기" className="w-20 h-20 object-cover rounded" />}
+              <input id="imageUpload" type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+              {formState.imageData && <img src={formState.imageData} alt="미리보기" className="w-20 h-20 object-cover rounded" />}
             </div>
             <textarea name="history" value={formState.history} onChange={handleInputChange} placeholder="주요 이력 (한 줄에 하나씩)" rows="4" className="w-full p-2 border rounded"></textarea>
             <div className="flex justify-end gap-4">
