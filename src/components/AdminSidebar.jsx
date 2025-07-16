@@ -2,12 +2,12 @@
 // 프론트엔드 관리자 메뉴 컴포넌트 (AdminSidebar.jsx)
 // 최종 업데이트: 2025년 7월 16일
 // 주요 개선사항:
-// 1. '병원 사진 관리' 메뉴 항목을 새로 추가
+// 1. '병원소개 관리' 메뉴 항목을 새로 추가하고, '병원 사진 관리'는 제거
 // =================================================================
 
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Megaphone, Newspaper, MessageSquare, LogOut, UserSquare, Image } from 'lucide-react'; // Image 아이콘 추가
+import { LayoutDashboard, Megaphone, Newspaper, MessageSquare, LogOut, UserSquare, Home } from 'lucide-react'; // Home 아이콘 추가
 
 const AdminSidebar = () => {
   const navigate = useNavigate();
@@ -33,14 +33,14 @@ const AdminSidebar = () => {
           <LayoutDashboard className="w-5 h-5 mr-3" />
           대시보드
         </NavLink>
+        {/* [핵심 추가] 병원소개 관리 메뉴 */}
+        <NavLink to="/admin/about" className={({ isActive }) => `${commonLinkClass} ${isActive ? activeLinkClass : ''}`}>
+          <Home className="w-5 h-5 mr-3" />
+          병원소개 관리
+        </NavLink>
         <NavLink to="/admin/doctors" className={({ isActive }) => `${commonLinkClass} ${isActive ? activeLinkClass : ''}`}>
           <UserSquare className="w-5 h-5 mr-3" />
           의료진 관리
-        </NavLink>
-        {/* [핵심 추가] 병원 사진 관리 메뉴 */}
-        <NavLink to="/admin/clinic-photos" className={({ isActive }) => `${commonLinkClass} ${isActive ? activeLinkClass : ''}`}>
-          <Image className="w-5 h-5 mr-3" />
-          병원 사진 관리
         </NavLink>
         <NavLink to="/admin/notices" className={({ isActive }) => `${commonLinkClass} ${isActive ? activeLinkClass : ''}`}>
           <Megaphone className="w-5 h-5 mr-3" />

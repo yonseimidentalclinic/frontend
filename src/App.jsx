@@ -2,7 +2,8 @@
 // 프론트엔드 최종 라우팅 설정 (App.jsx)
 // 최종 업데이트: 2025년 7월 16일
 // 주요 개선사항:
-// 1. 관리자용 '병원 사진 관리' 페이지(/admin/clinic-photos) 라우트 추가
+// 1. 관리자용 '병원소개 관리' 페이지(/admin/about) 라우트 추가
+// 2. 불필요한 '병원 사진 관리' 라우트는 제거
 // =================================================================
 
 import React from 'react';
@@ -32,8 +33,8 @@ import LocationPage from './pages/LocationPage.jsx';
 // 관리자 페이지 컴포넌트
 import AdminLoginPage from './pages/AdminLoginPage.jsx';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage.jsx';
+import AdminAboutPage from './pages/admin/AdminAboutPage.jsx'; // [핵심 추가]
 import AdminDoctorsListPage from './pages/admin/AdminDoctorsListPage.jsx';
-import AdminClinicPhotosPage from './pages/admin/AdminClinicPhotosPage.jsx'; // [핵심 추가]
 import AdminNoticeListPage from './pages/admin/AdminNoticeListPage.jsx';
 import AdminNoticeWritePage from './pages/admin/AdminNoticeWritePage.jsx';
 import AdminNoticeEditPage from './pages/admin/AdminNoticeEditPage.jsx';
@@ -92,8 +93,8 @@ function App() {
         <Route path="/admin" element={<ProtectedRoute />}>
           <Route index element={<AdminDashboardPage />} />
           <Route path="dashboard" element={<AdminDashboardPage />} />
+          <Route path="about" element={<AdminAboutPage />} /> {/* [핵심 추가] */}
           <Route path="doctors" element={<AdminDoctorsListPage />} />
-          <Route path="clinic-photos" element={<AdminClinicPhotosPage />} /> {/* [핵심 추가] */}
           <Route path="notices" element={<AdminNoticeListPage />} />
           <Route path="notices/write" element={<AdminNoticeWritePage />} />
           <Route path="notices/edit/:id" element={<AdminNoticeEditPage />} />
