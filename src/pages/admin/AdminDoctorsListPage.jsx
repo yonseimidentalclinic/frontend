@@ -1,6 +1,6 @@
 // =================================================================
 // 관리자 의료진 관리 페이지 - 최종 완성본 (FormData 방식 적용)
-// 최종 업데이트: 2025년 7월 15일
+// 최종 업데이트: 2025년 7월 16일
 // 주요 개선사항:
 // 1. 이미지 업로드 방식을 표준 FormData 방식으로 변경하여 안정성 및 효율성 대폭 향상
 // 2. 파일 선택 후 input 값을 초기화하여 동일 파일 재선택 오류 방지
@@ -70,8 +70,8 @@ const AdminDoctorsListPage = () => {
       position: doctor.position,
       history: doctor.history,
     });
-    setSelectedFile(null); // 수정 시작 시에는 새 파일 선택 전까지 기존 이미지 사용
-    setPreviewImage(doctor.imageData); // 기존 이미지 미리보기
+    setSelectedFile(null);
+    setPreviewImage(doctor.imageData);
     window.scrollTo(0, 0);
   };
 
