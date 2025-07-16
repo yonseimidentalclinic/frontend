@@ -1,59 +1,58 @@
 // =================================================================
-// 프론트엔드 안정화 코드: 관리자 공지사항 목록 페이지
-// 파일 경로: /src/pages/admin/AdminNoticesListPage.jsx
+// 관리자 공지사항 목록 페이지 (AdminNoticeListPage.jsx)
+// 최종 업데이트: 2025년 7월 16일
 // 주요 개선사항:
-// 1. 로딩, 데이터, 오류 상태를 분리하여 관리
-// 2. 데이터 로딩 중에는 로딩 표시, 실패 시에는 오류 메시지 표시
-// 3. 데이터가 비어있을 경우 "작성된 공지사항이 없습니다" 메시지 표시
-// 4. 삭제 기능 후 목록 자동 새로고침
+// 1. 페이지네이션 기능이 적용된 API 응답 형식에 맞게 데이터 처리 로직 수정
+// 2. 서버에서 받은 데이터가 배열이 아닐 경우에 대한 방어 코드 추가
 // =================================================================
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-// API 기본 URL 환경변수에서 가져오기
 const API_URL = import.meta.env.VITE_API_URL;
 
-const AdminNoticesListPage = () => {
-  // 1. 상태 관리: 데이터(notices), 로딩(loading), 오류(error)
+const AdminNoticeListPage = () => {
   const [notices, setNotices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
   const navigate = useNavigate();
 
-  // 날짜 포맷팅 함수
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
     return new Date(dateString).toLocaleString('ko-KR', options);
   };
 
-  // 2. 데이터 fetching 함수 (useCallback으로 불필요한 재생성 방지)
   const fetchNotices = useCallback(async () => {
-    setLoading(true); // 데이터 요청 시작 시 로딩 상태로 변경
-    setError(null); // 이전 오류 상태 초기화
+    setLoading(true);
+    setError(null);
     try {
+      // 관리자 페이지에서는 모든 공지사항을 봐야 하므로, 페이지 제한 없이 가져옵니다.
+      // (페이지네이션이 적용된 API는 기본적으로 첫 페이지만 가져옵니다. 
+      //  향후 관리자용 전체 목록 API를 만드는 것이 더 좋습니다.)
       const response = await axios.get(`${API_URL}/api/notices`);
-      // 백엔드에서 받아온 createdAt을 기준으로 내림차순 정렬 (이미 백엔드에서 정렬했지만, 한번 더 확인)
-      const sortedNotices = response.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-      setNotices(sortedNotices);
+      
+      // [핵심 수정] 서버 응답이 { notices: [...] } 형태의 객체이므로, response.data.notices를 사용합니다.
+      if (response.data && Array.isArray(response.data.notices)) {
+        setNotices(response.data.notices);
+      } else {
+        // 만약의 경우를 대비한 방어 코드
+        console.error("API did not return an array for notices:", response.data);
+        setNotices([]);
+      }
     } catch (err) {
       console.error("공지사항 목록을 불러오는 중 오류가 발생했습니다:", err);
       setError("데이터를 불러오는 데 실패했습니다. 잠시 후 다시 시도해 주세요.");
     } finally {
-      setLoading(false); // 요청 완료 후 로딩 상태 해제
+      setLoading(false);
     }
   }, []);
 
-  // 컴포넌트 마운트 시 데이터 fetching 실행
   useEffect(() => {
     fetchNotices();
   }, [fetchNotices]);
 
-  // 3. 삭제 처리 함수
   const handleDelete = async (id) => {
-    // 실제 운영에서는 alert/confirm 대신 UI 라이브러리의 모달창 사용을 권장합니다.
     if (window.confirm("정말로 이 공지사항을 삭제하시겠습니까?")) {
       try {
         const token = localStorage.getItem('accessToken');
@@ -61,30 +60,23 @@ const AdminNoticesListPage = () => {
           headers: { Authorization: `Bearer ${token}` }
         });
         alert("성공적으로 삭제되었습니다.");
-        // 삭제 성공 후 목록을 다시 불러와 UI를 업데이트합니다.
         fetchNotices();
       } catch (err) {
-        console.error("공지사항 삭제 중 오류 발생:", err);
         alert("삭제에 실패했습니다. 다시 시도해 주세요.");
       }
     }
   };
 
-  // 4. 조건부 렌더링 로직
   const renderContent = () => {
-    // 로딩 중일 때
     if (loading) {
       return <div className="text-center py-10">로딩 중...</div>;
     }
-    // 오류 발생 시
     if (error) {
       return <div className="text-center py-10 text-red-500">{error}</div>;
     }
-    // 데이터가 없을 때 (로딩 완료 후)
     if (notices.length === 0) {
       return <div className="text-center py-10">작성된 공지사항이 없습니다.</div>;
     }
-    // 데이터가 성공적으로 로드되었을 때
     return (
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white">
@@ -148,4 +140,4 @@ const AdminNoticesListPage = () => {
   );
 };
 
-export default AdminNoticesListPage;
+export default AdminNoticeListPage;
