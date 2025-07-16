@@ -68,7 +68,7 @@ const AboutPage = () => {
             <div className="mt-12 relative text-base max-w-prose mx-auto lg:mt-0 lg:max-w-none">
               <img
                 className="w-full rounded-lg shadow-lg"
-                src="public/images/clinic.jpg"
+                src="/images/clinic.jpg"
                 alt="진료실 이미지"
                 width={1184}
                 height={1376}
