@@ -1,15 +1,17 @@
 // =================================================================
 // 프론트엔드 병원소식 목록 페이지 (NoticeListPage.jsx)
-// 최종 업데이트: 2025년 7월 16일
+// 최종 업데이트: 2025년 7월 17일
 // 주요 개선사항:
-// 1. 페이지 번호에 따라 공지사항 목록을 불러오는 기능 추가
-// 2. 페이지네이션 컴포넌트를 추가하여 페이지 이동 기능 구현
+// 1. 검색창 UI 추가
+// 2. 검색어 입력 및 검색 실행 기능 구현
+// 3. 검색 결과가 없을 경우 안내 메시지 표시
 // =================================================================
 
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Pagination from '../components/Pagination.jsx';
+import { Search } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -17,50 +19,56 @@ const NoticeListPage = () => {
   const [notices, setNotices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // [핵심 추가] 페이지네이션 상태 관리
+  
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
-  const [totalNotices, setTotalNotices] = useState(0);
+  const [totalItems, setTotalItems] = useState(0);
 
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  
+  // [핵심 추가] 검색어 상태 관리
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
 
   useEffect(() => {
     const pageFromUrl = parseInt(searchParams.get('page') || '1', 10);
+    const searchFromUrl = searchParams.get('search') || '';
     
-    const fetchNotices = async (page) => {
+    const fetchNotices = async (page, search) => {
       setLoading(true);
       setError(null);
       try {
-        // [핵심 수정] API 호출 시 페이지 번호를 함께 보냅니다.
-        const response = await axios.get(`${API_URL}/api/notices`, { params: { page: page, limit: 10 } });
+        const response = await axios.get(`${API_URL}/api/notices`, { 
+          params: { page, limit: 10, search } 
+        });
         
-        if (response.data && Array.isArray(response.data.notices)) {
-          setNotices(response.data.notices);
+        if (response.data && Array.isArray(response.data.items)) {
+          setNotices(response.data.items);
           setTotalPages(response.data.totalPages);
           setCurrentPage(response.data.currentPage);
-          // 전체 게시물 수를 계산하기 위해 totalPages와 limit을 사용 (서버에서 직접 주지 않을 경우)
-          // 이 예제에서는 서버가 totalPages를 주므로 직접 계산할 필요는 없습니다.
-          // 하지만 첫 게시물 번호를 정확히 표시하기 위해 전체 개수를 알아두면 좋습니다.
-          // 간단한 계산: (전체 페이지 - 1) * 10 + 마지막 페이지의 게시물 수. 여기서는 더 간단하게 가정합니다.
+          setTotalItems(response.data.totalItems);
         } else {
           setNotices([]);
           setTotalPages(0);
         }
       } catch (err) {
-        console.error("공지사항 목록을 불러오는 중 오류가 발생했습니다:", err);
-        setError("목록을 불러오는 데 실패했습니다. 잠시 후 다시 시도해 주세요.");
+        setError("목록을 불러오는 데 실패했습니다.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchNotices(pageFromUrl);
+    fetchNotices(pageFromUrl, searchFromUrl);
   }, [searchParams]);
 
   const handlePageChange = (page) => {
-    navigate(`/news?page=${page}`);
+    const currentSearch = searchParams.get('search') || '';
+    navigate(`/news?page=${page}&search=${currentSearch}`);
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    navigate(`/news?page=1&search=${searchTerm}`);
   };
 
   const formatDate = (dateString) => {
@@ -69,15 +77,15 @@ const NoticeListPage = () => {
   };
 
   const renderContent = () => {
-    if (loading) {
-      return <div className="text-center py-20 text-gray-500">목록을 불러오는 중입니다...</div>;
-    }
-    if (error) {
-      return <div className="text-center py-20 text-red-500">{error}</div>;
-    }
+    if (loading) return <div className="text-center py-20 text-gray-500">목록을 불러오는 중입니다...</div>;
+    if (error) return <div className="text-center py-20 text-red-500">{error}</div>;
     if (notices.length === 0) {
+      if (searchParams.get('search')) {
+        return <div className="text-center py-20 text-gray-500">"{searchParams.get('search')}"에 대한 검색 결과가 없습니다.</div>;
+      }
       return <div className="text-center py-20 text-gray-500">등록된 공지사항이 없습니다.</div>;
     }
+    
     return (
       <div className="border-t-2 border-b-2 border-gray-200">
         <table className="min-w-full bg-white">
@@ -92,8 +100,7 @@ const NoticeListPage = () => {
             {notices.map((notice, index) => (
               <tr key={notice.id} className="border-b border-gray-200 last:border-b-0">
                 <td className="py-4 px-2 sm:px-4 text-center text-sm text-gray-500">
-                  {/* 페이지네이션을 고려한 게시물 번호 계산이 필요하지만, 여기서는 ID를 그대로 사용합니다. */}
-                  {notice.id}
+                  {totalItems - (currentPage - 1) * 10 - index}
                 </td>
                 <td className="py-4 px-2 sm:px-4">
                   <Link to={`/news/${notice.id}`} className="hover:underline text-gray-800">
@@ -115,6 +122,27 @@ const NoticeListPage = () => {
         <h1 className="text-3xl sm:text-4xl font-bold text-gray-800">병원소식</h1>
         <p className="text-gray-500 mt-2">연세미치과의 새로운 소식을 전해드립니다.</p>
       </div>
+
+      {/* [핵심 추가] 검색 폼 */}
+      <div className="mb-8 max-w-lg mx-auto">
+        <form onSubmit={handleSearchSubmit} className="flex gap-2">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="제목, 내용으로 검색"
+            className="flex-grow px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            type="submit"
+            className="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700 flex items-center"
+          >
+            <Search className="w-4 h-4 mr-2" />
+            검색
+          </button>
+        </form>
+      </div>
+
       {renderContent()}
       <div className="mt-8">
         <Pagination
