@@ -1,6 +1,9 @@
 // =================================================================
 // 프론트엔드 자유게시판 상세 페이지 (PostDetailPage.jsx)
-// 파일 경로: /src/pages/PostDetailPage.jsx
+// 최종 업데이트: 2025년 7월 17일
+// 주요 개선사항:
+// 1. 게시글 하단에 '수정'과 '삭제' 버튼을 추가
+// 2. 각 버튼 클릭 시, 비밀번호 확인 페이지로 이동하도록 링크 설정
 // =================================================================
 
 import React, { useState, useEffect } from 'react';
@@ -51,10 +54,20 @@ const PostDetailPage = () => {
         </div>
         <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: post.content }} />
       </div>
-      <div className="mt-8 text-center">
-        <Link to="/community/posts" className="bg-blue-600 text-white px-6 py-2 rounded-md font-semibold hover:bg-blue-700 transition-colors">
+
+      {/* [핵심 추가] 수정/삭제 버튼 영역 */}
+      <div className="mt-8 flex justify-between items-center">
+        <Link to="/community/posts" className="bg-gray-600 text-white px-6 py-2 rounded-md font-semibold hover:bg-gray-700 transition-colors">
           목록으로
         </Link>
+        <div className="flex gap-2">
+          <Link to={`/community/posts/${id}/verify?action=edit`} className="bg-blue-600 text-white px-6 py-2 rounded-md font-semibold hover:bg-blue-700">
+            수정
+          </Link>
+          <Link to={`/community/posts/${id}/verify?action=delete`} className="bg-red-600 text-white px-6 py-2 rounded-md font-semibold hover:bg-red-700">
+            삭제
+          </Link>
+        </div>
       </div>
     </div>
   );

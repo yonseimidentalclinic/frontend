@@ -27,6 +27,8 @@ import ConsultationVerifyPage from './pages/ConsultationVerifyPage.jsx';
 import PostListPage from './pages/PostListPage.jsx';
 import PostWritePage from './pages/PostWritePage.jsx';
 import PostDetailPage from './pages/PostDetailPage.jsx';
+import PostVerifyPage from './pages/PostVerifyPage.jsx'; // [핵심 추가]
+import PostEditPage from './pages/PostEditPage.jsx'; // [핵심 추가]
 import LocationPage from './pages/LocationPage.jsx';
 
 // 관리자 페이지 컴포넌트
@@ -84,6 +86,8 @@ function App() {
           <Route path="/community/posts" element={<PostListPage />} />
           <Route path="/community/posts/write" element={<PostWritePage />} />
           <Route path="/community/posts/:id" element={<PostDetailPage />} />
+          <Route path="/community/posts/:id/verify" element={<PostVerifyPage />} /> {/* [핵심 추가] */}
+          <Route path="/community/posts/:id/edit" element={<PostEditPage />} /> {/* [핵심 추가] */}
           <Route path="/location" element={<LocationPage />} />
         </Route>
 
