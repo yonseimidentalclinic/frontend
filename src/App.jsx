@@ -24,6 +24,7 @@ import ConsultationListPage from './pages/ConsultationListPage.jsx';
 import ConsultationWritePage from './pages/ConsultationWritePage.jsx';
 import ConsultationDetailPage from './pages/ConsultationDetailPage.jsx';
 import ConsultationVerifyPage from './pages/ConsultationVerifyPage.jsx';
+import ConsultationEditPage from './pages/ConsultationEditPage.jsx'; // [핵심 추가]
 import PostListPage from './pages/PostListPage.jsx';
 import PostWritePage from './pages/PostWritePage.jsx';
 import PostDetailPage from './pages/PostDetailPage.jsx';
@@ -83,6 +84,7 @@ function App() {
           <Route path="/consultation/write" element={<ConsultationWritePage />} />
           <Route path="/consultation/:id" element={<ConsultationDetailPage />} />
           <Route path="/consultation/:id/verify" element={<ConsultationVerifyPage />} />
+          <Route path="/consultation/:id/edit" element={<ConsultationEditPage />} /> {/* [핵심 추가] */}
           <Route path="/community/posts" element={<PostListPage />} />
           <Route path="/community/posts/write" element={<PostWritePage />} />
           <Route path="/community/posts/:id" element={<PostDetailPage />} />

@@ -1,6 +1,9 @@
 // =================================================================
-// 프론트엔드 온라인상담 상세 페이지 (ConsultationDetailPage.jsx)
-// 파일 경로: /src/pages/ConsultationDetailPage.jsx
+// 프론트엔드 온라인 상담 상세 페이지 (ConsultationDetailPage.jsx)
+// 최종 업데이트: 2025년 7월 17일
+// 주요 개선사항:
+// 1. 게시글 하단에 사용자가 직접 '수정'과 '삭제'를 할 수 있는 버튼 추가
+// 2. 각 버튼 클릭 시, 비밀번호 확인 페이지로 이동하도록 링크 설정
 // =================================================================
 
 import React, { useState, useEffect } from 'react';
@@ -66,10 +69,22 @@ const ConsultationDetailPage = () => {
         </div>
       )}
 
-      <div className="mt-8 text-center">
-        <Link to="/consultation" className="bg-blue-600 text-white px-6 py-2 rounded-md font-semibold hover:bg-blue-700 transition-colors">
+      {/* [핵심 추가] 수정/삭제 버튼 영역 */}
+      <div className="mt-8 flex justify-between items-center">
+        <Link to="/consultation" className="bg-gray-600 text-white px-6 py-2 rounded-md font-semibold hover:bg-gray-700 transition-colors">
           목록으로
         </Link>
+        {/* 답변이 없는 경우에만 수정/삭제 버튼을 표시합니다. */}
+        {(!data.replies || data.replies.length === 0) && (
+          <div className="flex gap-2">
+            <Link to={`/consultation/${id}/verify?action=edit`} className="bg-blue-600 text-white px-6 py-2 rounded-md font-semibold hover:bg-blue-700">
+              수정
+            </Link>
+            <Link to={`/consultation/${id}/verify?action=delete`} className="bg-red-600 text-white px-6 py-2 rounded-md font-semibold hover:bg-red-700">
+              삭제
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );
