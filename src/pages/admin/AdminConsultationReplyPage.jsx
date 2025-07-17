@@ -36,6 +36,7 @@ const AdminConsultationReplyPage = () => {
   const fetchConsultationDetails = useCallback(async () => {
     setIsLoading(true);
     try {
+      // 관리자 페이지에서 상세 내용을 볼 때는 인증 토큰을 함께 보냅니다.
       const token = localStorage.getItem('accessToken');
       const response = await axios.get(`${API_URL}/api/consultations/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
