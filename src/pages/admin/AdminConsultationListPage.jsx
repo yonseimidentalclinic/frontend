@@ -1,12 +1,12 @@
 // =================================================================
 // 관리자 온라인 상담 목록 페이지 (AdminConsultationListPage.jsx)
+// 최종 업데이트: 2025년 7월 17일
 // 주요 개선사항:
-// 1. 각 상담글마다 '상담글 수정' 버튼을 추가
-// 2. 버튼 클릭 시, 새로 만든 AdminConsultationEditPage로 이동
+// 1. 페이지네이션이 적용된 API 응답 형식({ items: [...] })에 맞게 데이터 처리 로직 수정
 // =================================================================
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Lock } from 'lucide-react';
 
@@ -24,10 +24,12 @@ const AdminConsultationListPage = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`${API_URL}/api/consultations`);
-      if (Array.isArray(response.data)) {
-        setConsultations(response.data);
+      const response = await axios.get(`${API_URL}/api/consultations`, { params: { limit: 9999 } });
+      
+      if (response.data && Array.isArray(response.data.items)) {
+        setConsultations(response.data.items);
       } else {
+        console.error("API did not return expected format for admin consultations:", response.data);
         setConsultations([]);
       }
     } catch (err) {
@@ -96,7 +98,6 @@ const AdminConsultationListPage = () => {
                   >
                     {item.isAnswered ? '답변수정' : '답변하기'}
                   </button>
-                  {/* [핵심 추가] 상담글 수정 버튼 */}
                   <button
                     onClick={() => navigate(`/admin/consultations/edit/${item.id}`)}
                     className="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600 mr-1"

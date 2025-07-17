@@ -1,12 +1,12 @@
 // =================================================================
 // 관리자 자유게시판 목록 페이지 (AdminPostListPage.jsx)
+// 최종 업데이트: 2025년 7월 17일
 // 주요 개선사항:
-// 1. 각 게시글마다 '수정' 버튼을 추가
-// 2. 수정 버튼 클릭 시, 새로 만든 AdminPostEditPage로 이동
+// 1. 페이지네이션이 적용된 API 응답 형식({ items: [...] })에 맞게 데이터 처리 로직 수정
 // =================================================================
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom'; // Link 대신 useNavigate 사용
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -15,7 +15,7 @@ const AdminPostListPage = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate(); // useNavigate 훅 사용
+  const navigate = useNavigate();
 
   const formatDate = (dateString) => new Date(dateString).toLocaleString('ko-KR');
 
@@ -23,10 +23,12 @@ const AdminPostListPage = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`${API_URL}/api/posts`);
-      if (Array.isArray(response.data)) {
-        setPosts(response.data);
+      const response = await axios.get(`${API_URL}/api/posts`, { params: { limit: 9999 } });
+      
+      if (response.data && Array.isArray(response.data.items)) {
+        setPosts(response.data.items);
       } else {
+        console.error("API did not return expected format for admin posts:", response.data);
         setPosts([]);
       }
     } catch (err) {
@@ -80,7 +82,6 @@ const AdminPostListPage = () => {
                 <td className="py-3 px-4">{post.author}</td>
                 <td className="py-3 px-4 text-sm">{formatDate(post.createdAt)}</td>
                 <td className="py-3 px-4 text-center">
-                  {/* [핵심 추가] 수정 버튼 */}
                   <button
                     onClick={() => navigate(`/admin/posts/edit/${post.id}`)}
                     className="bg-blue-500 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-600 mr-2"

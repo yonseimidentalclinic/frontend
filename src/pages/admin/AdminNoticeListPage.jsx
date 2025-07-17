@@ -1,9 +1,9 @@
 // =================================================================
 // 관리자 공지사항 목록 페이지 (AdminNoticeListPage.jsx)
-// 최종 업데이트: 2025년 7월 16일
+// 최종 업데이트: 2025년 7월 17일
 // 주요 개선사항:
-// 1. 페이지네이션 기능이 적용된 API 응답 형식에 맞게 데이터 처리 로직 수정
-// 2. 서버에서 받은 데이터가 배열이 아닐 경우에 대한 방어 코드 추가
+// 1. 페이지네이션이 적용된 API 응답 형식({ items: [...] })에 맞게 데이터 처리 로직 수정
+// 2. 관리자 페이지에서는 모든 목록을 볼 수 있도록 API 호출 방식 변경
 // =================================================================
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -27,17 +27,14 @@ const AdminNoticeListPage = () => {
     setLoading(true);
     setError(null);
     try {
-      // 관리자 페이지에서는 모든 공지사항을 봐야 하므로, 페이지 제한 없이 가져옵니다.
-      // (페이지네이션이 적용된 API는 기본적으로 첫 페이지만 가져옵니다. 
-      //  향후 관리자용 전체 목록 API를 만드는 것이 더 좋습니다.)
-      const response = await axios.get(`${API_URL}/api/notices`);
+      // 관리자 페이지에서는 페이지네이션 없이 모든 목록을 가져옵니다.
+      const response = await axios.get(`${API_URL}/api/notices`, { params: { limit: 9999 } });
       
-      // [핵심 수정] 서버 응답이 { notices: [...] } 형태의 객체이므로, response.data.notices를 사용합니다.
-      if (response.data && Array.isArray(response.data.notices)) {
-        setNotices(response.data.notices);
+      // [핵심 수정] 서버 응답이 { items: [...] } 형태의 객체이므로, response.data.items를 사용합니다.
+      if (response.data && Array.isArray(response.data.items)) {
+        setNotices(response.data.items);
       } else {
-        // 만약의 경우를 대비한 방어 코드
-        console.error("API did not return an array for notices:", response.data);
+        console.error("API did not return expected format for admin notices:", response.data);
         setNotices([]);
       }
     } catch (err) {
