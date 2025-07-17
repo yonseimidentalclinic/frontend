@@ -36,7 +36,10 @@ const AdminConsultationReplyPage = () => {
   const fetchConsultationDetails = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get(`${API_URL}/api/consultations/${id}`);
+      const token = localStorage.getItem('accessToken');
+      const response = await axios.get(`${API_URL}/api/consultations/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setConsultation(response.data);
     } catch (err) {
       console.error("상담 내용을 불러오는 중 오류 발생:", err);
