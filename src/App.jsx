@@ -18,6 +18,7 @@ import HomePage from './pages/HomePage.jsx';
 import AboutPage from './pages/AboutPage.jsx';
 import DoctorsPage from './pages/DoctorsPage.jsx';
 import ServicesPage from './pages/ServicesPage.jsx';
+import ReservationPage from './pages/ReservationPage.jsx'; // [핵심 추가]
 import NoticeListPage from './pages/NoticeListPage.jsx';
 import NoticeDetailPage from './pages/NoticeDetailPage.jsx';
 import ConsultationListPage from './pages/ConsultationListPage.jsx';
@@ -37,6 +38,7 @@ import AdminLoginPage from './pages/AdminLoginPage.jsx';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage.jsx';
 import AdminAboutPage from './pages/admin/AdminAboutPage.jsx'; // [핵심 추가]
 import AdminDoctorsListPage from './pages/admin/AdminDoctorsListPage.jsx';
+import AdminReservationsPage from './pages/admin/AdminReservationsPage.jsx'; // [핵심 추가]
 import AdminNoticeListPage from './pages/admin/AdminNoticeListPage.jsx';
 import AdminNoticeWritePage from './pages/admin/AdminNoticeWritePage.jsx';
 import AdminNoticeEditPage from './pages/admin/AdminNoticeEditPage.jsx';
@@ -78,6 +80,7 @@ function App() {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/doctors" element={<DoctorsPage />} />
           <Route path="/services" element={<ServicesPage />} />
+          <Route path="/reservation" element={<ReservationPage />} /> {/* [핵심 추가] */}
           <Route path="/news" element={<NoticeListPage />} />
           <Route path="/news/:id" element={<NoticeDetailPage />} />
           <Route path="/consultation" element={<ConsultationListPage />} />
@@ -100,6 +103,7 @@ function App() {
           <Route path="dashboard" element={<AdminDashboardPage />} />
           <Route path="about" element={<AdminAboutPage />} /> {/* [핵심 추가] */}
           <Route path="doctors" element={<AdminDoctorsListPage />} />
+          <Route path="reservations" element={<AdminReservationsPage />} /> {/* [핵심 추가] */}
           <Route path="notices" element={<AdminNoticeListPage />} />
           <Route path="notices/write" element={<AdminNoticeWritePage />} />
           <Route path="notices/edit/:id" element={<AdminNoticeEditPage />} />

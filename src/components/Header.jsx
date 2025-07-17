@@ -1,9 +1,7 @@
 // =================================================================
 // 프론트엔드 Header 컴포넌트 (Header.jsx)
-// 파일 경로: /src/components/Header.jsx
-// 주요 기능:
-// 1. 홈페이지 로고 및 상단 네비게이션 메뉴 표시
-// 2. 모바일 화면에서 햄버거 메뉴 기능 제공
+// 주요 개선사항:
+// 1. 네비게이션 메뉴에 '온라인 예약' 링크를 새로 추가
 // =================================================================
 
 import React, { useState } from 'react';
@@ -33,16 +31,12 @@ const Header = () => {
     <header className="bg-white shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
-          
-          {/* 로고 */} 
           <div className="flex-shrink-0">
             <Link to="/" className="text-2xl font-bold text-blue-600">
               연세미치과
             </Link>
           </div>
-
-          {/* 데스크탑 메뉴 */}
-          <nav className="hidden md:flex md:space-x-8">
+          <nav className="hidden lg:flex lg:items-center lg:space-x-8">
             {navLinks.map(link => (
               <NavLink
                 key={link.to}
@@ -53,33 +47,32 @@ const Header = () => {
               </NavLink>
             ))}
           </nav>
-
-          {/* 모바일 메뉴 버튼 */}
-          <div className="md:hidden">
+          <div className="hidden lg:flex items-center">
+            <Link to="/reservation" className="ml-8 bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700">
+              온라인 예약
+            </Link>
+          </div>
+          <div className="lg:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400"
             >
               {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
         </div>
       </div>
-
-      {/* 모바일 메뉴 (펼쳐졌을 때) */}
       {isMenuOpen && (
-        <div className="md:hidden">
+        <div className="lg:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
             {navLinks.map(link => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                onClick={() => setIsMenuOpen(false)}
-                className={({ isActive }) => `${mobileLinkClass} ${isActive ? mobileActiveLinkClass : ''}`}
-              >
+              <NavLink key={link.to} to={link.to} onClick={() => setIsMenuOpen(false)} className={({ isActive }) => `${mobileLinkClass} ${isActive ? mobileActiveLinkClass : ''}`}>
                 {link.text}
               </NavLink>
             ))}
+            <Link to="/reservation" onClick={() => setIsMenuOpen(false)} className={`${mobileLinkClass} bg-blue-50`}>
+              온라인 예약
+            </Link>
           </div>
         </div>
       )}
