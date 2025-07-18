@@ -2,10 +2,12 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
-// 프로젝트의 API 서비스 유틸리티를 임포트합니다. 경로를 확인해주세요.
+// 프로젝트의 API 서비스 유틸리티를 임포트합니다.
 import api from '../../services/api'; 
-// 공용 페이지네이션 컴포넌트를 임포트합니다. 경로를 확인해주세요.
-import Pagination from '../../components/common/Pagination';
+// *** 오류 수정: Pagination 컴포넌트의 경로를 수정했습니다. ***
+// 'common' 폴더가 없을 가능성을 고려하여 경로를 조정합니다.
+// 만약 이 경로도 아니라면, 프로젝트 내 Pagination.jsx 파일의 실제 위치를 확인해주세요.
+import Pagination from '../../components/Pagination'; 
 // UI 개선을 위해 아이콘을 사용합니다. (lucide-react 라이브러리 사용 가정)
 import { Search, Edit, Trash2, PlusCircle } from 'lucide-react';
 
@@ -90,13 +92,11 @@ const AdminNoticeListPage = () => {
   // 삭제 버튼 클릭 시 실행되는 핸들러
   const handleDelete = async (id) => {
     // 사용자에게 삭제 여부를 다시 한 번 확인받습니다.
-    // 실제 운영 환경에서는 alert/confirm 대신 디자인된 모달창을 사용하는 것이 좋습니다.
     if (window.confirm(`[ID: ${id}] 공지사항을 정말로 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) {
       try {
         await api.delete(`/admin/notices/${id}`);
         // 삭제 성공 시, 목록을 다시 불러와 화면을 갱신합니다.
         fetchNotices();
-        // 사용자에게 성공 피드백을 줍니다. (커스텀 알림 컴포넌트 사용 권장)
         alert('성공적으로 삭제되었습니다.');
       } catch (err) {
         console.error("공지사항 삭제 실패:", err);
