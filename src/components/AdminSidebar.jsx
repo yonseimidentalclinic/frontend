@@ -2,12 +2,12 @@
 // 프론트엔드 관리자 메뉴 컴포넌트 (AdminSidebar.jsx)
 // 최종 업데이트: 2025년 7월 18일
 // 주요 개선사항:
-// 1. '치료 사례 관리' 메뉴 항목을 새로 추가
+// 1. 'FAQ 관리' 메뉴 항목을 새로 추가
 // =================================================================
 
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Megaphone, Newspaper, MessageSquare, LogOut, UserSquare, Home, CalendarCheck, Camera } from 'lucide-react';
+import { LayoutDashboard, Megaphone, Newspaper, MessageSquare, LogOut, UserSquare, Home, CalendarCheck, Camera, HelpCircle } from 'lucide-react';
 
 const AdminSidebar = () => {
   const navigate = useNavigate();
@@ -28,7 +28,7 @@ const AdminSidebar = () => {
         <h1 className="text-2xl font-bold text-white">연세미치과</h1>
         <p className="text-sm text-gray-400">관리자 페이지</p>
       </div>
-      <nav className="flex-grow px-4 py-4">
+      <nav className="flex-grow px-4 py-4 space-y-1">
         <NavLink to="/admin" end className={({ isActive }) => `${commonLinkClass} ${isActive ? activeLinkClass : ''}`}>
           <LayoutDashboard className="w-5 h-5 mr-3" />
           대시보드
@@ -45,10 +45,14 @@ const AdminSidebar = () => {
           <UserSquare className="w-5 h-5 mr-3" />
           의료진 관리
         </NavLink>
-        {/* [핵심 추가] 치료 사례 관리 메뉴 */}
         <NavLink to="/admin/cases" className={({ isActive }) => `${commonLinkClass} ${isActive ? activeLinkClass : ''}`}>
           <Camera className="w-5 h-5 mr-3" />
           치료 사례 관리
+        </NavLink>
+        {/* [핵심 추가] FAQ 관리 메뉴 */}
+        <NavLink to="/admin/faqs" className={({ isActive }) => `${commonLinkClass} ${isActive ? activeLinkClass : ''}`}>
+          <HelpCircle className="w-5 h-5 mr-3" />
+          FAQ 관리
         </NavLink>
         <NavLink to="/admin/notices" className={({ isActive }) => `${commonLinkClass} ${isActive ? activeLinkClass : ''}`}>
           <Megaphone className="w-5 h-5 mr-3" />

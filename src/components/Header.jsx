@@ -1,7 +1,7 @@
 // =================================================================
 // 프론트엔드 Header 컴포넌트 (Header.jsx)
 // 주요 개선사항:
-// 1. 네비게이션 메뉴에 '치료 사례' 링크를 새로 추가
+// 1. 네비게이션 메뉴에 '자주 묻는 질문' 링크를 새로 추가
 // =================================================================
 
 import React, { useState } from 'react';
@@ -20,8 +20,8 @@ const Header = () => {
   const navLinks = [
     { to: "/about", text: "병원소개" },
     { to: "/doctors", text: "의료진 소개" },
-    { to: "/cases", text: "치료 사례" }, // [핵심 추가]
-    { to: "/services", text: "진료안내" },
+    { to: "/cases", text: "치료 사례" },
+    { to: "/faq", text: "자주 묻는 질문" }, // [핵심 추가]
     { to: "/news", text: "병원소식" },
     { to: "/consultation", text: "온라인 상담" },
     { to: "/community/posts", text: "자유게시판" },
@@ -37,7 +37,7 @@ const Header = () => {
               연세미치과
             </Link>
           </div>
-          <nav className="hidden lg:flex lg:items-center lg:space-x-8">
+          <nav className="hidden lg:flex lg:items-center lg:space-x-6">
             {navLinks.map(link => (
               <NavLink
                 key={link.to}
@@ -49,7 +49,7 @@ const Header = () => {
             ))}
           </nav>
           <div className="hidden lg:flex items-center">
-            <Link to="/reservation" className="ml-8 bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700">
+            <Link to="/reservation" className="ml-6 bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700">
               온라인 예약
             </Link>
           </div>
