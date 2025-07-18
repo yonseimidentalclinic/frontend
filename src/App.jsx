@@ -79,7 +79,7 @@ function App() {
           <Route path="consultations/edit/:id" element={<ConsultationEditPage />} />
           <Route path="reservation" element={<ReservationPage />} />
           {/* *** 수정: ReviewPage 라우트를 주석 처리합니다. *** */}
-          <Route path="reviews" element={<ReviewPage />} /> 
+          <Route path="reviews" element={<ReviewsPage />} /> 
         </Route>
 
         {/* 관리자용 페이지 라우트 (실제로 존재하는 페이지만 연결) */}
