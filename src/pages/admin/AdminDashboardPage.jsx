@@ -1,19 +1,17 @@
 // =================================================================
-// 관리자 대시보드 페이지 (AdminDashboardPage.jsx) - UI/UX 개선 버전
-// 최종 업데이트: 2025년 7월 17일
+// 관리자 대시보드 페이지 (AdminDashboardPage.jsx) - API 경로 수정 버전
+// 최종 업데이트: 2025년 7월 18일
 // 주요 개선사항:
-// 1. 주요 현황을 한눈에 볼 수 있는 통계 카드 디자인 적용
-// 2. 'recharts' 라이브러리를 사용하여 콘텐츠 현황을 시각적인 막대 차트로 표시
-// 3. 답변 대기 중인 상담이 있을 경우, 강조 알림 표시
+// 1. 올바른 백엔드 API 주소(/admin/dashboard-stats)로 요청하도록 수정
+// 2. 중앙 api.js 모듈을 사용하도록 변경하여 코드 일관성 및 안정성 확보
 // =================================================================
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+// *** 핵심 수정: axios 대신 중앙 api 모듈을 사용합니다. ***
+import api from '../../services/api';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Megaphone, Newspaper, MessageSquare, Bell, AlertTriangle } from 'lucide-react';
-
-const API_URL = import.meta.env.VITE_API_URL;
 
 // 통계 카드 컴포넌트
 const StatCard = ({ icon: Icon, title, value, linkTo, colorClass }) => (
@@ -35,14 +33,18 @@ const AdminDashboardPage = () => {
 
   const fetchStats = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
-      const token = localStorage.getItem('accessToken');
-      const response = await axios.get(`${API_URL}/api/admin/dashboard-summary`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      // *** 핵심 수정: api 모듈을 사용하여 올바른 주소로 요청합니다. ***
+      // 이제 인증 헤더는 api.js에서 자동으로 처리됩니다.
+      const response = await api.get('/admin/dashboard-stats');
       setStats(response.data);
     } catch (err) {
-      setError('대시보드 데이터를 불러오는 데 실패했습니다.');
+      console.error("대시보드 데이터 로딩 실패:", err);
+      // api.js의 인터셉터가 401 오류를 처리하므로, 여기서는 일반 오류만 처리합니다.
+      if (err.response?.status !== 401) {
+        setError('대시보드 데이터를 불러오는 데 실패했습니다.');
+      }
     } finally {
       setLoading(false);
     }
@@ -59,10 +61,10 @@ const AdminDashboardPage = () => {
   ];
 
   if (loading) {
-    return <div className="p-10 text-center">대시보드 데이터를 불러오는 중...</div>;
+    return <div className="p-10 text-center text-gray-600">대시보드 데이터를 불러오는 중...</div>;
   }
   if (error) {
-    return <div className="p-10 text-center text-red-500">{error}</div>;
+    return <div className="p-10 text-center text-red-500 bg-red-50 rounded-lg">{error}</div>;
   }
 
   return (
