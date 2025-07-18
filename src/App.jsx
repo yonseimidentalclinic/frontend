@@ -4,7 +4,6 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 // 공용 레이아웃 컴포넌트
-// components 폴더 바로 아래에 있는 MainLayout과 AdminLayout을 불러옵니다.
 import MainLayout from './components/MainLayout';
 import AdminLayout from './components/AdminLayout';
 
@@ -14,7 +13,8 @@ import AboutPage from './pages/AboutPage';
 import DoctorsPage from './pages/DoctorsPage';
 import CasesPage from './pages/CasesPage';
 import FaqPage from './pages/FaqPage'; 
-import InfoPage from './pages/InfoPage';
+// *** 핵심 수정: 존재하지 않는 InfoPage 관련 코드를 삭제했습니다. ***
+// import InfoPage from './pages/InfoPage'; 
 import LocationPage from './pages/LocationPage';
 import NoticeListPage from './pages/NoticeListPage';
 import NoticeDetailPage from './pages/NoticeDetailPage';
@@ -61,7 +61,8 @@ function App() {
           <Route path="doctors" element={<DoctorsPage />} />
           <Route path="cases" element={<CasesPage />} />
           <Route path="faq" element={<FaqPage />} />
-          <Route path="info" element={<InfoPage />} />
+          {/* *** 핵심 수정: 존재하지 않는 InfoPage 라우트를 삭제했습니다. *** */}
+          {/* <Route path="info" element={<InfoPage />} /> */}
           <Route path="location" element={<LocationPage />} />
           <Route path="notices" element={<NoticeListPage />} />
           <Route path="notices/:id" element={<NoticeDetailPage />} />
