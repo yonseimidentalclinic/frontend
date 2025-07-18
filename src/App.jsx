@@ -4,7 +4,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 // 공용 레이아웃 컴포넌트
-import MainLayout from './components/MainLayout';
+//import MainLayout from './components/MainLayout';
 import AdminLayout from './components/AdminLayout';
 
 // --- 환자용 페이지 컴포넌트 (실제로 존재하는 파일만 import) ---
@@ -26,7 +26,7 @@ import ConsultationWritePage from './pages/ConsultationWritePage';
 import ConsultationEditPage from './pages/ConsultationEditPage';
 import ReservationPage from './pages/ReservationPage';
 // *** 수정: ReviewPage.jsx 파일이 없어 빌드 오류가 발생하므로 관련 코드를 주석 처리합니다. ***
-//import ReviewPage from './pages/ReviewPage';
+import ReviewPage from './pages/ReviewPage';
 
 // -관리자용 페이지 컴포넌트 (스크린샷에서 확인된 파일만 활성화) ---
 import AdminLoginPage from './pages/admin/AdminLoginPage';
@@ -79,7 +79,7 @@ function App() {
           <Route path="consultations/edit/:id" element={<ConsultationEditPage />} />
           <Route path="reservation" element={<ReservationPage />} />
           {/* *** 수정: ReviewPage 라우트를 주석 처리합니다. *** */}
-         {/* <Route path="reviews" element={<ReviewPage />} /> */} 
+         <Route path="reviews" element={<ReviewPage />} /> 
         </Route>
 
         {/* 관리자용 페이지 라우트 (실제로 존재하는 페이지만 연결) */}
