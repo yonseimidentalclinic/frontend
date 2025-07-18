@@ -26,7 +26,7 @@ import ConsultationWritePage from './pages/ConsultationWritePage';
 import ConsultationEditPage from './pages/ConsultationEditPage';
 import ReservationPage from './pages/ReservationPage';
 // *** 수정: ReviewPage.jsx 파일이 없어 빌드 오류가 발생하므로 관련 코드를 주석 처리합니다. ***
-// import ReviewPage from './pages/ReviewPage';
+import ReviewPage from './pages/ReviewPage';
 
 // --- 관리자용 페이지 컴포넌트 (스크린샷에서 확인된 파일만 활성화) ---
 import AdminLoginPage from './pages/admin/AdminLoginPage';
@@ -42,11 +42,11 @@ import AdminAboutPage from './pages/admin/AdminAboutPage';
 // --- 참고 ---
 // 아래 관리자 페이지 파일들은 아직 프로젝트에 없어 빌드 오류를 유발할 수 있습니다.
 // 향후 해당 페이지 파일을 생성하신 후, 이 import와 아래 Routes의 경로 주석을 해제하여 사용해주세요.
-// import AdminPostListPage from './pages/admin/AdminPostListPage';
-// import AdminFaqListPage from './pages/admin/AdminFaqListPage';
-// import AdminReviewListPage from './pages/admin/AdminReviewListPage';
-// import AdminReservationListPage from './pages/admin/AdminReservationListPage';
-// import AdminSchedulePage from './pages/admin/AdminSchedulePage';
+ import AdminPostListPage from './pages/admin/AdminPostListPage';
+import AdminFaqListPage from './pages/admin/AdminFaqListPage';
+ import AdminReviewListPage from './pages/admin/AdminReviewListPage';
+ import AdminReservationListPage from './pages/admin/AdminReservationListPage';
+ import AdminSchedulePage from './pages/admin/AdminSchedulePage';
 
 
 // 인증 상태에 따라 관리자 페이지 접근을 제어하는 컴포넌트
@@ -79,7 +79,7 @@ function App() {
           <Route path="consultations/edit/:id" element={<ConsultationEditPage />} />
           <Route path="reservation" element={<ReservationPage />} />
           {/* *** 수정: ReviewPage 라우트를 주석 처리합니다. *** */}
-          {/* <Route path="reviews" element={<ReviewPage />} /> */}
+         <Route path="reviews" element={<ReviewPage />} />
         </Route>
 
         {/* 관리자용 페이지 라우트 (실제로 존재하는 페이지만 연결) */}
@@ -102,11 +102,11 @@ function App() {
           
           {/* --- 참고 --- */}
           {/* 아래 페이지들은 파일을 만드신 후 주석을 해제하여 경로를 연결해주세요. */}
-          {/* <Route path="reservations" element={<AdminReservationListPage />} /> */}
-          {/* <Route path="schedule" element={<AdminSchedulePage />} /> */}
-          {/* <Route path="reviews" element={<AdminReviewListPage />} /> */}
-          {/* <Route path="faqs" element={<AdminFaqListPage />} /> */}
-          {/* <Route path="posts" element={<AdminPostListPage />} /> */}
+           <Route path="reservations" element={<AdminReservationListPage />} /> 
+           <Route path="schedule" element={<AdminSchedulePage />} /> 
+           <Route path="reviews" element={<AdminReviewListPage />} /> 
+           <Route path="faqs" element={<AdminFaqListPage />} /> 
+           <Route path="posts" element={<AdminPostListPage />} /> 
         </Route>
       </Routes>
     </Router>
