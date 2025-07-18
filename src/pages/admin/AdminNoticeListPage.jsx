@@ -2,100 +2,91 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
-// 프로젝트의 API 서비스 유틸리티를 임포트합니다.
-import api from '../../services/api'; 
-// *** 오류 수정: Pagination 컴포넌트의 경로를 수정했습니다. ***
-// 'common' 폴더가 없을 가능성을 고려하여 경로를 조정합니다.
-// 만약 이 경로도 아니라면, 프로젝트 내 Pagination.jsx 파일의 실제 위치를 확인해주세요.
+// *** 오류 수정: 기존 api 인스턴스 대신 axios를 직접 사용합니다. ***
+// 이는 '/api' 경로 문제에 대한 임시 해결책입니다.
+// 근본적인 해결을 위해서는 백엔드 라우팅 또는 프론트엔드의 api.js 설정을 확인해야 합니다.
+import axios from 'axios'; 
 import Pagination from '../../components/Pagination'; 
-// UI 개선을 위해 아이콘을 사용합니다. (lucide-react 라이브러리 사용 가정)
 import { Search, Edit, Trash2, PlusCircle } from 'lucide-react';
 
 const AdminNoticeListPage = () => {
   // --- 상태 관리 (State Management) --- //
-
-  // 공지사항 목록을 저장할 상태
   const [notices, setNotices] = useState([]); 
-  // 데이터 로딩 상태
   const [loading, setLoading] = useState(true); 
-  // 에러 발생 시 에러 메시지를 저장할 상태
   const [error, setError] = useState(null); 
-  // 현재 페이지 번호
   const [currentPage, setCurrentPage] = useState(1);
-  // 전체 페이지 수
   const [totalPages, setTotalPages] = useState(1);
-  // 전체 공지사항 개수
   const [totalNotices, setTotalNotices] = useState(0);
-  // 사용자가 입력하는 검색어
   const [searchTerm, setSearchTerm] = useState('');
 
   // --- React Router Hooks --- //
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  // --- 데이터 로딩 함수 --- //
-
-  // 백엔드 API로부터 공지사항 목록을 가져오는 함수
+  // --- 데이터 로딩 함수 (API 경로 수정) --- //
   const fetchNotices = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      // URL 쿼리 파라미터에서 'page'와 'query' 값을 가져옵니다. 없으면 기본값을 사용합니다.
       const page = searchParams.get('page') || '1';
       const query = searchParams.get('query') || '';
 
-      // 백엔드에 GET 요청을 보냅니다.
-      const response = await api.get('/admin/notices', {
+      // *** 오류 수정: 404 오류 해결을 위해 API 요청 주소를 직접 구성합니다. ***
+      // VITE_API_URL 환경변수를 사용하여 '/api' 접두사 없이 요청을 보냅니다.
+      const API_BASE_URL = import.meta.env.VITE_API_URL;
+      const response = await axios.get(`${API_BASE_URL}/admin/notices`, {
         params: { page, query },
+        withCredentials: true // 인증 쿠키를 포함하기 위해 필요할 수 있습니다.
       });
       
-      // API 응답으로 상태를 업데이트합니다.
       setNotices(response.data.notices);
       setTotalPages(response.data.totalPages);
       setTotalNotices(response.data.totalCount);
       setCurrentPage(parseInt(page, 10));
-      setSearchTerm(query); // URL 쿼리와 검색창 입력값을 동기화
+      setSearchTerm(query);
 
     } catch (err) {
       console.error("공지사항 목록 로딩 실패:", err);
-      setError("데이터를 불러오는 데 실패했습니다. 잠시 후 다시 시도해주세요.");
+      // 404 오류가 발생하면 사용자에게 더 명확한 메시지를 보여줄 수 있습니다.
+      if (err.response && err.response.status === 404) {
+        setError("API 경로를 찾을 수 없습니다. 관리자에게 문의하세요.");
+      } else {
+        setError("데이터를 불러오는 데 실패했습니다. 잠시 후 다시 시도해주세요.");
+      }
     } finally {
       setLoading(false);
     }
-  }, [searchParams]); // searchParams가 변경될 때마다 함수를 재생성합니다.
+  }, [searchParams]);
 
-  // 컴포넌트가 처음 렌더링되거나, searchParams가 바뀔 때 공지사항 목록을 불러옵니다.
   useEffect(() => {
     fetchNotices();
   }, [fetchNotices]);
 
   // --- 이벤트 핸들러 --- //
-
-  // 검색창 입력값이 변경될 때마다 searchTerm 상태를 업데이트합니다.
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
   };
 
-  // 검색 버튼을 클릭하거나 Enter 키를 누르면 검색을 실행합니다.
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    // URL 쿼리를 업데이트하여 검색 결과의 1페이지로 이동합니다.
     setSearchParams({ query: searchTerm, page: '1' });
   };
 
-  // 페이지네이션 컴포넌트에서 페이지 번호를 클릭했을 때 실행됩니다.
   const handlePageChange = (pageNumber) => {
     const currentQuery = searchParams.get('query') || '';
     setSearchParams({ query: currentQuery, page: pageNumber.toString() });
   };
   
-  // 삭제 버튼 클릭 시 실행되는 핸들러
+  // 삭제 핸들러 (API 경로 수정)
   const handleDelete = async (id) => {
-    // 사용자에게 삭제 여부를 다시 한 번 확인받습니다.
     if (window.confirm(`[ID: ${id}] 공지사항을 정말로 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) {
       try {
-        await api.delete(`/admin/notices/${id}`);
-        // 삭제 성공 시, 목록을 다시 불러와 화면을 갱신합니다.
+        // *** 오류 수정: 삭제 요청 주소도 직접 구성합니다. ***
+        const API_BASE_URL = import.meta.env.VITE_API_URL;
+        await axios.delete(`${API_BASE_URL}/admin/notices/${id}`, {
+          withCredentials: true
+        });
+        
         fetchNotices();
         alert('성공적으로 삭제되었습니다.');
       } catch (err) {
@@ -106,7 +97,6 @@ const AdminNoticeListPage = () => {
   };
 
   // --- 렌더링 --- //
-
   return (
     <div className="p-4 md:p-6 lg:p-8 bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto">
@@ -167,7 +157,7 @@ const AdminNoticeListPage = () => {
                       <tr key={notice.id} className="hover:bg-gray-50 transition-colors">
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">{notice.id}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                          <Link to={`/admin/notices/${notice.id}`} className="hover:text-blue-600 hover:underline">
+                          <Link to={`/admin/notices/edit/${notice.id}`} className="hover:text-blue-600 hover:underline">
                             {notice.title}
                           </Link>
                         </td>
@@ -178,7 +168,7 @@ const AdminNoticeListPage = () => {
                         <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                           <div className="flex justify-center items-center gap-x-4">
                             <button
-                              onClick={() => navigate(`/admin/notices/${notice.id}`)}
+                              onClick={() => navigate(`/admin/notices/edit/${notice.id}`)}
                               className="text-indigo-600 hover:text-indigo-900 flex items-center gap-1 transition-colors"
                               aria-label={`${notice.title} 수정`}
                             >
