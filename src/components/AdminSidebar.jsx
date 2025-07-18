@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Megaphone, Newspaper, MessageSquare, LogOut, UserSquare, Home, CalendarCheck, Camera, HelpCircle, Star, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, Megaphone, Newspaper, MessageSquare, LogOut, UserSquare, Home, CalendarCheck, Camera, HelpCircle, Star, ShieldCheck, CalendarClock } from 'lucide-react';
 
 const AdminSidebar = () => {
   const navigate = useNavigate();
@@ -38,7 +38,7 @@ const AdminSidebar = () => {
           예약 관리
         </NavLink>
         <NavLink to="/admin/schedule" className={({ isActive }) => `${commonLinkClass} ${isActive ? activeLinkClass : ''}`}>
-          <CalendarCheck className="w-5 h-5 mr-3" />
+          <CalendarClock className="w-5 h-5 mr-3" />
           스케줄 관리
         </NavLink>
         <NavLink to="/admin/about" className={({ isActive }) => `${commonLinkClass} ${isActive ? activeLinkClass : ''}`}>
