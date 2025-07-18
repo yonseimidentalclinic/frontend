@@ -1,13 +1,13 @@
 // =================================================================
-// 프론트엔드 관리자 메뉴 컴포넌트 (AdminSidebar.jsx) - 최종 수정본
+// 프론트엔드 관리자 메뉴 컴포넌트 (AdminSidebar.jsx)
 // 최종 업데이트: 2025년 7월 18일
 // 주요 개선사항:
-// 1. 누락되었던 '스케줄 관리' 메뉴 항목을 다시 추가
+// 1. '접근 기록' 메뉴 항목을 새로 추가
 // =================================================================
 
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Megaphone, Newspaper, MessageSquare, LogOut, UserSquare, Home, CalendarCheck, Camera, HelpCircle, CalendarClock ,Star } from 'lucide-react';
+import { LayoutDashboard, Megaphone, Newspaper, MessageSquare, LogOut, UserSquare, Home, CalendarCheck, Camera, HelpCircle, Star, ShieldCheck } from 'lucide-react';
 
 const AdminSidebar = () => {
   const navigate = useNavigate();
@@ -37,9 +37,8 @@ const AdminSidebar = () => {
           <CalendarCheck className="w-5 h-5 mr-3" />
           예약 관리
         </NavLink>
-        {/* [핵심 수정] 누락된 스케줄 관리 메뉴 추가 */}
         <NavLink to="/admin/schedule" className={({ isActive }) => `${commonLinkClass} ${isActive ? activeLinkClass : ''}`}>
-          <CalendarClock className="w-5 h-5 mr-3" />
+          <CalendarCheck className="w-5 h-5 mr-3" />
           스케줄 관리
         </NavLink>
         <NavLink to="/admin/about" className={({ isActive }) => `${commonLinkClass} ${isActive ? activeLinkClass : ''}`}>
@@ -73,6 +72,11 @@ const AdminSidebar = () => {
         <NavLink to="/admin/consultations" className={({ isActive }) => `${commonLinkClass} ${isActive ? activeLinkClass : ''}`}>
           <MessageSquare className="w-5 h-5 mr-3" />
           온라인상담 관리
+        </NavLink>
+        {/* [핵심 추가] 접근 기록 메뉴 */}
+        <NavLink to="/admin/logs" className={({ isActive }) => `${commonLinkClass} ${isActive ? activeLinkClass : ''}`}>
+          <ShieldCheck className="w-5 h-5 mr-3" />
+          접근 기록
         </NavLink>
       </nav>
       <div className="px-4 py-4 border-t border-gray-700">

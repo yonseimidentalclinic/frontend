@@ -47,6 +47,7 @@ import AdminReviewsPage from './pages/admin/AdminReviewsPage.jsx'; // [핵심 �
 import AdminFaqPage from './pages/admin/AdminFaqPage.jsx'; // [핵심 추가]
 import AdminReservationsPage from './pages/admin/AdminReservationsPage.jsx'; // [핵심 추가]
 import AdminSchedulePage from './pages/admin/AdminSchedulePage.jsx'; // [핵심 추가]
+import AdminLogsPage from './pages/admin/AdminLogsPage.jsx'; // [핵심 추가]
 import AdminNoticeListPage from './pages/admin/AdminNoticeListPage.jsx';
 import AdminNoticeWritePage from './pages/admin/AdminNoticeWritePage.jsx';
 import AdminNoticeEditPage from './pages/admin/AdminNoticeEditPage.jsx';
@@ -120,6 +121,7 @@ function App() {
           <Route path="faqs" element={<AdminFaqPage />} /> {/* [핵심 추가] */}
           <Route path="reservations" element={<AdminReservationsPage />} /> {/* [핵심 추가] */}
           <Route path="schedule" element={<AdminSchedulePage />} /> {/* [핵심 추가] */}
+          <Route path="logs" element={<AdminLogsPage />} /> {/* [핵심 추가] */}
           <Route path="notices" element={<AdminNoticeListPage />} />
           <Route path="notices/write" element={<AdminNoticeWritePage />} />
           <Route path="notices/edit/:id" element={<AdminNoticeEditPage />} />
