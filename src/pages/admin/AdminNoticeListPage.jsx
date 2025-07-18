@@ -1,114 +1,125 @@
 // =================================================================
-// 관리자 공지사항 목록 페이지 (AdminNoticeListPage.jsx)
-// 최종 업데이트: 2025년 7월 17일
+// 프론트엔드 병원소식 목록 페이지 (NoticeListPage.jsx)
+// 최종 업데이트: 2025년 7월 18일
 // 주요 개선사항:
-// 1. 페이지네이션이 적용된 API 응답 형식({ items: [...] })에 맞게 데이터 처리 로직 수정
-// 2. 관리자 페이지에서는 모든 목록을 볼 수 있도록 API 호출 방식 변경
+// 1. 카테고리 필터 버튼 UI 추가
+// 2. 선택된 카테고리에 따라 게시물 목록을 필터링하는 기능 구현
 // =================================================================
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import Pagination from '../components/Pagination.jsx';
+import { Search } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL;
+const NOTICE_CATEGORIES = ['전체', '병원소식', '의료상식', '이벤트'];
 
-const AdminNoticeListPage = () => {
+const NoticeListPage = () => {
   const [notices, setNotices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalItems, setTotalItems] = useState(0);
+
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-
-  const formatDate = (dateString) => {
-    const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
-    return new Date(dateString).toLocaleString('ko-KR', options);
-  };
-
-  const fetchNotices = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      // 관리자 페이지에서는 페이지네이션 없이 모든 목록을 가져옵니다.
-      const response = await axios.get(`${API_URL}/api/notices`, { params: { limit: 9999 } });
-      
-      // [핵심 수정] 서버 응답이 { items: [...] } 형태의 객체이므로, response.data.items를 사용합니다.
-      if (response.data && Array.isArray(response.data.items)) {
-        setNotices(response.data.items);
-      } else {
-        console.error("API did not return expected format for admin notices:", response.data);
-        setNotices([]);
-      }
-    } catch (err) {
-      console.error("공지사항 목록을 불러오는 중 오류가 발생했습니다:", err);
-      setError("데이터를 불러오는 데 실패했습니다. 잠시 후 다시 시도해 주세요.");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
+  const activeCategory = searchParams.get('category') || '전체';
 
   useEffect(() => {
-    fetchNotices();
-  }, [fetchNotices]);
-
-  const handleDelete = async (id) => {
-    if (window.confirm("정말로 이 공지사항을 삭제하시겠습니까?")) {
+    const pageFromUrl = parseInt(searchParams.get('page') || '1', 10);
+    const searchFromUrl = searchParams.get('search') || '';
+    const categoryFromUrl = searchParams.get('category') || '';
+    
+    const fetchNotices = async (page, search, category) => {
+      setLoading(true);
+      setError(null);
       try {
-        const token = localStorage.getItem('accessToken');
-        await axios.delete(`${API_URL}/api/admin/notices/${id}`, {
-          headers: { Authorization: `Bearer ${token}` }
+        const response = await axios.get(`${API_URL}/api/notices`, { 
+          params: { page, limit: 10, search, category } 
         });
-        alert("성공적으로 삭제되었습니다.");
-        fetchNotices();
+        
+        if (response.data && Array.isArray(response.data.items)) {
+          setNotices(response.data.items);
+          setTotalPages(response.data.totalPages);
+          setCurrentPage(response.data.currentPage);
+          setTotalItems(response.data.totalItems);
+        } else {
+          setNotices([]);
+          setTotalPages(0);
+        }
       } catch (err) {
-        alert("삭제에 실패했습니다. 다시 시도해 주세요.");
+        setError("목록을 불러오는 데 실패했습니다.");
+      } finally {
+        setLoading(false);
       }
-    }
+    };
+
+    fetchNotices(pageFromUrl, searchFromUrl, categoryFromUrl);
+  }, [searchParams]);
+
+  const handlePageChange = (page) => {
+    const currentSearch = searchParams.get('search') || '';
+    const currentCategory = searchParams.get('category') || '';
+    navigate(`/news?page=${page}&search=${currentSearch}&category=${currentCategory}`);
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    const currentCategory = searchParams.get('category') || '';
+    navigate(`/news?page=1&search=${searchTerm}&category=${currentCategory}`);
+  };
+
+  const handleCategoryClick = (category) => {
+    const currentSearch = searchParams.get('search') || '';
+    navigate(`/news?page=1&search=${currentSearch}&category=${category}`);
+  };
+
+  const formatDate = (dateString) => {
+    const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+    return new Date(dateString).toLocaleDateString('ko-KR', options);
   };
 
   const renderContent = () => {
-    if (loading) {
-      return <div className="text-center py-10">로딩 중...</div>;
-    }
-    if (error) {
-      return <div className="text-center py-10 text-red-500">{error}</div>;
-    }
+    if (loading) return <div className="text-center py-20 text-gray-500">목록을 불러오는 중입니다...</div>;
+    if (error) return <div className="text-center py-20 text-red-500">{error}</div>;
     if (notices.length === 0) {
-      return <div className="text-center py-10">작성된 공지사항이 없습니다.</div>;
+      if (searchParams.get('search') || (searchParams.get('category') && searchParams.get('category') !== '전체')) {
+        return <div className="text-center py-20 text-gray-500">조건에 맞는 게시물이 없습니다.</div>;
+      }
+      return <div className="text-center py-20 text-gray-500">등록된 공지사항이 없습니다.</div>;
     }
+    
     return (
-      <div className="overflow-x-auto">
+      <div className="border-t-2 border-b-2 border-gray-200">
         <table className="min-w-full bg-white">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600">ID</th>
+          <thead className="hidden sm:table-header-group">
+            <tr className="border-b">
+              <th className="py-3 px-4 text-center text-sm font-semibold text-gray-600 w-20">번호</th>
+              <th className="py-3 px-4 text-center text-sm font-semibold text-gray-600 w-28">카테고리</th>
               <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600">제목</th>
-              <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600">작성일</th>
-              <th className="py-3 px-4 text-center text-sm font-semibold text-gray-600">관리</th>
+              <th className="py-3 px-4 text-center text-sm font-semibold text-gray-600 w-32">작성일</th>
             </tr>
           </thead>
           <tbody className="text-gray-700">
-            {notices.map((notice) => (
-              <tr key={notice.id} className="border-b border-gray-200 hover:bg-gray-50">
-                <td className="py-3 px-4">{notice.id}</td>
-                <td className="py-3 px-4">
-                  <Link to={`/admin/notices/edit/${notice.id}`} className="hover:underline">
+            {notices.map((notice, index) => (
+              <tr key={notice.id} className="border-b border-gray-200 last:border-b-0">
+                <td className="py-4 px-2 sm:px-4 text-center text-sm text-gray-500">
+                  {totalItems - (currentPage - 1) * 10 - index}
+                </td>
+                <td className="py-4 px-2 sm:px-4 text-center text-sm text-blue-600 font-semibold">
+                  {notice.category}
+                </td>
+                <td className="py-4 px-2 sm:px-4">
+                  <Link to={`/news/${notice.id}`} className="hover:underline text-gray-800">
                     {notice.title}
                   </Link>
                 </td>
-                <td className="py-3 px-4 text-sm">{formatDate(notice.createdAt)}</td>
-                <td className="py-3 px-4 text-center">
-                  <button
-                    onClick={() => navigate(`/admin/notices/edit/${notice.id}`)}
-                    className="bg-blue-500 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-600 transition-colors duration-200 mr-2"
-                  >
-                    수정
-                  </button>
-                  <button
-                    onClick={() => handleDelete(notice.id)}
-                    className="bg-red-500 text-white px-3 py-1 rounded-md text-sm hover:bg-red-600 transition-colors duration-200"
-                  >
-                    삭제
-                  </button>
-                </td>
+                <td className="py-4 px-2 sm:px-4 text-center text-sm text-gray-600">{formatDate(notice.createdAt)}</td>
               </tr>
             ))}
           </tbody>
@@ -118,23 +129,55 @@ const AdminNoticeListPage = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">공지사항 관리</h1>
-          <Link
-            to="/admin/notices/write"
-            className="bg-green-500 text-white px-5 py-2 rounded-lg font-semibold hover:bg-green-600 transition-colors duration-200"
+    <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
+      <div className="text-center mb-8">
+        <h1 className="text-3xl sm:text-4xl font-bold text-gray-800">병원소식</h1>
+        <p className="text-gray-500 mt-2">연세미치과의 새로운 소식을 전해드립니다.</p>
+      </div>
+
+      {/* [핵심 추가] 카테고리 필터 */}
+      <div className="flex justify-center flex-wrap gap-2 mb-6">
+        {NOTICE_CATEGORIES.map(category => (
+          <button
+            key={category}
+            onClick={() => handleCategoryClick(category)}
+            className={`px-4 py-2 rounded-full font-semibold text-sm ${
+              activeCategory === category
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
           >
-            새 글 작성
-          </Link>
-        </div>
-        <div className="bg-white rounded-lg shadow-md">
-          {renderContent()}
-        </div>
+            {category}
+          </button>
+        ))}
+      </div>
+
+      <div className="mb-8 max-w-lg mx-auto">
+        <form onSubmit={handleSearchSubmit} className="flex gap-2">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="제목, 내용으로 검색"
+            className="flex-grow px-4 py-2 border rounded-md"
+          />
+          <button type="submit" className="bg-gray-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-gray-700 flex items-center">
+            <Search className="w-4 h-4 mr-2" />
+            검색
+          </button>
+        </form>
+      </div>
+
+      {renderContent()}
+      <div className="mt-8">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       </div>
     </div>
   );
 };
 
-export default AdminNoticeListPage;
+export default NoticeListPage;
