@@ -4,7 +4,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 // 공용 레이아웃 컴포넌트
-//import MainLayout from './components/MainLayout';
+import MainLayout from './components/MainLayout';
 import AdminLayout from './components/AdminLayout';
 
 // --- 환자용 페이지 컴포넌트 (실제로 존재하는 파일만 import) ---
@@ -43,7 +43,7 @@ import AdminAboutPage from './pages/admin/AdminAboutPage';
 // 아래 관리자 페이지 파일들은 아직 프로젝트에 없어 빌드 오류를 유발할 수 있습니다.
 // 향후 해당 페이지 파일을 생성하신 후, 이 import와 아래 Routes의 경로 주석을 해제하여 사용해주세요.
  import AdminPostListPage from './pages/admin/AdminPostListPage';
-import AdminFaqListPage from './pages/admin/AdminFaqListPage';
+ import AdminFaqListPage from './pages/admin/AdminFaqListPage';
  import AdminReviewListPage from './pages/admin/AdminReviewListPage';
  import AdminReservationListPage from './pages/admin/AdminReservationListPage';
  import AdminSchedulePage from './pages/admin/AdminSchedulePage';
@@ -79,7 +79,7 @@ function App() {
           <Route path="consultations/edit/:id" element={<ConsultationEditPage />} />
           <Route path="reservation" element={<ReservationPage />} />
           {/* *** 수정: ReviewPage 라우트를 주석 처리합니다. *** */}
-         <Route path="reviews" element={<ReviewPage />} /> 
+          <Route path="reviews" element={<ReviewPage />} /> 
         </Route>
 
         {/* 관리자용 페이지 라우트 (실제로 존재하는 페이지만 연결) */}
