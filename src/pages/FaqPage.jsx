@@ -1,83 +1,170 @@
-// =================================================================
-// 사용자용 자주 묻는 질문(FAQ) 페이지 (FaqPage.jsx)
-// 파일 경로: /src/pages/FaqPage.jsx
-// 주요 기능:
-// 1. 서버에서 FAQ 목록을 불러와 카테고리별로 그룹화
-// 2. 아코디언 형태로 질문을 클릭하면 답변이 펼쳐지는 UI 제공
-// =================================================================
+// src/pages/FaqPage.jsx
 
-import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
-import { ChevronDown } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import api from '../services/api';
+import { Search, ChevronDown, HelpCircle } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL;
-
-const FaqItem = ({ faq }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
+// 개별 FAQ 아이템을 위한 아코디언 컴포넌트
+const AccordionItem = ({ faq, isOpen, onClick }) => {
   return (
-    <div className="border-b">
+    <div className="border-b border-gray-200">
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex justify-between items-center w-full py-5 text-left"
+        onClick={onClick}
+        className="w-full flex justify-between items-center text-left py-5 px-6 focus:outline-none"
       >
-        <span className="text-lg font-medium text-gray-900">Q. {faq.question}</span>
-        <ChevronDown className={`w-6 h-6 text-gray-400 transform transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-      </button>
-      {isOpen && (
-        <div className="pb-5 px-1">
-          <p className="text-gray-600 whitespace-pre-wrap">A. {faq.answer}</p>
+        <div className="flex items-center">
+          <span className="text-lg font-semibold text-indigo-600 mr-4">Q.</span>
+          <span className="text-base md:text-lg font-medium text-gray-800">{faq.question}</span>
         </div>
-      )}
+        <ChevronDown
+          className={`h-6 w-6 text-gray-500 transition-transform duration-300 ${isOpen ? 'transform rotate-180' : ''}`}
+        />
+      </button>
+      <div
+        className={`overflow-hidden transition-all duration-500 ease-in-out ${isOpen ? 'max-h-screen' : 'max-h-0'}`}
+      >
+        <div className="p-6 bg-gray-50 flex">
+          <span className="text-lg font-semibold text-gray-500 mr-4">A.</span>
+          <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{faq.answer}</p>
+        </div>
+      </div>
     </div>
   );
 };
 
 const FaqPage = () => {
-  const [faqs, setFaqs] = useState({});
-  const [isLoading, setIsLoading] = useState(true);
+  const [faqs, setFaqs] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeAccordion, setActiveAccordion] = useState(null);
+  const [activeCategory, setActiveCategory] = useState('전체');
 
-  const fetchFaqs = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const response = await axios.get(`${API_URL}/api/faqs`);
-      const grouped = (response.data || []).reduce((acc, faq) => {
-        (acc[faq.category] = acc[faq.category] || []).push(faq);
-        return acc;
-      }, {});
-      setFaqs(grouped);
-    } catch (err) {
-      setError('FAQ 목록을 불러오는 데 실패했습니다.');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
+  // API로부터 FAQ 데이터를 가져오는 함수
   useEffect(() => {
-    fetchFaqs();
-  }, [fetchFaqs]);
+    const fetchFaqs = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        // 백엔드에 검색어를 파라미터로 전달합니다.
+        const response = await api.get('/faqs', {
+          params: { search: searchTerm }
+        });
+        setFaqs(response.data);
+      } catch (err) {
+        setError('데이터를 불러오는 데 실패했습니다.');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // 사용자가 입력을 멈추면 검색을 실행 (디바운싱)
+    const timerId = setTimeout(() => {
+      fetchFaqs();
+    }, 300); // 300ms 후에 검색 실행
+
+    return () => clearTimeout(timerId);
+  }, [searchTerm]);
+
+  // 카테고리별로 FAQ를 그룹화
+  const groupedFaqs = useMemo(() => {
+    return faqs.reduce((acc, faq) => {
+      const category = faq.category || '기타';
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(faq);
+      return acc;
+    }, {});
+  }, [faqs]);
+
+  const categories = ['전체', ...Object.keys(groupedFaqs)];
+
+  // 표시할 FAQ 필터링
+  const filteredFaqs = useMemo(() => {
+    if (activeCategory === '전체') {
+      return groupedFaqs;
+    }
+    return { [activeCategory]: groupedFaqs[activeCategory] };
+  }, [activeCategory, groupedFaqs]);
+
+  const handleAccordionClick = (id) => {
+    setActiveAccordion(activeAccordion === id ? null : id);
+  };
 
   return (
-    <div className="bg-gray-50 py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-800">자주 묻는 질문</h1>
-          <p className="text-gray-500 mt-2">궁금하신 점을 쉽고 빠르게 확인해보세요.</p>
+    <div className="bg-gray-50 min-h-screen">
+      <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8">
+        {/* 페이지 헤더 */}
+        <div className="text-center">
+          <HelpCircle className="mx-auto h-12 w-12 text-indigo-600" />
+          <h2 className="mt-2 text-3xl font-extrabold text-gray-900 sm:text-4xl">
+            자주 묻는 질문
+          </h2>
+          <p className="mt-4 text-lg text-gray-600">
+            연세미치과에 대해 궁금한 점을 찾아보세요.
+          </p>
         </div>
 
-        {isLoading && <p className="text-center">로딩 중...</p>}
-        {error && <p className="text-center text-red-500">{error}</p>}
-        
-        <div className="space-y-10">
-          {Object.entries(faqs).map(([category, items]) => (
-            <div key={category}>
-              <h2 className="text-2xl font-bold text-blue-700 mb-4">{category}</h2>
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                {items.map(faq => <FaqItem key={faq.id} faq={faq} />)}
-              </div>
+        {/* 검색창 */}
+        <div className="mt-10 max-w-2xl mx-auto">
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-gray-400" />
             </div>
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="궁금한 점을 검색해보세요 (예: 임플란트, 스케일링)"
+              className="block w-full bg-white border border-gray-300 rounded-full py-4 pl-12 pr-6 text-lg shadow-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
+        </div>
+
+        {/* 카테고리 필터 */}
+        <div className="mt-8 flex justify-center flex-wrap gap-2">
+          {categories.map((category) => (
+            <button
+              key={category}
+              onClick={() => setActiveCategory(category)}
+              className={`px-4 py-2 text-sm font-medium rounded-full transition-colors ${
+                activeCategory === category
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-white text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              {category}
+            </button>
           ))}
+        </div>
+
+        {/* FAQ 목록 */}
+        <div className="mt-12">
+          {loading ? (
+            <p className="text-center text-gray-500">불러오는 중...</p>
+          ) : error ? (
+            <p className="text-center text-red-500">{error}</p>
+          ) : Object.keys(filteredFaqs).length > 0 ? (
+            Object.entries(filteredFaqs).map(([category, faqsInCategory]) => (
+              <div key={category} className="mb-10">
+                <h3 className="text-2xl font-bold text-gray-800 mb-4 px-6">{category}</h3>
+                <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                  {faqsInCategory && faqsInCategory.map((faq) => (
+                    <AccordionItem
+                      key={faq.id}
+                      faq={faq}
+                      isOpen={activeAccordion === faq.id}
+                      onClick={() => handleAccordionClick(faq.id)}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-center text-gray-500 pt-8">검색 결과가 없습니다.</p>
+          )}
         </div>
       </div>
     </div>
