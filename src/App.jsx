@@ -26,7 +26,7 @@ import ConsultationWritePage from './pages/ConsultationWritePage';
 import ConsultationEditPage from './pages/ConsultationEditPage';
 import ReservationPage from './pages/ReservationPage';
 // *** 수정: ReviewPage.jsx 파일이 없어 빌드 오류가 발생하므로 관련 코드를 주석 처리합니다. ***
-import ReviewPage from './pages/ReviewPage';
+import ReviewPage from './pages/ReviewsPage';
 
 // -관리자용 페이지 컴포넌트 (스크린샷에서 확인된 파일만 활성화) ---
 import AdminLoginPage from './pages/admin/AdminLoginPage';
