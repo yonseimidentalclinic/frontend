@@ -4,9 +4,9 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 // 공용 레이아웃 컴포넌트
-// *** 핵심 수정: 폴더 경로의 대소문자를 실제 이름(Layout)과 일치시켰습니다. ***
-import MainLayout from './components/Layout/MainLayout';
-import AdminLayout from './components/Layout/AdminLayout';
+// components 폴더 바로 아래에 있는 MainLayout과 AdminLayout을 불러옵니다.
+import MainLayout from './components/MainLayout';
+import AdminLayout from './components/AdminLayout';
 
 // 환자용 페이지 컴포넌트
 import HomePage from './pages/HomePage';
