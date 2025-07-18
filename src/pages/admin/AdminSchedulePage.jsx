@@ -2,8 +2,8 @@
 // 관리자 스케줄 관리 페이지 (AdminSchedulePage.jsx) - 최종 완성본
 // 최종 업데이트: 2025년 7월 18일
 // 주요 개선사항:
-// 1. 서버에서 모든 예약 현황(대기, 확정)과 수동 마감 정보를 불러옴
-// 2. 시간대별로 예약 상태를 색상(대기:노랑, 확정:초록, 마감:빨강)으로 구분하여 표시
+// 1. new Date() 사용 시 발생하는 타임존 문제를 해결하여 날짜 선택이 정확하게 작동하도록 수정
+// 2. 날짜 형식을 'YYYY-MM-DD'로 통일하여 안정성 강화
 // =================================================================
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -16,6 +16,14 @@ const timeSlots = [
   '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30',
   '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30',
 ];
+
+// [핵심 수정] 타임존 문제 해결을 위한 날짜 포맷팅 헬퍼 함수
+const formatDateToYYYYMMDD = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 const AdminSchedulePage = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -75,15 +83,17 @@ const AdminSchedulePage = () => {
     let blanks = Array.from({ length: firstDay }, (_, i) => <div key={`blank-${i}`} className="border p-2 text-center"></div>);
     let days = Array.from({ length: daysInMonth }, (_, i) => {
       const d = i + 1;
-      const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-      const isSelected = selectedDate.toISOString().split('T')[0] === dateStr;
-      const isToday = today.toISOString().split('T')[0] === dateStr;
+      const dateObj = new Date(year, month, d);
+      const dateStr = formatDateToYYYYMMDD(dateObj); // [핵심 수정]
+      
+      const isSelected = formatDateToYYYYMMDD(selectedDate) === dateStr; // [핵심 수정]
+      const isToday = formatDateToYYYYMMDD(today) === dateStr; // [핵심 수정]
       
       return (
         <div 
           key={d} 
           className={`border p-2 text-center cursor-pointer ${isSelected ? 'bg-blue-600 text-white' : isToday ? 'bg-blue-100' : 'hover:bg-gray-100'}`}
-          onClick={() => setSelectedDate(new Date(year, month, d))}
+          onClick={() => setSelectedDate(dateObj)}
         >
           {d}
         </div>
@@ -96,7 +106,7 @@ const AdminSchedulePage = () => {
     setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() + offset, 1));
   };
 
-  const selectedDateStr = selectedDate.toISOString().split('T')[0];
+  const selectedDateStr = formatDateToYYYYMMDD(selectedDate); // [핵심 수정]
   const selectedDaySchedule = schedule[selectedDateStr] || {};
 
   return (
