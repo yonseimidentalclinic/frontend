@@ -2,12 +2,12 @@
 // 프론트엔드 관리자 메뉴 컴포넌트 (AdminSidebar.jsx)
 // 최종 업데이트: 2025년 7월 18일
 // 주요 개선사항:
-// 1. 'FAQ 관리' 메뉴 항목을 새로 추가
+// 1. '스케줄 관리' 메뉴 항목을 새로 추가
 // =================================================================
 
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Megaphone, Newspaper, MessageSquare, LogOut, UserSquare, Home, CalendarCheck, Camera, HelpCircle } from 'lucide-react';
+import { LayoutDashboard, Megaphone, Newspaper, MessageSquare, LogOut, UserSquare, Home, CalendarCheck, Camera, HelpCircle, CalendarClock } from 'lucide-react';
 
 const AdminSidebar = () => {
   const navigate = useNavigate();
@@ -37,6 +37,11 @@ const AdminSidebar = () => {
           <CalendarCheck className="w-5 h-5 mr-3" />
           예약 관리
         </NavLink>
+        {/* [핵심 추가] 스케줄 관리 메뉴 */}
+        <NavLink to="/admin/schedule" className={({ isActive }) => `${commonLinkClass} ${isActive ? activeLinkClass : ''}`}>
+          <CalendarClock className="w-5 h-5 mr-3" />
+          스케줄 관리
+        </NavLink>
         <NavLink to="/admin/about" className={({ isActive }) => `${commonLinkClass} ${isActive ? activeLinkClass : ''}`}>
           <Home className="w-5 h-5 mr-3" />
           병원소개 관리
@@ -49,7 +54,6 @@ const AdminSidebar = () => {
           <Camera className="w-5 h-5 mr-3" />
           치료 사례 관리
         </NavLink>
-        {/* [핵심 추가] FAQ 관리 메뉴 */}
         <NavLink to="/admin/faqs" className={({ isActive }) => `${commonLinkClass} ${isActive ? activeLinkClass : ''}`}>
           <HelpCircle className="w-5 h-5 mr-3" />
           FAQ 관리
