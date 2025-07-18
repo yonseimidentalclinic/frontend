@@ -18,6 +18,8 @@ import HomePage from './pages/HomePage.jsx';
 import AboutPage from './pages/AboutPage.jsx';
 import DoctorsPage from './pages/DoctorsPage.jsx';
 import CasesPage from './pages/CasesPage.jsx'; // [핵심 추가]
+import ReviewsPage from './pages/ReviewsPage.jsx'; // [핵심 추가]
+import ReviewWritePage from './pages/ReviewWritePage.jsx'; // [핵심 추가]
 import FaqPage from './pages/FaqPage.jsx'; // [핵심 추가]
 import ServicesPage from './pages/ServicesPage.jsx';
 import ReservationPage from './pages/ReservationPage.jsx'; // [핵심 추가]
@@ -41,6 +43,7 @@ import AdminDashboardPage from './pages/admin/AdminDashboardPage.jsx';
 import AdminAboutPage from './pages/admin/AdminAboutPage.jsx'; // [핵심 추가]
 import AdminDoctorsListPage from './pages/admin/AdminDoctorsListPage.jsx';
 import AdminCasePhotosPage from './pages/admin/AdminCasePhotosPage.jsx'; // [핵심 추가]
+import AdminReviewsPage from './pages/admin/AdminReviewsPage.jsx'; // [핵심 추가]
 import AdminFaqPage from './pages/admin/AdminFaqPage.jsx'; // [핵심 추가]
 import AdminReservationsPage from './pages/admin/AdminReservationsPage.jsx'; // [핵심 추가]
 import AdminSchedulePage from './pages/admin/AdminSchedulePage.jsx'; // [핵심 추가]
@@ -85,6 +88,8 @@ function App() {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/doctors" element={<DoctorsPage />} />
           <Route path="/cases" element={<CasesPage />} /> {/* [핵심 추가] */}
+          <Route path="/reviews" element={<ReviewsPage />} /> {/* [핵심 추가] */}
+          <Route path="/reviews/write" element={<ReviewWritePage />} /> {/* [핵심 추가] */}
           <Route path="/faq" element={<FaqPage />} /> {/* [핵심 추가] */}
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/reservation" element={<ReservationPage />} /> {/* [핵심 추가] */}
@@ -111,6 +116,7 @@ function App() {
           <Route path="about" element={<AdminAboutPage />} /> {/* [핵심 추가] */}
           <Route path="doctors" element={<AdminDoctorsListPage />} />
           <Route path="cases" element={<AdminCasePhotosPage />} /> {/* [핵심 추가] */}
+          <Route path="reviews" element={<AdminReviewsPage />} /> {/* [핵심 추가] */}
           <Route path="faqs" element={<AdminFaqPage />} /> {/* [핵심 추가] */}
           <Route path="reservations" element={<AdminReservationsPage />} /> {/* [핵심 추가] */}
           <Route path="schedule" element={<AdminSchedulePage />} /> {/* [핵심 추가] */}
