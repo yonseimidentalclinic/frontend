@@ -1,10 +1,9 @@
 // =================================================================
 // 프론트엔드 병원소식 목록 페이지 (NoticeListPage.jsx)
-// 최종 업데이트: 2025년 7월 17일
+// 최종 업데이트: 2025년 7월 18일
 // 주요 개선사항:
-// 1. 검색창 UI 추가
-// 2. 검색어 입력 및 검색 실행 기능 구현
-// 3. 검색 결과가 없을 경우 안내 메시지 표시
+// 1. 카테고리 필터 버튼 UI 추가
+// 2. 선택된 카테고리에 따라 게시물 목록을 필터링하는 기능 구현
 // =================================================================
 
 import React, { useState, useEffect } from 'react';
@@ -14,6 +13,7 @@ import Pagination from '../components/Pagination.jsx';
 import { Search } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL;
+const NOTICE_CATEGORIES = ['전체', '병원소식', '의료상식', '이벤트'];
 
 const NoticeListPage = () => {
   const [notices, setNotices] = useState([]);
@@ -27,19 +27,20 @@ const NoticeListPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   
-  // [핵심 추가] 검색어 상태 관리
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
+  const activeCategory = searchParams.get('category') || '전체';
 
   useEffect(() => {
     const pageFromUrl = parseInt(searchParams.get('page') || '1', 10);
     const searchFromUrl = searchParams.get('search') || '';
+    const categoryFromUrl = searchParams.get('category') || '';
     
-    const fetchNotices = async (page, search) => {
+    const fetchNotices = async (page, search, category) => {
       setLoading(true);
       setError(null);
       try {
         const response = await axios.get(`${API_URL}/api/notices`, { 
-          params: { page, limit: 10, search } 
+          params: { page, limit: 10, search, category } 
         });
         
         if (response.data && Array.isArray(response.data.items)) {
@@ -58,17 +59,24 @@ const NoticeListPage = () => {
       }
     };
 
-    fetchNotices(pageFromUrl, searchFromUrl);
+    fetchNotices(pageFromUrl, searchFromUrl, categoryFromUrl);
   }, [searchParams]);
 
   const handlePageChange = (page) => {
     const currentSearch = searchParams.get('search') || '';
-    navigate(`/news?page=${page}&search=${currentSearch}`);
+    const currentCategory = searchParams.get('category') || '';
+    navigate(`/news?page=${page}&search=${currentSearch}&category=${currentCategory}`);
   };
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    navigate(`/news?page=1&search=${searchTerm}`);
+    const currentCategory = searchParams.get('category') || '';
+    navigate(`/news?page=1&search=${searchTerm}&category=${currentCategory}`);
+  };
+
+  const handleCategoryClick = (category) => {
+    const currentSearch = searchParams.get('search') || '';
+    navigate(`/news?page=1&search=${currentSearch}&category=${category}`);
   };
 
   const formatDate = (dateString) => {
@@ -80,8 +88,8 @@ const NoticeListPage = () => {
     if (loading) return <div className="text-center py-20 text-gray-500">목록을 불러오는 중입니다...</div>;
     if (error) return <div className="text-center py-20 text-red-500">{error}</div>;
     if (notices.length === 0) {
-      if (searchParams.get('search')) {
-        return <div className="text-center py-20 text-gray-500">"{searchParams.get('search')}"에 대한 검색 결과가 없습니다.</div>;
+      if (searchParams.get('search') || (searchParams.get('category') && searchParams.get('category') !== '전체')) {
+        return <div className="text-center py-20 text-gray-500">조건에 맞는 게시물이 없습니다.</div>;
       }
       return <div className="text-center py-20 text-gray-500">등록된 공지사항이 없습니다.</div>;
     }
@@ -92,6 +100,7 @@ const NoticeListPage = () => {
           <thead className="hidden sm:table-header-group">
             <tr className="border-b">
               <th className="py-3 px-4 text-center text-sm font-semibold text-gray-600 w-20">번호</th>
+              <th className="py-3 px-4 text-center text-sm font-semibold text-gray-600 w-28">카테고리</th>
               <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600">제목</th>
               <th className="py-3 px-4 text-center text-sm font-semibold text-gray-600 w-32">작성일</th>
             </tr>
@@ -101,6 +110,9 @@ const NoticeListPage = () => {
               <tr key={notice.id} className="border-b border-gray-200 last:border-b-0">
                 <td className="py-4 px-2 sm:px-4 text-center text-sm text-gray-500">
                   {totalItems - (currentPage - 1) * 10 - index}
+                </td>
+                <td className="py-4 px-2 sm:px-4 text-center text-sm text-blue-600 font-semibold">
+                  {notice.category}
                 </td>
                 <td className="py-4 px-2 sm:px-4">
                   <Link to={`/news/${notice.id}`} className="hover:underline text-gray-800">
@@ -123,7 +135,23 @@ const NoticeListPage = () => {
         <p className="text-gray-500 mt-2">연세미치과의 새로운 소식을 전해드립니다.</p>
       </div>
 
-      {/* [핵심 추가] 검색 폼 */}
+      {/* [핵심 추가] 카테고리 필터 */}
+      <div className="flex justify-center flex-wrap gap-2 mb-6">
+        {NOTICE_CATEGORIES.map(category => (
+          <button
+            key={category}
+            onClick={() => handleCategoryClick(category)}
+            className={`px-4 py-2 rounded-full font-semibold text-sm ${
+              activeCategory === category
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            {category}
+          </button>
+        ))}
+      </div>
+
       <div className="mb-8 max-w-lg mx-auto">
         <form onSubmit={handleSearchSubmit} className="flex gap-2">
           <input
@@ -131,12 +159,9 @@ const NoticeListPage = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="제목, 내용으로 검색"
-            className="flex-grow px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-grow px-4 py-2 border rounded-md"
           />
-          <button
-            type="submit"
-            className="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700 flex items-center"
-          >
+          <button type="submit" className="bg-gray-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-gray-700 flex items-center">
             <Search className="w-4 h-4 mr-2" />
             검색
           </button>

@@ -1,183 +1,228 @@
-// =================================================================
-// 프론트엔드 병원소식 목록 페이지 (NoticeListPage.jsx)
-// 최종 업데이트: 2025년 7월 18일
-// 주요 개선사항:
-// 1. 카테고리 필터 버튼 UI 추가
-// 2. 선택된 카테고리에 따라 게시물 목록을 필터링하는 기능 구현
-// =================================================================
+// src/pages/admin/AdminNoticeListPage.jsx
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import Pagination from '../components/Pagination.jsx';
-import { Search } from 'lucide-react';
+// 프로젝트의 API 서비스 유틸리티를 임포트합니다. 경로를 확인해주세요.
+import api from '../../services/api'; 
+// 공용 페이지네이션 컴포넌트를 임포트합니다. 경로를 확인해주세요.
+import Pagination from '../../components/common/Pagination';
+// UI 개선을 위해 아이콘을 사용합니다. (lucide-react 라이브러리 사용 가정)
+import { Search, Edit, Trash2, PlusCircle } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL;
-const NOTICE_CATEGORIES = ['전체', '병원소식', '의료상식', '이벤트'];
+const AdminNoticeListPage = () => {
+  // --- 상태 관리 (State Management) --- //
 
-const NoticeListPage = () => {
-  const [notices, setNotices] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  
+  // 공지사항 목록을 저장할 상태
+  const [notices, setNotices] = useState([]); 
+  // 데이터 로딩 상태
+  const [loading, setLoading] = useState(true); 
+  // 에러 발생 시 에러 메시지를 저장할 상태
+  const [error, setError] = useState(null); 
+  // 현재 페이지 번호
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
-  const [totalItems, setTotalItems] = useState(0);
+  // 전체 페이지 수
+  const [totalPages, setTotalPages] = useState(1);
+  // 전체 공지사항 개수
+  const [totalNotices, setTotalNotices] = useState(0);
+  // 사용자가 입력하는 검색어
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const [searchParams] = useSearchParams();
+  // --- React Router Hooks --- //
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  
-  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
-  const activeCategory = searchParams.get('category') || '전체';
 
+  // --- 데이터 로딩 함수 --- //
+
+  // 백엔드 API로부터 공지사항 목록을 가져오는 함수
+  const fetchNotices = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      // URL 쿼리 파라미터에서 'page'와 'query' 값을 가져옵니다. 없으면 기본값을 사용합니다.
+      const page = searchParams.get('page') || '1';
+      const query = searchParams.get('query') || '';
+
+      // 백엔드에 GET 요청을 보냅니다.
+      const response = await api.get('/admin/notices', {
+        params: { page, query },
+      });
+      
+      // API 응답으로 상태를 업데이트합니다.
+      setNotices(response.data.notices);
+      setTotalPages(response.data.totalPages);
+      setTotalNotices(response.data.totalCount);
+      setCurrentPage(parseInt(page, 10));
+      setSearchTerm(query); // URL 쿼리와 검색창 입력값을 동기화
+
+    } catch (err) {
+      console.error("공지사항 목록 로딩 실패:", err);
+      setError("데이터를 불러오는 데 실패했습니다. 잠시 후 다시 시도해주세요.");
+    } finally {
+      setLoading(false);
+    }
+  }, [searchParams]); // searchParams가 변경될 때마다 함수를 재생성합니다.
+
+  // 컴포넌트가 처음 렌더링되거나, searchParams가 바뀔 때 공지사항 목록을 불러옵니다.
   useEffect(() => {
-    const pageFromUrl = parseInt(searchParams.get('page') || '1', 10);
-    const searchFromUrl = searchParams.get('search') || '';
-    const categoryFromUrl = searchParams.get('category') || '';
-    
-    const fetchNotices = async (page, search, category) => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await axios.get(`${API_URL}/api/notices`, { 
-          params: { page, limit: 10, search, category } 
-        });
-        
-        if (response.data && Array.isArray(response.data.items)) {
-          setNotices(response.data.items);
-          setTotalPages(response.data.totalPages);
-          setCurrentPage(response.data.currentPage);
-          setTotalItems(response.data.totalItems);
-        } else {
-          setNotices([]);
-          setTotalPages(0);
-        }
-      } catch (err) {
-        setError("목록을 불러오는 데 실패했습니다.");
-      } finally {
-        setLoading(false);
-      }
-    };
+    fetchNotices();
+  }, [fetchNotices]);
 
-    fetchNotices(pageFromUrl, searchFromUrl, categoryFromUrl);
-  }, [searchParams]);
+  // --- 이벤트 핸들러 --- //
 
-  const handlePageChange = (page) => {
-    const currentSearch = searchParams.get('search') || '';
-    const currentCategory = searchParams.get('category') || '';
-    navigate(`/news?page=${page}&search=${currentSearch}&category=${currentCategory}`);
+  // 검색창 입력값이 변경될 때마다 searchTerm 상태를 업데이트합니다.
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
   };
 
+  // 검색 버튼을 클릭하거나 Enter 키를 누르면 검색을 실행합니다.
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    const currentCategory = searchParams.get('category') || '';
-    navigate(`/news?page=1&search=${searchTerm}&category=${currentCategory}`);
+    // URL 쿼리를 업데이트하여 검색 결과의 1페이지로 이동합니다.
+    setSearchParams({ query: searchTerm, page: '1' });
   };
 
-  const handleCategoryClick = (category) => {
-    const currentSearch = searchParams.get('search') || '';
-    navigate(`/news?page=1&search=${currentSearch}&category=${category}`);
+  // 페이지네이션 컴포넌트에서 페이지 번호를 클릭했을 때 실행됩니다.
+  const handlePageChange = (pageNumber) => {
+    const currentQuery = searchParams.get('query') || '';
+    setSearchParams({ query: currentQuery, page: pageNumber.toString() });
   };
-
-  const formatDate = (dateString) => {
-    const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
-    return new Date(dateString).toLocaleDateString('ko-KR', options);
-  };
-
-  const renderContent = () => {
-    if (loading) return <div className="text-center py-20 text-gray-500">목록을 불러오는 중입니다...</div>;
-    if (error) return <div className="text-center py-20 text-red-500">{error}</div>;
-    if (notices.length === 0) {
-      if (searchParams.get('search') || (searchParams.get('category') && searchParams.get('category') !== '전체')) {
-        return <div className="text-center py-20 text-gray-500">조건에 맞는 게시물이 없습니다.</div>;
+  
+  // 삭제 버튼 클릭 시 실행되는 핸들러
+  const handleDelete = async (id) => {
+    // 사용자에게 삭제 여부를 다시 한 번 확인받습니다.
+    // 실제 운영 환경에서는 alert/confirm 대신 디자인된 모달창을 사용하는 것이 좋습니다.
+    if (window.confirm(`[ID: ${id}] 공지사항을 정말로 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) {
+      try {
+        await api.delete(`/admin/notices/${id}`);
+        // 삭제 성공 시, 목록을 다시 불러와 화면을 갱신합니다.
+        fetchNotices();
+        // 사용자에게 성공 피드백을 줍니다. (커스텀 알림 컴포넌트 사용 권장)
+        alert('성공적으로 삭제되었습니다.');
+      } catch (err) {
+        console.error("공지사항 삭제 실패:", err);
+        alert('삭제 처리 중 오류가 발생했습니다.');
       }
-      return <div className="text-center py-20 text-gray-500">등록된 공지사항이 없습니다.</div>;
     }
-    
-    return (
-      <div className="border-t-2 border-b-2 border-gray-200">
-        <table className="min-w-full bg-white">
-          <thead className="hidden sm:table-header-group">
-            <tr className="border-b">
-              <th className="py-3 px-4 text-center text-sm font-semibold text-gray-600 w-20">번호</th>
-              <th className="py-3 px-4 text-center text-sm font-semibold text-gray-600 w-28">카테고리</th>
-              <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600">제목</th>
-              <th className="py-3 px-4 text-center text-sm font-semibold text-gray-600 w-32">작성일</th>
-            </tr>
-          </thead>
-          <tbody className="text-gray-700">
-            {notices.map((notice, index) => (
-              <tr key={notice.id} className="border-b border-gray-200 last:border-b-0">
-                <td className="py-4 px-2 sm:px-4 text-center text-sm text-gray-500">
-                  {totalItems - (currentPage - 1) * 10 - index}
-                </td>
-                <td className="py-4 px-2 sm:px-4 text-center text-sm text-blue-600 font-semibold">
-                  {notice.category}
-                </td>
-                <td className="py-4 px-2 sm:px-4">
-                  <Link to={`/news/${notice.id}`} className="hover:underline text-gray-800">
-                    {notice.title}
-                  </Link>
-                </td>
-                <td className="py-4 px-2 sm:px-4 text-center text-sm text-gray-600">{formatDate(notice.createdAt)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    );
   };
+
+  // --- 렌더링 --- //
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl sm:text-4xl font-bold text-gray-800">병원소식</h1>
-        <p className="text-gray-500 mt-2">연세미치과의 새로운 소식을 전해드립니다.</p>
-      </div>
-
-      {/* [핵심 추가] 카테고리 필터 */}
-      <div className="flex justify-center flex-wrap gap-2 mb-6">
-        {NOTICE_CATEGORIES.map(category => (
-          <button
-            key={category}
-            onClick={() => handleCategoryClick(category)}
-            className={`px-4 py-2 rounded-full font-semibold text-sm ${
-              activeCategory === category
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
+    <div className="p-4 md:p-6 lg:p-8 bg-gray-50 min-h-screen">
+      <div className="max-w-7xl mx-auto">
+        {/* 페이지 헤더 */}
+        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6">
+          <h1 className="text-3xl font-bold text-gray-800">공지사항 관리</h1>
+          <Link
+            to="/admin/notices/new"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
           >
-            {category}
-          </button>
-        ))}
-      </div>
+            <PlusCircle size={18} />
+            새 글 작성
+          </Link>
+        </div>
 
-      <div className="mb-8 max-w-lg mx-auto">
-        <form onSubmit={handleSearchSubmit} className="flex gap-2">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="제목, 내용으로 검색"
-            className="flex-grow px-4 py-2 border rounded-md"
-          />
-          <button type="submit" className="bg-gray-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-gray-700 flex items-center">
-            <Search className="w-4 h-4 mr-2" />
-            검색
-          </button>
-        </form>
-      </div>
+        {/* 메인 컨텐츠 영역 */}
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <div className="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
+            <p className="text-sm text-gray-600 self-start md:self-center">
+              총 <span className="font-semibold text-blue-600">{totalNotices}</span>개의 게시물이 있습니다.
+            </p>
+            <form onSubmit={handleSearchSubmit} className="w-full md:w-auto">
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                  placeholder="제목, 내용으로 검색..."
+                  className="w-full md:w-72 pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
+                />
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search className="h-5 w-5 text-gray-400" />
+                </div>
+              </div>
+            </form>
+          </div>
 
-      {renderContent()}
-      <div className="mt-8">
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        />
+          {/* 로딩 및 에러 메시지 표시 */}
+          {loading && <div className="text-center py-16 text-gray-500">데이터를 불러오는 중입니다...</div>}
+          {error && <div className="text-center py-16 text-red-500 bg-red-50 p-4 rounded-lg">{error}</div>}
+
+          {/* 공지사항 목록 테이블 */}
+          {!loading && !error && (
+            <div className="overflow-x-auto">
+              <table className="min-w-full bg-white divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">제목</th>
+                    <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">작성일</th>
+                    <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">조회수</th>
+                    <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">관리</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {notices.length > 0 ? (
+                    notices.map((notice) => (
+                      <tr key={notice.id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">{notice.id}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          <Link to={`/admin/notices/${notice.id}`} className="hover:text-blue-600 hover:underline">
+                            {notice.title}
+                          </Link>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">
+                          {new Date(notice.createdAt).toLocaleDateString('ko-KR')}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">{notice.viewCount || 0}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                          <div className="flex justify-center items-center gap-x-4">
+                            <button
+                              onClick={() => navigate(`/admin/notices/${notice.id}`)}
+                              className="text-indigo-600 hover:text-indigo-900 flex items-center gap-1 transition-colors"
+                              aria-label={`${notice.title} 수정`}
+                            >
+                              <Edit size={16} />
+                              <span>수정</span>
+                            </button>
+                            <button
+                              onClick={() => handleDelete(notice.id)}
+                              className="text-red-600 hover:text-red-900 flex items-center gap-1 transition-colors"
+                              aria-label={`${notice.title} 삭제`}
+                            >
+                              <Trash2 size={16} />
+                              <span>삭제</span>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="5" className="px-6 py-16 text-center text-sm text-gray-500">
+                        표시할 공지사항이 없습니다.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* 페이지네이션 */}
+          {!loading && !error && totalPages > 1 && (
+            <div className="mt-6">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
 };
 
-export default NoticeListPage;
+export default AdminNoticeListPage;
