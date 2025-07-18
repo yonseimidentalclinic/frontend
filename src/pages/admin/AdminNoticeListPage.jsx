@@ -2,8 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
-// *** 복원: 원래의 api 모듈을 다시 사용하도록 되돌립니다. ***
-// 백엔드 CORS 및 경로 문제가 해결되었으므로 이 방식이 정상적으로 작동합니다.
+// 수정된 api 모듈을 임포트합니다. 이제 모든 인증 처리는 이 모듈이 자동으로 담당합니다.
 import api from '../../services/api'; 
 import Pagination from '../../components/Pagination'; 
 import { Search, Edit, Trash2, PlusCircle } from 'lucide-react';
@@ -22,7 +21,7 @@ const AdminNoticeListPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  // --- 데이터 로딩 함수 (원래대로 복구) --- //
+  // --- 데이터 로딩 함수 (최종 버전) --- //
   const fetchNotices = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -30,8 +29,7 @@ const AdminNoticeListPage = () => {
       const page = searchParams.get('page') || '1';
       const query = searchParams.get('query') || '';
 
-      // *** 복원: api 모듈을 통한 요청으로 되돌립니다. ***
-      // 이제 백엔드에서 '/admin/notices' 경로를 정상적으로 처리할 것입니다.
+      // api 모듈이 요청 헤더에 인증 토큰을 자동으로 추가해줍니다.
       const response = await api.get('/admin/notices', {
         params: { page, query },
       });
@@ -44,7 +42,11 @@ const AdminNoticeListPage = () => {
 
     } catch (err) {
       console.error("공지사항 목록 로딩 실패:", err);
-      setError("데이터를 불러오는 데 실패했습니다. 잠시 후 다시 시도해주세요.");
+      // api.js의 응답 인터셉터가 401 오류를 감지하고 로그인 페이지로 리디렉션하므로,
+      // 여기서는 일반적인 네트워크 오류나 서버 오류 메시지만 표시합니다.
+      if (err.response?.status !== 401) {
+          setError("데이터를 불러오는 데 실패했습니다. 잠시 후 다시 시도해주세요.");
+      }
     } finally {
       setLoading(false);
     }
@@ -69,13 +71,13 @@ const AdminNoticeListPage = () => {
     setSearchParams({ query: currentQuery, page: pageNumber.toString() });
   };
   
-  // 삭제 핸들러 (원래대로 복구)
+  // 삭제 핸들러 (최종 버전)
   const handleDelete = async (id) => {
     if (window.confirm(`[ID: ${id}] 공지사항을 정말로 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) {
       try {
-        // *** 복원: api 모듈을 통한 삭제 요청으로 되돌립니다. ***
+        // api 모듈이 삭제 요청에도 인증 토큰을 자동으로 추가해줍니다.
         await api.delete(`/admin/notices/${id}`);
-        fetchNotices();
+        fetchNotices(); // 삭제 후 목록을 새로고침합니다.
         alert('성공적으로 삭제되었습니다.');
       } catch (err) {
         console.error("공지사항 삭제 실패:", err);
@@ -84,7 +86,7 @@ const AdminNoticeListPage = () => {
     }
   };
 
-  // --- 렌더링 (수정/삭제 링크 경로 수정) --- //
+  // --- 렌더링 --- //
   return (
     <div className="p-4 md:p-6 lg:p-8 bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto">
@@ -141,7 +143,6 @@ const AdminNoticeListPage = () => {
                       <tr key={notice.id} className="hover:bg-gray-50 transition-colors">
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">{notice.id}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {/* 수정 페이지로 이동하는 링크 */}
                           <Link to={`/admin/notices/edit/${notice.id}`} className="hover:text-blue-600 hover:underline">
                             {notice.title}
                           </Link>
