@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Megaphone, Newspaper, MessageSquare, LogOut, UserSquare, Home, CalendarCheck, Camera, HelpCircle, CalendarClock } from 'lucide-react';
+import { LayoutDashboard, Megaphone, Newspaper, MessageSquare, LogOut, UserSquare, Home, CalendarCheck, Camera, HelpCircle, CalendarClock ,Star } from 'lucide-react';
 
 const AdminSidebar = () => {
   const navigate = useNavigate();
