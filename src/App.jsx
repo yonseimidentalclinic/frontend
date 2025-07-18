@@ -7,7 +7,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import MainLayout from './components/MainLayout';
 import AdminLayout from './components/AdminLayout';
 
-// --- 환자용 페이지 컴포넌트 ---
+// --- 환자용 페이지 컴포넌트 (실제로 존재하는 파일만 import) ---
 import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import DoctorsPage from './pages/DoctorsPage';
@@ -25,26 +25,28 @@ import ConsultationDetailPage from './pages/ConsultationDetailPage';
 import ConsultationWritePage from './pages/ConsultationWritePage';
 import ConsultationEditPage from './pages/ConsultationEditPage';
 import ReservationPage from './pages/ReservationPage';
-// *** 핵심 수정: ReviewPage.jsx 파일이 있다고 하셔서 주석을 해제했습니다. ***
-import ReviewPage from './pages/ReviewPage';
+// *** 수정: ReviewPage.jsx 파일이 없어 빌드 오류가 발생하므로 관련 코드를 주석 처리합니다. ***
+// import ReviewPage from './pages/ReviewPage';
 
 // --- 관리자용 페이지 컴포넌트 (스크린샷에서 확인된 파일만 활성화) ---
 import AdminLoginPage from './pages/admin/AdminLoginPage';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import AdminNoticeListPage from './pages/admin/AdminNoticeListPage';
 import AdminConsultationListPage from './pages/admin/AdminConsultationListPage';
-import AdminCasesListPage from './pages/admin/AdminCasesListPage';
+// *** 수정: 스크린샷의 실제 파일 이름(AdminCasePhotosPage)에 맞게 수정했습니다. ***
+import AdminCasePhotosPage from './pages/admin/AdminCasePhotosPage'; 
+// *** 수정: 스크린샷의 실제 파일 이름(AdminDoctorListPage)에 맞게 수정했습니다. ***
 import AdminDoctorListPage from './pages/admin/AdminDoctorListPage';
 import AdminAboutPage from './pages/admin/AdminAboutPage';
 
 // --- 참고 ---
 // 아래 관리자 페이지 파일들은 아직 프로젝트에 없어 빌드 오류를 유발할 수 있습니다.
 // 향후 해당 페이지 파일을 생성하신 후, 이 import와 아래 Routes의 경로 주석을 해제하여 사용해주세요.
-import AdminPostListPage from './pages/admin/AdminPostListPage';
-import AdminFaqListPage from './pages/admin/AdminFaqListPage';
-import AdminReviewListPage from './pages/admin/AdminReviewListPage';
-import AdminReservationListPage from './pages/admin/AdminReservationListPage';
- import AdminSchedulePage from './pages/admin/AdminSchedulePage';
+// import AdminPostListPage from './pages/admin/AdminPostListPage';
+// import AdminFaqListPage from './pages/admin/AdminFaqListPage';
+// import AdminReviewListPage from './pages/admin/AdminReviewListPage';
+// import AdminReservationListPage from './pages/admin/AdminReservationListPage';
+// import AdminSchedulePage from './pages/admin/AdminSchedulePage';
 
 
 // 인증 상태에 따라 관리자 페이지 접근을 제어하는 컴포넌트
@@ -76,8 +78,8 @@ function App() {
           <Route path="consultations/write" element={<ConsultationWritePage />} />
           <Route path="consultations/edit/:id" element={<ConsultationEditPage />} />
           <Route path="reservation" element={<ReservationPage />} />
-          {/* *** 핵심 수정: ReviewPage 라우트의 주석을 해제했습니다. *** */}
-          <Route path="reviews" element={<ReviewPage />} />
+          {/* *** 수정: ReviewPage 라우트를 주석 처리합니다. *** */}
+          {/* <Route path="reviews" element={<ReviewPage />} /> */}
         </Route>
 
         {/* 관리자용 페이지 라우트 (실제로 존재하는 페이지만 연결) */}
@@ -94,17 +96,17 @@ function App() {
           <Route path="dashboard" element={<AdminDashboardPage />} />
           <Route path="about" element={<AdminAboutPage />} />
           <Route path="doctors" element={<AdminDoctorListPage />} />
-          <Route path="cases" element={<AdminCasesListPage />} />
+          <Route path="cases" element={<AdminCasePhotosPage />} />
           <Route path="notices" element={<AdminNoticeListPage />} />
           <Route path="consultations" element={<AdminConsultationListPage />} />
           
           {/* --- 참고 --- */}
           {/* 아래 페이지들은 파일을 만드신 후 주석을 해제하여 경로를 연결해주세요. */}
-           <Route path="reservations" element={<AdminReservationListPage />} /> 
-           <Route path="schedule" element={<AdminSchedulePage />} /> 
-           <Route path="reviews" element={<AdminReviewListPage />} /> 
-          <Route path="faqs" element={<AdminFaqListPage />} /> 
-           <Route path="posts" element={<AdminPostListPage />} /> 
+          {/* <Route path="reservations" element={<AdminReservationListPage />} /> */}
+          {/* <Route path="schedule" element={<AdminSchedulePage />} /> */}
+          {/* <Route path="reviews" element={<AdminReviewListPage />} /> */}
+          {/* <Route path="faqs" element={<AdminFaqListPage />} /> */}
+          {/* <Route path="posts" element={<AdminPostListPage />} /> */}
         </Route>
       </Routes>
     </Router>
