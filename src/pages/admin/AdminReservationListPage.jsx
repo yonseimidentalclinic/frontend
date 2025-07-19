@@ -48,11 +48,11 @@ const AdminReservationListPage = () => {
 
   const getStatusStyle = (status) => {
     switch (status) {
-      case 'pending': return 'text-yellow-600';
-      case 'confirmed': return 'text-green-600';
-      case 'completed': return 'text-blue-600';
-      case 'cancelled': return 'text-gray-500';
-      default: return '';
+      case 'pending': return 'bg-yellow-100 text-yellow-800';
+      case 'confirmed': return 'bg-green-100 text-green-800';
+      case 'completed': return 'bg-blue-100 text-blue-800';
+      case 'cancelled': return 'bg-gray-200 text-gray-800';
+      default: return 'bg-gray-100';
     }
   };
 
@@ -70,8 +70,8 @@ const AdminReservationListPage = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">연락처</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">예약일시</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">상태</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">상태 변경</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">관리</th>
+              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">상태 변경</th>
+              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">관리</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -80,16 +80,20 @@ const AdminReservationListPage = () => {
                 <td className="px-6 py-4 whitespace-nowrap">{res.patientName}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{res.phoneNumber}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{new Date(res.desiredDate).toLocaleDateString('ko-KR')} {res.desiredTime}</td>
-                <td className={`px-6 py-4 whitespace-nowrap font-semibold ${getStatusStyle(res.status)}`}>{res.status}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  <div className="flex gap-1">
-                    <button onClick={() => handleStatusChange(res.id, 'confirmed')} title="확정" className="p-1 text-green-500 hover:text-green-700"><CheckCircle size={20} /></button>
-                    <button onClick={() => handleStatusChange(res.id, 'completed')} title="완료" className="p-1 text-blue-500 hover:text-blue-700"><Clock size={20} /></button>
-                    <button onClick={() => handleStatusChange(res.id, 'cancelled')} title="취소" className="p-1 text-gray-400 hover:text-gray-600"><XCircle size={20} /></button>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusStyle(res.status)}`}>
+                    {res.status}
+                  </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
+                  <div className="flex justify-center gap-1">
+                    <button onClick={() => handleStatusChange(res.id, 'confirmed')} title="확정" className="p-2 rounded-full text-green-500 hover:bg-green-100"><CheckCircle size={20} /></button>
+                    <button onClick={() => handleStatusChange(res.id, 'completed')} title="완료" className="p-2 rounded-full text-blue-500 hover:bg-blue-100"><Clock size={20} /></button>
+                    <button onClick={() => handleStatusChange(res.id, 'cancelled')} title="취소" className="p-2 rounded-full text-gray-400 hover:bg-gray-100"><XCircle size={20} /></button>
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <button onClick={() => handleDelete(res.id)} className="text-red-500 hover:text-red-700 p-1"><Trash2 size={20} /></button>
+                <td className="px-6 py-4 whitespace-nowrap text-center">
+                  <button onClick={() => handleDelete(res.id)} className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-100"><Trash2 size={20} /></button>
                 </td>
               </tr>
             ))}

@@ -1,16 +1,9 @@
-// =================================================================
-// 관리자 온라인 상담 목록 페이지 (AdminConsultationListPage.jsx)
-// 최종 업데이트: 2025년 7월 17일
-// 주요 개선사항:
-// 1. 페이지네이션이 적용된 API 응답 형식({ items: [...] })에 맞게 데이터 처리 로직 수정
-// =================================================================
+// src/pages/admin/AdminConsultationListPage.jsx
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { Lock } from 'lucide-react';
-
-const API_URL = import.meta.env.VITE_API_URL;
+import api from '../../services/api';
+import { MessageSquare, Edit, Trash2, CheckSquare } from 'lucide-react';
 
 const AdminConsultationListPage = () => {
   const [consultations, setConsultations] = useState([]);
@@ -18,22 +11,14 @@ const AdminConsultationListPage = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  const formatDate = (dateString) => new Date(dateString).toLocaleDateString('ko-KR');
-
   const fetchConsultations = useCallback(async () => {
     setLoading(true);
-    setError(null);
     try {
-      const response = await axios.get(`${API_URL}/api/consultations`, { params: { limit: 9999 } });
-      
-      if (response.data && Array.isArray(response.data.items)) {
-        setConsultations(response.data.items);
-      } else {
-        console.error("API did not return expected format for admin consultations:", response.data);
-        setConsultations([]);
-      }
+      const response = await api.get('/consultations', { params: { limit: 1000 } });
+      // --- 핵심 수정: API 응답 구조 변경에 따라 .items를 추가합니다. ---
+      setConsultations(response.data.items);
     } catch (err) {
-      setError("데이터를 불러오는 데 실패했습니다.");
+      setError('상담글 목록을 불러오는 데 실패했습니다.');
     } finally {
       setLoading(false);
     }
@@ -44,88 +29,59 @@ const AdminConsultationListPage = () => {
   }, [fetchConsultations]);
 
   const handleDelete = async (id) => {
-    if (window.confirm("정말로 이 상담글을 삭제하시겠습니까? (관련된 답변도 모두 삭제됩니다)")) {
+    if (window.confirm(`[ID: ${id}] 상담글을 정말로 삭제하시겠습니까?`)) {
       try {
-        const token = localStorage.getItem('accessToken');
-        await axios.delete(`${API_URL}/api/admin/consultations/${id}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        alert("성공적으로 삭제되었습니다.");
+        await api.delete(`/admin/consultations/${id}`);
         fetchConsultations();
+        alert('상담글이 삭제되었습니다.');
       } catch (err) {
-        alert("삭제에 실패했습니다.");
+        alert('상담글 삭제에 실패했습니다.');
       }
     }
   };
 
-  const renderContent = () => {
-    if (loading) return <div className="text-center py-10">로딩 중...</div>;
-    if (error) return <div className="text-center py-10 text-red-500">{error}</div>;
-    if (consultations.length === 0) return <div className="text-center py-10">접수된 상담이 없습니다.</div>;
-    
-    return (
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white">
-          <thead className="bg-gray-100">
+  if (loading) return <div className="p-8 text-center">로딩 중...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
+
+  return (
+    <div className="p-6 md:p-8">
+      <h1 className="text-3xl font-bold mb-6">온라인상담 관리</h1>
+      <div className="bg-white rounded-lg shadow-md overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
             <tr>
-              <th className="py-3 px-2 text-left">번호</th>
-              <th className="py-3 px-2 text-left">상태</th>
-              <th className="py-3 px-2 text-left">제목</th>
-              <th className="py-3 px-2 text-left">작성자</th>
-              <th className="py-3 px-2 text-left">작성일</th>
-              <th className="py-3 px-2 text-center">관리</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">상태</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">제목</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">작성자</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">작성일</th>
+              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">관리</th>
             </tr>
           </thead>
-          <tbody className="text-gray-700">
+          <tbody className="bg-white divide-y divide-gray-200">
             {consultations.map((item) => (
-              <tr key={item.id} className="border-b hover:bg-gray-50">
-                <td className="py-3 px-2">{item.id}</td>
-                <td className="py-3 px-2">
-                  {item.isAnswered ? '답변완료' : '답변대기'}
+              <tr key={item.id}>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {item.isAnswered ? 
+                    <span className="text-blue-600 font-semibold flex items-center"><CheckSquare size={16} className="mr-1"/>답변완료</span> : 
+                    <span className="text-red-600 font-semibold">답변대기</span>
+                  }
                 </td>
-                <td className="py-3 px-2">
-                  <span className="flex items-center">
-                    {item.title}
-                    {item.isSecret && <Lock className="w-4 h-4 ml-2 text-gray-500" />}
-                  </span>
+                <td className="px-6 py-4 whitespace-nowrap font-medium">{item.title}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{item.author}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {new Date(item.createdAt).toLocaleString('ko-KR')}
                 </td>
-                <td className="py-3 px-2">{item.author}</td>
-                <td className="py-3 px-2 text-sm">{formatDate(item.createdAt)}</td>
-                <td className="py-3 px-2 text-center whitespace-nowrap">
-                  <button
-                    onClick={() => navigate(`/admin/consultations/reply/${item.id}`)}
-                    className="bg-green-500 text-white px-2 py-1 rounded text-xs hover:bg-green-600 mr-1"
-                  >
-                    {item.isAnswered ? '답변수정' : '답변하기'}
-                  </button>
-                  <button
-                    onClick={() => navigate(`/admin/consultations/edit/${item.id}`)}
-                    className="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600 mr-1"
-                  >
-                    글수정
-                  </button>
-                  <button
-                    onClick={() => handleDelete(item.id)}
-                    className="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600"
-                  >
-                    삭제
-                  </button>
+                <td className="px-6 py-4 whitespace-nowrap text-center">
+                  <div className="flex justify-center gap-4">
+                    <button onClick={() => navigate(`/admin/consultations/reply/${item.id}`)} className="text-blue-600 hover:text-blue-900"><MessageSquare size={20} /></button>
+                    <button onClick={() => navigate(`/admin/consultations/edit/${item.id}`)} className="text-indigo-600 hover:text-indigo-900"><Edit size={20} /></button>
+                    <button onClick={() => handleDelete(item.id)} className="text-red-600 hover:text-red-900"><Trash2 size={20} /></button>
+                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-      </div>
-    );
-  };
-
-  return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6">온라인 상담 관리</h1>
-        <div className="bg-white rounded-lg shadow-md">
-          {renderContent()}
-        </div>
       </div>
     </div>
   );
