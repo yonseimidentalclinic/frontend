@@ -23,6 +23,11 @@ const ConsultationListPage = () => {
         const response = await api.get('/consultations', {
           params: { page }
         });
+
+        // --- [디버깅 코드] ---
+        // 서버로부터 받은 데이터를 브라우저 개발자 도구 콘솔에 출력합니다.
+        console.log('서버로부터 받은 실제 데이터:', response.data); 
+        
         // 핵심 수정: response.data에서 items 배열을 가져와 상태를 설정합니다.
         setConsultations(response.data.items);
         setTotalPages(response.data.totalPages);
@@ -51,7 +56,7 @@ const ConsultationListPage = () => {
       </div>
       <div className="bg-white shadow-md rounded-lg">
         <ul className="divide-y divide-gray-200">
-          {consultations.length > 0 ? (
+          {consultations && consultations.length > 0 ? ( // consultations가 null이 아닌지 확인
             consultations.map((item) => (
               <li key={item.id} className="p-4 hover:bg-gray-50">
                 <Link to={`/consultations/${item.id}`} className="block">
