@@ -18,7 +18,8 @@ import {
 
 const SidebarLink = ({ to, icon: Icon, children }) => {
   const location = useLocation();
-  const isActive = location.pathname === `/admin/${to}`;
+  // '/admin/notices/write' 같은 하위 경로도 활성화되도록 startsWith 사용
+  const isActive = location.pathname.startsWith(`/admin/${to}`);
   
   return (
     <Link
