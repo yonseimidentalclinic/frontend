@@ -10,10 +10,10 @@ const containerStyle = {
   height: '500px'
 };
 
-// --- 핵심 수정: 실제 병원 위치의 정확한 좌표로 다시 설정했습니다. ---
+// --- 핵심 수정: 백석역의 정확한 좌표로 다시 설정했습니다. ---
 const center = {
-  lat: 37.68355, // 위도
-  lng: 126.77421  // 경도
+  lat: 37.6425, // 위도
+  lng: 126.7881  // 경도
 };
 
 const LocationPage = () => {
@@ -55,7 +55,7 @@ const LocationPage = () => {
               >
                 <MarkerF 
                   position={center} 
-                  title="연세미치과"
+                  title="백석역 1번 출구"
                   onClick={() => setInfoWindowVisible(!infoWindowVisible)}
                 />
 
@@ -64,9 +64,10 @@ const LocationPage = () => {
                     position={center}
                     onCloseClick={() => setInfoWindowVisible(false)}
                   >
+                    {/* --- 핵심 수정: 정보창 내용을 백석역 기준으로 변경했습니다. --- */}
                     <div className="p-2">
-                      <h3 className="font-bold text-lg">연세미치과</h3>
-                      <p className="text-sm text-gray-600 mt-1">경기 고양시 일산동구 일산로 46, 4층</p>
+                      <h3 className="font-bold text-lg">백석역 1번 출구</h3>
+                      <p className="text-sm text-gray-600 mt-1">여기서부터 도보 5분 거리에<br/>연세미치과가 있습니다.</p>
                       <a
                         href={`https://www.google.com/maps/dir/?api=1&destination=${center.lat},${center.lng}`}
                         target="_blank"
@@ -91,7 +92,6 @@ const LocationPage = () => {
           <div className="bg-gray-50 p-8 rounded-lg">
             <MapPin className="mx-auto h-10 w-10 text-indigo-600" />
             <h3 className="mt-4 text-xl font-bold text-gray-900">주소</h3>
-            {/* --- 핵심 수정: 지하철 정보와 함께 상세 주소를 추가했습니다. --- */}
             <p className="mt-2 text-gray-600">
               경기 고양시 일산동구 일산로 46<br/>
               남정씨티프라자 4층 407호<br/>
