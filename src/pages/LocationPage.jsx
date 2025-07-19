@@ -10,10 +10,10 @@ const containerStyle = {
   height: '500px'
 };
 
-// --- 핵심 수정: 실제 병원 위치 좌표로 변경했습니다. ---
+// --- 핵심 수정: 실제 병원 위치의 정확한 좌표로 다시 설정했습니다. ---
 const center = {
-  lat: 37.6830, // 위도
-  lng: 126.7765  // 경도
+  lat: 37.68355, // 위도
+  lng: 126.77421  // 경도
 };
 
 const LocationPage = () => {
@@ -66,7 +66,6 @@ const LocationPage = () => {
                   >
                     <div className="p-2">
                       <h3 className="font-bold text-lg">연세미치과</h3>
-                      {/* --- 핵심 수정: 실제 병원 주소로 변경했습니다. --- */}
                       <p className="text-sm text-gray-600 mt-1">경기 고양시 일산동구 일산로 46, 4층</p>
                       <a
                         href={`https://www.google.com/maps/dir/?api=1&destination=${center.lat},${center.lng}`}
@@ -92,8 +91,12 @@ const LocationPage = () => {
           <div className="bg-gray-50 p-8 rounded-lg">
             <MapPin className="mx-auto h-10 w-10 text-indigo-600" />
             <h3 className="mt-4 text-xl font-bold text-gray-900">주소</h3>
-            {/* --- 핵심 수정: 실제 병원 주소로 변경했습니다. --- */}
-            <p className="mt-2 text-gray-600">경기 고양시 일산동구 일산로 46<br/>남정씨티 프라자 4층 407호</p>
+            {/* --- 핵심 수정: 지하철 정보와 함께 상세 주소를 추가했습니다. --- */}
+            <p className="mt-2 text-gray-600">
+              경기 고양시 일산동구 일산로 46<br/>
+              남정씨티프라자 4층 407호<br/>
+              <span className="font-semibold text-indigo-600">(3호선 백석역 1번 출구)</span>
+            </p>
           </div>
           <div className="bg-gray-50 p-8 rounded-lg">
             <Phone className="mx-auto h-10 w-10 text-indigo-600" />
@@ -105,7 +108,7 @@ const LocationPage = () => {
             <h3 className="mt-4 text-xl font-bold text-gray-900">진료시간</h3>
             <p className="mt-2 text-gray-600">
               평일: 10:00 - 18:30<br />
-              토요일: 10:00 - 14:00  점심시간없음<br />
+              토요일: 10:00 - 14:00   점심시간 없음<br />
               (점심시간 13:00 - 14:00)
             </p>
           </div>
