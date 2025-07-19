@@ -1,42 +1,65 @@
 // src/pages/LocationPage.jsx
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { MapPin, Phone, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const LocationPage = () => {
-  // --- 핵심: React가 지도를 그릴 div 요소를 기억하게 만듭니다. ---
   const mapElement = useRef(null);
+  const [mapReady, setMapReady] = useState(false);
+  const [mapError, setMapError] = useState(null);
 
   useEffect(() => {
-    // --- 핵심: 페이지가 처음 나타날 때 딱 한 번만 실행됩니다. ---
-    
-    // VITE_NAVER_MAP_CLIENT_ID는 .env.local 파일에 정의되어 있어야 합니다.
-    // 예: VITE_NAVER_MAP_CLIENT_ID=여기에실제ID입력
-    const naverMapClientId = import.meta.env.VITE_NAVER_MAP_CLIENT_ID || '83bfuniegk'; // 임시 ID
+    // .env.local 파일 또는 Vercel 환경 변수에 정의된 Client ID를 가져옵니다.
+    const naverMapClientId = import.meta.env.VITE_NAVER_MAP_CLIENT_ID;
 
-    // 네이버 지도 스크립트를 동적으로 불러옵니다.
-    const script = document.createElement('script');
-    script.src = `https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${naverMapClientId}`;
-    script.async = true;
-    
-    // 스크립트 로딩이 완료되면 지도를 초기화하는 함수를 실행합니다.
-    script.onload = () => initMap();
-    
-    document.head.appendChild(script);
+    if (!naverMapClientId) {
+      setMapError("네이버 지도 Client ID가 설정되지 않았습니다. 관리자에게 문의하세요.");
+      return;
+    }
 
+    // 스크립트가 중복으로 추가되는 것을 방지합니다.
+    if (window.naver && window.naver.maps) {
+      initMap();
+      return;
+    }
+
+    const scriptId = 'naver-maps-script';
+    let script = document.getElementById(scriptId);
+
+    if (!script) {
+      script = document.createElement('script');
+      script.id = scriptId;
+      script.src = `https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${naverMapClientId}`;
+      script.async = true;
+      script.onload = () => setMapReady(true); // 스크립트 로딩 완료 시 상태 변경
+      script.onerror = () => setMapError("네이버 지도 스크립트를 불러오는 데 실패했습니다.");
+      document.head.appendChild(script);
+    }
+    
     return () => {
-      // 페이지를 벗어날 때 스크립트를 정리합니다.
-      document.head.removeChild(script);
+      // 페이지를 벗어날 때 스크립트를 정리할 수 있습니다.
+      const existingScript = document.getElementById(scriptId);
+      if (existingScript) {
+        // document.head.removeChild(existingScript);
+      }
     };
-  }, []); // 빈 배열 []은 이 코드가 단 한 번만 실행되도록 보장합니다.
+  }, []);
+
+  // 스크립트가 준비되면 지도를 초기화합니다.
+  useEffect(() => {
+    if (mapReady) {
+      initMap();
+    }
+  }, [mapReady]);
 
   const initMap = () => {
-    // 지도 div나 naver maps API가 준비되지 않았다면 실행하지 않습니다.
-    if (!mapElement.current || !window.naver) return;
+    if (!mapElement.current || !window.naver || !window.naver.maps) {
+      setMapError("지도 초기화에 필요한 리소스가 준비되지 않았습니다.");
+      return;
+    };
 
-    // 병원 위치 좌표 (예: 신촌역)
-    const location = new window.naver.maps.LatLng(37.5552, 126.9369);
+    const location = new window.naver.maps.LatLng(37.5552, 126.9369); // 신촌역 좌표
     
     const mapOptions = {
       center: location,
@@ -47,10 +70,8 @@ const LocationPage = () => {
       },
     };
 
-    // --- 핵심: 기억해둔 div에 지도를 생성합니다. ---
     const map = new window.naver.maps.Map(mapElement.current, mapOptions);
 
-    // 지도에 마커를 표시합니다.
     new window.naver.maps.Marker({
       position: location,
       map: map,
@@ -79,27 +100,28 @@ const LocationPage = () => {
         </motion.div>
 
         <motion.div {...fadeInAnimation}>
-          {/* --- 핵심: ref 속성으로 이 div를 React가 기억하게 합니다. --- */}
-          <div ref={mapElement} style={{ width: '100%', height: '500px' }} className="rounded-lg shadow-lg" />
+          <div ref={mapElement} style={{ width: '100%', height: '500px' }} className="rounded-lg shadow-lg bg-gray-200 flex items-center justify-center">
+            {mapError && <p className="text-red-500 font-semibold">{mapError}</p>}
+          </div>
         </motion.div>
 
         <motion.div {...fadeInAnimation} className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
           <div className="bg-gray-50 p-8 rounded-lg">
             <MapPin className="mx-auto h-10 w-10 text-indigo-600" />
             <h3 className="mt-4 text-xl font-bold text-gray-900">주소</h3>
-            <p className="mt-2 text-gray-600">경기 고양시 일산동구 일산로 46 남정씨티프라자 4층 407호 연세미치과</p>
+            <p className="mt-2 text-gray-600">서울특별시 서대문구 연세로 50</p>
           </div>
           <div className="bg-gray-50 p-8 rounded-lg">
             <Phone className="mx-auto h-10 w-10 text-indigo-600" />
             <h3 className="mt-4 text-xl font-bold text-gray-900">전화번호</h3>
-            <p className="mt-2 text-gray-600">031-905-7285</p>
+            <p className="mt-2 text-gray-600">02-1234-5678</p>
           </div>
           <div className="bg-gray-50 p-8 rounded-lg">
             <Clock className="mx-auto h-10 w-10 text-indigo-600" />
             <h3 className="mt-4 text-xl font-bold text-gray-900">진료시간</h3>
             <p className="mt-2 text-gray-600">
-              평일: 10:00 - 18:30<br />
-              토요일: 10:00 - 14:00 점심시간 없음<br />
+              평일: 09:30 - 18:30<br />
+              토요일: 09:30 - 14:00<br />
               (점심시간 13:00 - 14:00)
             </p>
           </div>
