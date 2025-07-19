@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import api from '../services/api';
 import Pagination from '../components/Pagination';
-import { Lock, CheckSquare } from 'lucide-react';
+import { Lock, CheckSquare, Search } from 'lucide-react';
 
 const ConsultationListPage = () => {
   const [consultations, setConsultations] = useState([]);
@@ -12,7 +12,10 @@ const ConsultationListPage = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [searchParams] = useSearchParams();
+  
+  // --- 검색 기능 추가 ---
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
 
   useEffect(() => {
     const fetchConsultations = async () => {
@@ -20,9 +23,10 @@ const ConsultationListPage = () => {
       setError(null);
       try {
         const page = searchParams.get('page') || 1;
-        // *** 핵심 수정: API 요청 주소를 올바른 '/consultations' (복수형)으로 변경합니다. ***
+        const search = searchParams.get('search') || '';
+
         const response = await api.get('/consultations', {
-          params: { page }
+          params: { page, search }
         });
         
         setConsultations(response.data.items);
@@ -39,17 +43,40 @@ const ConsultationListPage = () => {
     fetchConsultations();
   }, [searchParams]);
 
+  // 검색 실행 핸들러
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setSearchParams({ search: searchInput, page: 1 });
+  };
+
   if (loading) return <div className="text-center py-20">로딩 중...</div>;
   if (error) return <div className="text-center py-20 text-red-500">{error}</div>;
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">온라인상담</h1>
         <Link to="/consultations/write" className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
           상담하기
         </Link>
       </div>
+
+      {/* 검색창 UI */}
+      <form onSubmit={handleSearch} className="mb-8 max-w-lg mx-auto">
+        <div className="relative">
+          <input
+            type="text"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="제목, 내용 또는 작성자로 검색"
+            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Search className="h-5 w-5 text-gray-400" />
+          </div>
+        </div>
+      </form>
+
       <div className="bg-white shadow-md rounded-lg">
         <ul className="divide-y divide-gray-200">
           {consultations && consultations.length > 0 ? (
@@ -77,7 +104,9 @@ const ConsultationListPage = () => {
               </li>
             ))
           ) : (
-            <li className="p-4 text-center text-gray-500">등록된 상담글이 없습니다.</li>
+            <li className="p-4 text-center text-gray-500">
+              {searchParams.get('search') ? '검색 결과가 없습니다.' : '등록된 상담글이 없습니다.'}
+            </li>
           )}
         </ul>
       </div>

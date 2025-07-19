@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import api from '../services/api';
 import Pagination from '../components/Pagination';
+import { Search } from 'lucide-react';
 
 const PostListPage = () => {
   const [posts, setPosts] = useState([]);
@@ -11,7 +12,10 @@ const PostListPage = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [searchParams] = useSearchParams();
+
+  // --- 검색 기능 추가 ---
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -19,15 +23,12 @@ const PostListPage = () => {
       setError(null);
       try {
         const page = searchParams.get('page') || 1;
-        const response = await api.get('/posts', {
-          params: { page }
-        });
+        const search = searchParams.get('search') || '';
 
-        // --- [디버깅 코드] ---
-        // 서버로부터 받은 데이터를 브라우저 개발자 도구 콘솔에 출력합니다.
-        console.log('자유게시판 서버로부터 받은 실제 데이터:', response.data); 
+        const response = await api.get('/posts', {
+          params: { page, search }
+        });
         
-        // 핵심 수정: response.data에서 items 배열을 가져와 상태를 설정합니다.
         setPosts(response.data.items);
         setTotalPages(response.data.totalPages);
         setCurrentPage(response.data.currentPage);
@@ -41,21 +42,44 @@ const PostListPage = () => {
 
     fetchPosts();
   }, [searchParams]);
+  
+  // 검색 실행 핸들러
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setSearchParams({ search: searchInput, page: 1 });
+  };
 
   if (loading) return <div className="text-center py-20">로딩 중...</div>;
   if (error) return <div className="text-center py-20 text-red-500">{error}</div>;
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">자유게시판</h1>
         <Link to="/posts/write" className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
           글쓰기
         </Link>
       </div>
+
+      {/* 검색창 UI */}
+      <form onSubmit={handleSearch} className="mb-8 max-w-lg mx-auto">
+        <div className="relative">
+          <input
+            type="text"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="제목, 내용 또는 작성자로 검색"
+            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Search className="h-5 w-5 text-gray-400" />
+          </div>
+        </div>
+      </form>
+
       <div className="bg-white shadow-md rounded-lg">
         <ul className="divide-y divide-gray-200">
-          {posts && posts.length > 0 ? ( // posts가 null이 아닌지 확인
+          {posts && posts.length > 0 ? (
             posts.map((post) => (
               <li key={post.id} className="p-4 hover:bg-gray-50">
                 <Link to={`/posts/${post.id}`} className="block">
@@ -70,7 +94,9 @@ const PostListPage = () => {
               </li>
             ))
           ) : (
-            <li className="p-4 text-center text-gray-500">등록된 게시글이 없습니다.</li>
+            <li className="p-4 text-center text-gray-500">
+              {searchParams.get('search') ? '검색 결과가 없습니다.' : '등록된 게시글이 없습니다.'}
+            </li>
           )}
         </ul>
       </div>
