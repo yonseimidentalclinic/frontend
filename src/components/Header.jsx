@@ -1,80 +1,76 @@
-// =================================================================
-// 프론트엔드 Header 컴포넌트 (Header.jsx)
-// 주요 개선사항:
-// 1. 네비게이션 메뉴에 '치료 후기' 링크를 새로 추가
-// =================================================================
+// src/components/Header.jsx
 
 import React, { useState } from 'react';
-import { NavLink, Link } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 
+const NavItem = ({ to, children }) => (
+  <NavLink
+    to={to}
+    className={({ isActive }) =>
+      `px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+        isActive ? 'text-white bg-indigo-700' : 'text-gray-300 hover:text-white hover:bg-indigo-600'
+      }`
+    }
+  >
+    {children}
+  </NavLink>
+);
+
 const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const commonLinkClass = "text-gray-600 hover:text-blue-600 transition-colors duration-200 font-semibold";
-  const activeLinkClass = "text-blue-600 border-b-2 border-blue-600";
-  
-  const mobileLinkClass = "block py-2 px-4 text-lg text-gray-700 hover:bg-gray-100";
-  const mobileActiveLinkClass = "bg-blue-100 text-blue-600 font-bold";
-
-  const navLinks = [
-    { to: "/about", text: "병원소개" },
-    { to: "/doctors", text: "의료진 소개" },
-    { to: "/cases", text: "치료 사례" },
-    { to: "/reviews", text: "치료 후기" }, // [핵심 추가]
-    { to: "/faq", text: "자주 묻는 질문" },
-    { to: "/news", text: "병원소식" },
-    { to: "/consultation", text: "온라인 상담" },
-    { to: "/community/posts", text: "자유게시판" },
-    { to: "/location", text: "오시는 길" },
-  ];
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <header className="bg-white shadow-md sticky top-0 z-50">
+    <header className="bg-indigo-800 shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
+        <div className="flex items-center justify-between h-16">
           <div className="flex-shrink-0">
-            <Link to="/" className="text-2xl font-bold text-blue-600">
+            <Link to="/" className="text-white text-2xl font-bold">
               연세미치과
             </Link>
           </div>
-          <nav className="hidden lg:flex lg:items-center lg:space-x-6">
-            {navLinks.map(link => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                className={({ isActive }) => `${commonLinkClass} ${isActive ? activeLinkClass : ''} py-7`}
-              >
-                {link.text}
-              </NavLink>
-            ))}
-          </nav>
-          <div className="hidden lg:flex items-center">
-            <Link to="/reservation" className="ml-6 bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700">
-              온라인 예약
-            </Link>
+          <div className="hidden md:block">
+            <nav className="ml-10 flex items-baseline space-x-4">
+              <NavItem to="/about">병원소개</NavItem>
+              <NavItem to="/doctors">의료진</NavItem>
+              <NavItem to="/cases">치료사례</NavItem>
+              {/* --- 핵심 수정: /community 경로를 모두 제거했습니다. --- */}
+              <NavItem to="/notices">병원소식</NavItem>
+              <NavItem to="/posts">자유게시판</NavItem>
+              <NavItem to="/consultations">온라인상담</NavItem>
+              <NavItem to="/faq">FAQ</NavItem>
+              <NavItem to="/location">오시는 길</NavItem>
+            </nav>
           </div>
-          <div className="lg:hidden">
+          <div className="hidden md:block">
+             <Link to="/reservation" className="bg-white text-indigo-800 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-200 transition-colors">
+                온라인 예약
+             </Link>
+          </div>
+          <div className="-mr-2 flex md:hidden">
             <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400"
+              onClick={() => setIsOpen(!isOpen)}
+              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-indigo-700 focus:outline-none"
             >
-              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
         </div>
       </div>
-      {isMenuOpen && (
-        <div className="lg:hidden">
+
+      {/* 모바일 메뉴 */}
+      {isOpen && (
+        <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            {navLinks.map(link => (
-              <NavLink key={link.to} to={link.to} onClick={() => setIsMenuOpen(false)} className={({ isActive }) => `${mobileLinkClass} ${isActive ? mobileActiveLinkClass : ''}`}>
-                {link.text}
-              </NavLink>
-            ))}
-            <Link to="/reservation" onClick={() => setIsMenuOpen(false)} className={`${mobileLinkClass} bg-blue-50`}>
-              온라인 예약
-            </Link>
+            <NavItem to="/about">병원소개</NavItem>
+            <NavItem to="/doctors">의료진</NavItem>
+            <NavItem to="/cases">치료사례</NavItem>
+            <NavItem to="/notices">병원소식</NavItem>
+            <NavItem to="/posts">자유게시판</NavItem>
+            <NavItem to="/consultations">온라인상담</NavItem>
+            <NavItem to="/faq">FAQ</NavItem>
+            <NavItem to="/location">오시는 길</NavItem>
+            <NavItem to="/reservation">온라인 예약</NavItem>
           </div>
         </div>
       )}
