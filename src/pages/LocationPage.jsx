@@ -1,53 +1,28 @@
 // src/pages/LocationPage.jsx
 
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { MapPin, Phone, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
+// --- 핵심: 구글 지도 라이브러리를 불러옵니다. ---
+import { GoogleMap, useJsApiLoader, MarkerF } from '@react-google-maps/api';
+
+const containerStyle = {
+  width: '100%',
+  height: '500px'
+};
+
+// 병원 위치 좌표 (예: 신촌역)
+const center = {
+  lat: 37.5552,
+  lng: 126.9369
+};
 
 const LocationPage = () => {
-  const mapElement = useRef(null);
-
-  useEffect(() => {
-    // index.html에서 네이버 지도 API를 미리 불러오므로,
-    // 이 컴포넌트는 지도를 생성하기만 하면 됩니다.
-    
-    const init = () => {
-      if (window.naver && window.naver.maps) {
-        initMap();
-      } else {
-        // 만약 스크립트가 아직 로딩 중이라면, 0.1초 후 다시 시도
-        setTimeout(init, 100);
-      }
-    };
-    
-    init();
-
-  }, []);
-
-  const initMap = () => {
-    if (!mapElement.current) return;
-
-    const location = new window.naver.maps.LatLng(37.5552, 126.9369); // 신촌역 좌표
-    
-    const mapOptions = {
-      center: location,
-      zoom: 17,
-      zoomControl: true,
-      zoomControlOptions: {
-        position: window.naver.maps.Position.TOP_RIGHT,
-      },
-    };
-
-    // 지도 생성
-    const map = new window.naver.maps.Map(mapElement.current, mapOptions);
-
-    // 마커 생성
-    new window.naver.maps.Marker({
-      position: location,
-      map: map,
-      title: '연세미치과',
-    });
-  };
+  // --- 핵심: API 키를 사용하여 구글 지도 스크립트를 안전하게 불러옵니다. ---
+  const { isLoaded } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+  });
 
   const fadeInAnimation = {
     initial: { opacity: 0, y: 30 },
@@ -70,7 +45,21 @@ const LocationPage = () => {
         </motion.div>
 
         <motion.div {...fadeInAnimation}>
-          <div ref={mapElement} style={{ width: '100%', height: '500px' }} className="rounded-lg shadow-lg bg-gray-200" />
+          <div className="rounded-lg shadow-lg overflow-hidden">
+            {isLoaded ? (
+              <GoogleMap
+                mapContainerStyle={containerStyle}
+                center={center}
+                zoom={17}
+              >
+                <MarkerF position={center} title="연세미치과" />
+              </GoogleMap>
+            ) : (
+              <div style={containerStyle} className="bg-gray-200 flex items-center justify-center">
+                <p>지도를 불러오는 중입니다...</p>
+              </div>
+            )}
+          </div>
         </motion.div>
 
         <motion.div {...fadeInAnimation} className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
