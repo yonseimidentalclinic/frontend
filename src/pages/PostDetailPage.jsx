@@ -1,15 +1,16 @@
 // src/pages/PostDetailPage.jsx
 
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
-import { ArrowLeft, Edit } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2 } from 'lucide-react';
 
 const PostDetailPage = () => {
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { id } = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -28,6 +29,34 @@ const PostDetailPage = () => {
     fetchPost();
   }, [id]);
 
+  // --- 핵심 추가: 게시글 삭제 기능 ---
+  const handleDelete = async () => {
+    const password = window.prompt('게시글을 삭제하려면 비밀번호를 입력하세요.');
+    if (password === null) { // 사용자가 '취소'를 누른 경우
+      return;
+    }
+    if (!password) {
+      alert('비밀번호를 입력해야 합니다.');
+      return;
+    }
+
+    try {
+      // Axios의 delete 메소드로 body를 보낼 때는 data 객체로 감싸야 합니다.
+      await api.delete(`/posts/${id}`, {
+        data: { password }
+      });
+      alert('게시글이 성공적으로 삭제되었습니다.');
+      navigate('/posts'); // 삭제 후 목록으로 이동
+    } catch (err) {
+      if (err.response && err.response.status === 403) {
+        alert('비밀번호가 올바르지 않습니다.');
+      } else {
+        alert('게시글 삭제에 실패했습니다. 다시 시도해주세요.');
+      }
+      console.error(err);
+    }
+  };
+
   if (loading) return <div className="text-center py-20">로딩 중...</div>;
   if (error) return <div className="text-center py-20 text-red-500">{error}</div>;
   if (!post) return <div className="text-center py-20">게시글을 찾을 수 없습니다.</div>;
@@ -45,7 +74,6 @@ const PostDetailPage = () => {
               </p>
             </div>
           </div>
-          {/* --- 핵심 수정: dangerouslySetInnerHTML을 사용하여 HTML을 렌더링합니다. --- */}
           <div
             className="p-8 prose max-w-none text-slate-700 leading-relaxed"
             dangerouslySetInnerHTML={{ __html: post.content }}
@@ -64,6 +92,13 @@ const PostDetailPage = () => {
             <Link to={`/posts/edit/${id}`} className="inline-flex items-center px-4 py-2 bg-yellow-500 text-white font-semibold rounded-lg hover:bg-yellow-600 transition-colors">
               <Edit className="mr-2 h-4 w-4" /> 수정
             </Link>
+            {/* --- 핵심 추가: 삭제 버튼 --- */}
+            <button 
+              onClick={handleDelete}
+              className="inline-flex items-center px-4 py-2 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition-colors"
+            >
+              <Trash2 className="mr-2 h-4 w-4" /> 삭제
+            </button>
           </div>
         </div>
       </div>
