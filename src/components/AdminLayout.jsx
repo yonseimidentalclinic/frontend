@@ -39,7 +39,8 @@ const AdminLayout = () => {
   const handleLogout = () => {
     if (window.confirm('정말로 로그아웃하시겠습니까?')) {
       localStorage.removeItem('accessToken');
-      navigate('/admin/login');
+      // --- 핵심 수정: 로그아웃 시 로그인 페이지가 아닌 홈페이지('/')로 이동합니다. ---
+      navigate('/'); 
     }
   };
 
@@ -52,7 +53,6 @@ const AdminLayout = () => {
         </div>
         <nav className="flex-grow space-y-2">
           <SidebarLink to="dashboard" icon={LayoutDashboard}>대시보드</SidebarLink>
-          {/* --- 핵심 추가: 관리자 접근 기록 메뉴를 추가했습니다. --- */}
           <SidebarLink to="logs" icon={History}>접근 기록</SidebarLink>
           
           <p className="text-xs text-gray-400 uppercase font-semibold mt-6 mb-2 px-4">예약/환자</p>
