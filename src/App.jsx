@@ -138,8 +138,8 @@ function App() {
           <Route path="faqs" element={<AdminFaqListPage />} />
           <Route path="Logs" element={<AdminLogsPage />} />
           <Route path="notices/edit/:id" element={<AdminNoticeEditPage />} />
-          <Route path="notices/write" element={<AdminNoticeWritePage />} />
-          <Route path="Notices" element={<AdminNoticeListPage />} />
+          <Route path="notices/new" element={<AdminNoticeWritePage />} />
+          <Route path="notices" element={<AdminNoticeListPage />} />
 
           <Route path="posts/edit/:id" element={<AdminPostEditPage />} />
           <Route path="posts" element={<AdminPostListPage />} />
