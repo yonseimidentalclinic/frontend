@@ -29,6 +29,10 @@ import PostDetailPage from './pages/PostDetailPage';
 import PostWritePage from './pages/PostWritePage';
 import PostEditPage from './pages/PostEditPage';
 import ReservationPage from './pages/ReservationPage';
+// [새 기능] 예약 관리 페이지 import
+import ReservationCheckPage from './pages/ReservationCheckPage';
+import ReservationDetailPage from './pages/ReservationDetailPage';
+import ReservationEditPage from './pages/ReservationEditPage';
 // *** 수정: ReviewPage.jsx 파일이 없어 빌드 오류가 발생하므로 관련 코드를 주석 처리합니다. ***
 import ReviewsPage from './pages/ReviewsPage';
 import ReviewWritePage from './pages/ReviewWritePage';
@@ -102,7 +106,10 @@ function App() {
 
           {/* *** 수정: ReviewPage 라우트를 주석 처리합니다. *** */}
           <Route path="reviews" element={<ReviewsPage />} /> 
-        </Route>
+          <Route path="reservation/check" element={<ReservationCheckPage />} />
+          <Route path="reservation/:id" element={<ReservationDetailPage />} />
+          <Route path="reservation/edit/:id" element={<ReservationEditPage />} />
+          </Route>
 
         {/* 관리자용 페이지 라우트 (실제로 존재하는 페이지만 연결) */}
         <Route path="/admin/login" element={<AdminLoginPage />} />
