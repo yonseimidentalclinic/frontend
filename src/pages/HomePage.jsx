@@ -1,102 +1,158 @@
-// =================================================================
-// 프론트엔드 메인 페이지 (HomePage.jsx)
-// 파일 경로: /src/pages/HomePage.jsx
-// 주요 개선사항:
-// 1. 컴포넌트 이름을 App.jsx와 일치하는 'HomePage'로 수정
-// =================================================================
+// src/pages/HomePage.jsx
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Stethoscope, Heart, Smile } from 'lucide-react';
+import api from '../services/api';
+import { Stethoscope, Calendar, Users, ArrowRight, Newspaper, Star, Image as ImageIcon } from 'lucide-react';
 
-const HomePage = () => { // 컴포넌트 이름을 HomePage로 수정
+// 섹션 제목 컴포넌트
+const SectionTitle = ({ title, subtitle }) => (
+  <div className="text-center mb-12">
+    <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">{title}</h2>
+    <p className="mt-2 text-lg leading-8 text-gray-600">{subtitle}</p>
+  </div>
+);
+
+const HomePage = () => {
+  const [homeData, setHomeData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchHomeData = async () => {
+      try {
+        const response = await api.get('/home-summary');
+        setHomeData(response.data);
+      } catch (error) {
+        console.error("메인 페이지 데이터를 불러오는 데 실패했습니다.", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchHomeData();
+  }, []);
+
+  if (loading) {
+    return <div className="flex justify-center items-center h-screen">로딩 중...</div>;
+  }
+
   return (
-    <div className="bg-white">
-      {/* Hero Section */}
-      <div className="relative bg-blue-50">
-        <div className="max-w-7xl mx-auto py-24 px-4 sm:py-32 sm:px-6 lg:px-8">
-          <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl">
-            <span className="block">환자 중심의 진료,</span>
-            <span className="block text-blue-600">연세미치과가 함께합니다.</span>
-          </h1>
-          <p className="mt-6 max-w-lg mx-auto text-xl text-gray-500 sm:max-w-3xl">
-            최고의 의료진과 최첨단 장비로 환자 한 분 한 분의 미소를 되찾아 드리는 것에 최선을 다합니다.
+    <div>
+      {/* Hero 섹션 */}
+      <div className="relative bg-indigo-800 text-white text-center py-20 md:py-32">
+        <div className="absolute inset-0 bg-black opacity-30"></div>
+        <div className="relative z-10">
+          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight">연세미치과</h1>
+          <p className="mt-4 text-lg md:text-xl max-w-2xl mx-auto">
+            환자 한 분 한 분의 건강한 미소를 위해, 저희는 보이지 않는 곳까지 정성을 다합니다.
           </p>
-          <div className="mt-10 max-w-sm mx-auto sm:max-w-none sm:flex sm:justify-center">
-            <div className="space-y-4 sm:space-y-0 sm:mx-auto sm:inline-grid sm:grid-cols-2 sm:gap-5">
-              <Link
-                to="/about"
-                className="flex items-center justify-center px-4 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 sm:px-8"
-              >
-                병원소개
-              </Link>
-              <Link
-                to="/location"
-                className="flex items-center justify-center px-4 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-blue-600 bg-white hover:bg-gray-50 sm:px-8"
-              >
-                오시는 길
-              </Link>
+          <Link
+            to="/reservation"
+            className="mt-8 inline-block bg-white text-indigo-600 font-semibold px-8 py-3 rounded-lg shadow-lg hover:bg-gray-100 transition-transform transform hover:scale-105"
+          >
+            온라인 예약하기
+          </Link>
+        </div>
+      </div>
+
+      {/* 핵심 가치 섹션 */}
+      <section className="py-24 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
+          <div className="flex flex-col items-center">
+            <div className="flex items-center justify-center h-16 w-16 rounded-full bg-indigo-100 text-indigo-600 mb-4">
+              <Stethoscope size={32} />
+            </div>
+            <h3 className="text-xl font-bold">전문적인 진료</h3>
+            <p className="mt-2 text-gray-600">최신 장비와 숙련된 의료진이 정확하고 안전한 치료를 제공합니다.</p>
+          </div>
+          <div className="flex flex-col items-center">
+            <div className="flex items-center justify-center h-16 w-16 rounded-full bg-indigo-100 text-indigo-600 mb-4">
+              <Calendar size={32} />
+            </div>
+            <h3 className="text-xl font-bold">편안한 예약</h3>
+            <p className="mt-2 text-gray-600">온라인으로 간편하게 예약하고, 원하는 시간에 진료받으세요.</p>
+          </div>
+          <div className="flex flex-col items-center">
+            <div className="flex items-center justify-center h-16 w-16 rounded-full bg-indigo-100 text-indigo-600 mb-4">
+              <Users size={32} />
+            </div>
+            <h3 className="text-xl font-bold">환자 중심 소통</h3>
+            <p className="mt-2 text-gray-600">언제나 환자의 입장에서 생각하고, 충분한 설명으로 신뢰를 드립니다.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* 최신 병원소식 */}
+      {homeData?.notices?.length > 0 && (
+        <section className="py-24 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <SectionTitle title="최신 병원소식" subtitle="연세미치과의 새로운 소식을 확인하세요." />
+            <div className="mt-12 space-y-8">
+              {homeData.notices.map(notice => (
+                <div key={notice.id} className="p-6 border rounded-lg hover:shadow-lg transition-shadow">
+                  <Link to={`/notices/${notice.id}`} className="block">
+                    <p className="text-sm text-gray-500">{new Date(notice.createdAt).toLocaleDateString('ko-KR')}</p>
+                    <h3 className="mt-2 text-xl font-semibold text-gray-900">{notice.title}</h3>
+                  </Link>
+                </div>
+              ))}
+            </div>
+             <div className="text-center mt-12">
+                <Link to="/notices" className="inline-flex items-center font-semibold text-indigo-600 hover:text-indigo-800">
+                    더보기 <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
             </div>
           </div>
-        </div>
-      </div>
+        </section>
+      )}
 
-      {/* Features Section */}
-      <div className="bg-gray-50 py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="lg:text-center">
-            <h2 className="text-base text-blue-600 font-semibold tracking-wide uppercase">Our Values</h2>
-            <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
-              연세미치과의 약속
-            </p>
-            <p className="mt-4 max-w-2xl text-xl text-gray-500 lg:mx-auto">
-              저희는 아래 세 가지 가치를 바탕으로 환자분들을 대합니다.
-            </p>
+      {/* 최신 치료사례 */}
+      {homeData?.cases?.length > 0 && (
+        <section className="py-24 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <SectionTitle title="최신 치료사례" subtitle="연세미치과의 치료 결과를 직접 확인해보세요." />
+            <div className="mt-12 grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+              {homeData.cases.map(caseItem => (
+                <Link to={`/cases`} key={caseItem.id} className="group block">
+                  <div className="overflow-hidden rounded-lg">
+                    <img src={caseItem.beforeImageData} alt={caseItem.title} className="w-full h-64 object-cover transform group-hover:scale-105 transition-transform duration-300"/>
+                  </div>
+                  <div className="mt-4">
+                    <p className="text-sm text-indigo-600 font-semibold">{caseItem.category}</p>
+                    <h3 className="mt-1 text-lg font-semibold text-gray-900 group-hover:text-indigo-700">{caseItem.title}</h3>
+                  </div>
+                </Link>
+              ))}
+            </div>
+             <div className="text-center mt-12">
+                <Link to="/cases" className="inline-flex items-center font-semibold text-indigo-600 hover:text-indigo-800">
+                    더보기 <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+            </div>
           </div>
+        </section>
+      )}
 
-          <div className="mt-10">
-            <dl className="space-y-10 md:space-y-0 md:grid md:grid-cols-3 md:gap-x-8 md:gap-y-10">
-              <div className="relative">
-                <dt>
-                  <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-blue-500 text-white">
-                    <Stethoscope className="h-6 w-6" />
+      {/* 환자 후기 */}
+      {homeData?.reviews?.length > 0 && (
+        <section className="py-24 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <SectionTitle title="환자 후기" subtitle="환자분들이 직접 남겨주신 소중한 후기입니다." />
+            <div className="mt-12 grid gap-8 grid-cols-1 md:grid-cols-3">
+              {homeData.reviews.map((review, index) => (
+                <div key={index} className="bg-gray-50 p-8 rounded-lg">
+                  <div className="flex items-center mb-4">
+                    {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
                   </div>
-                  <p className="ml-16 text-lg leading-6 font-medium text-gray-900">전문적인 진료</p>
-                </dt>
-                <dd className="mt-2 ml-16 text-base text-gray-500">
-                  분야별 최고의 의료진이 검증된 기술과 최신 장비를 통해 정확하고 안전한 진료를 제공합니다.
-                </dd>
-              </div>
-
-              <div className="relative">
-                <dt>
-                  <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-blue-500 text-white">
-                    <Heart className="h-6 w-6" />
-                  </div>
-                  <p className="ml-16 text-lg leading-6 font-medium text-gray-900">따뜻한 공감</p>
-                </dt>
-                <dd className="mt-2 ml-16 text-base text-gray-500">
-                  환자분의 마음에 공감하며, 작은 불편함까지도 세심하게 살피는 따뜻한 소통을 약속합니다.
-                </dd>
-              </div>
-
-              <div className="relative">
-                <dt>
-                  <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-blue-500 text-white">
-                    <Smile className="h-6 w-6" />
-                  </div>
-                  <p className="ml-16 text-lg leading-6 font-medium text-gray-900">만족스러운 결과</p>
-                </dt>
-                <dd className="mt-2 ml-16 text-base text-gray-500">
-                  과잉 진료 없이 꼭 필요한 치료만을 정직하게 시행하여, 건강하고 아름다운 미소를 되찾아 드립니다.
-                </dd>
-              </div>
-            </dl>
+                  <p className="text-gray-600 italic">"{review.content.length > 100 ? `${review.content.substring(0, 100)}...` : review.content}"</p>
+                  <p className="mt-4 font-semibold text-right">- {review.patientName} 님</p>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      </div>
+        </section>
+      )}
     </div>
   );
 };
 
-export default HomePage; // export 이름도 HomePage로 수정
+export default HomePage;
