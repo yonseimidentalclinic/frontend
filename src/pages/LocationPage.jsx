@@ -1,28 +1,27 @@
 // src/pages/LocationPage.jsx
 
-import React from 'react';
+import React, { useState } from 'react';
 import { MapPin, Phone, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
-// --- 핵심: 구글 지도 라이브러리를 불러옵니다. ---
-import { GoogleMap, useJsApiLoader, MarkerF } from '@react-google-maps/api';
+import { GoogleMap, useJsApiLoader, MarkerF, InfoWindowF } from '@react-google-maps/api';
 
 const containerStyle = {
   width: '100%',
   height: '500px'
 };
 
-// 병원 위치 좌표 (예: 신촌역)
+// --- 핵심 수정: 실제 병원 위치 좌표로 변경했습니다. ---
 const center = {
-  lat: 37.5552,
-  lng: 126.9369
+  lat: 37.6830, // 위도
+  lng: 126.7765  // 경도
 };
 
 const LocationPage = () => {
-  // --- 핵심: API 키를 사용하여 구글 지도 스크립트를 안전하게 불러옵니다. ---
+  const [infoWindowVisible, setInfoWindowVisible] = useState(true);
+
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-    // --- 핵심 수정: 지도 언어를 한국어로 설정합니다. ---
     language: 'ko',
   });
 
@@ -54,7 +53,32 @@ const LocationPage = () => {
                 center={center}
                 zoom={17}
               >
-                <MarkerF position={center} title="연세미치과" />
+                <MarkerF 
+                  position={center} 
+                  title="연세미치과"
+                  onClick={() => setInfoWindowVisible(!infoWindowVisible)}
+                />
+
+                {infoWindowVisible && (
+                  <InfoWindowF
+                    position={center}
+                    onCloseClick={() => setInfoWindowVisible(false)}
+                  >
+                    <div className="p-2">
+                      <h3 className="font-bold text-lg">연세미치과</h3>
+                      {/* --- 핵심 수정: 실제 병원 주소로 변경했습니다. --- */}
+                      <p className="text-sm text-gray-600 mt-1">경기 고양시 일산동구 일산로 46, 4층</p>
+                      <a
+                        href={`https://www.google.com/maps/dir/?api=1&destination=${center.lat},${center.lng}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-indigo-600 hover:underline mt-2 inline-block text-sm"
+                      >
+                        길찾기
+                      </a>
+                    </div>
+                  </InfoWindowF>
+                )}
               </GoogleMap>
             ) : (
               <div style={containerStyle} className="bg-gray-200 flex items-center justify-center">
@@ -68,7 +92,8 @@ const LocationPage = () => {
           <div className="bg-gray-50 p-8 rounded-lg">
             <MapPin className="mx-auto h-10 w-10 text-indigo-600" />
             <h3 className="mt-4 text-xl font-bold text-gray-900">주소</h3>
-            <p className="mt-2 text-gray-600">경기 고양시 일산동구 일산로 46 남정씨티 프라자 4층 407호</p>
+            {/* --- 핵심 수정: 실제 병원 주소로 변경했습니다. --- */}
+            <p className="mt-2 text-gray-600">경기 고양시 일산동구 일산로 46<br/>남정씨티 프라자 4층 407호</p>
           </div>
           <div className="bg-gray-50 p-8 rounded-lg">
             <Phone className="mx-auto h-10 w-10 text-indigo-600" />
@@ -80,7 +105,7 @@ const LocationPage = () => {
             <h3 className="mt-4 text-xl font-bold text-gray-900">진료시간</h3>
             <p className="mt-2 text-gray-600">
               평일: 10:00 - 18:30<br />
-              토요일: 10:00 - 14:00  점시시간없음<br />
+              토요일: 10:00 - 14:00  점심시간없음<br />
               (점심시간 13:00 - 14:00)
             </p>
           </div>
