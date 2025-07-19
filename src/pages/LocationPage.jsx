@@ -1,67 +1,109 @@
-// =================================================================
-// 프론트엔드 오시는 길 페이지 (LocationPage.jsx)
-// 파일 경로: /src/pages/LocationPage.jsx
-// =================================================================
+// src/pages/LocationPage.jsx
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
+import { MapPin, Phone, Clock } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const LocationPage = () => {
+  // --- 핵심: React가 지도를 그릴 div 요소를 기억하게 만듭니다. ---
+  const mapElement = useRef(null);
+
   useEffect(() => {
+    // --- 핵심: 페이지가 처음 나타날 때 딱 한 번만 실행됩니다. ---
+    
+    // VITE_NAVER_MAP_CLIENT_ID는 .env.local 파일에 정의되어 있어야 합니다.
+    // 예: VITE_NAVER_MAP_CLIENT_ID=여기에실제ID입력
+    const naverMapClientId = import.meta.env.VITE_NAVER_MAP_CLIENT_ID || '83bfuniegk'; // 임시 ID
+
+    // 네이버 지도 스크립트를 동적으로 불러옵니다.
     const script = document.createElement('script');
+    script.src = `https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${naverMapClientId}`;
     script.async = true;
-    script.src = `https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${import.meta.env.VITE_NAVER_MAP_CLIENT_ID}`;
+    
+    // 스크립트 로딩이 완료되면 지도를 초기화하는 함수를 실행합니다.
+    script.onload = () => initMap();
+    
     document.head.appendChild(script);
 
-    script.onload = () => {
-      const mapOptions = {
-        center: new window.naver.maps.LatLng(37.5665, 126.9780), // 서울 시청 기본 위치
-        zoom: 17,
-      };
-      const map = new window.naver.maps.Map('map', mapOptions);
-      
-      new window.naver.maps.Marker({
-        position: new window.naver.maps.LatLng(37.5665, 126.9780),
-        map: map,
-      });
-    };
-    
     return () => {
-      // 컴포넌트 언마운트 시 스크립트 제거 (선택적)
+      // 페이지를 벗어날 때 스크립트를 정리합니다.
       document.head.removeChild(script);
     };
-  }, []);
+  }, []); // 빈 배열 []은 이 코드가 단 한 번만 실행되도록 보장합니다.
+
+  const initMap = () => {
+    // 지도 div나 naver maps API가 준비되지 않았다면 실행하지 않습니다.
+    if (!mapElement.current || !window.naver) return;
+
+    // 병원 위치 좌표 (예: 신촌역)
+    const location = new window.naver.maps.LatLng(37.5552, 126.9369);
+    
+    const mapOptions = {
+      center: location,
+      zoom: 17,
+      zoomControl: true,
+      zoomControlOptions: {
+        position: window.naver.maps.Position.TOP_RIGHT,
+      },
+    };
+
+    // --- 핵심: 기억해둔 div에 지도를 생성합니다. ---
+    const map = new window.naver.maps.Map(mapElement.current, mapOptions);
+
+    // 지도에 마커를 표시합니다.
+    new window.naver.maps.Marker({
+      position: location,
+      map: map,
+      title: '연세미치과',
+    });
+  };
+
+  const fadeInAnimation = {
+    initial: { opacity: 0, y: 30 },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: true },
+    transition: { duration: 0.8 }
+  };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 sm:py-12">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-gray-800">오시는 길</h1>
-        <p className="text-gray-500 mt-2">연세미치과를 찾아주셔서 감사합니다.</p>
-      </div>
+    <div className="bg-white">
+      <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:py-24 lg:px-8">
+        <motion.div {...fadeInAnimation} className="text-center mb-16">
+          <h2 className="text-base font-semibold text-indigo-600 tracking-wide uppercase">오시는 길</h2>
+          <p className="mt-1 text-4xl font-extrabold text-gray-900 sm:text-5xl">
+            연세미치과를 찾아주셔서 감사합니다.
+          </p>
+          <p className="max-w-xl mt-5 mx-auto text-xl text-gray-500">
+            대중교통을 이용하시면 더욱 편리하게 방문하실 수 있습니다.
+          </p>
+        </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-        {/* 지도 표시 영역 */}
-        <div id="map" style={{ width: '100%', height: '400px' }} className="rounded-lg shadow-md">
-          <div className="flex items-center justify-center h-full bg-gray-100 text-gray-500">
-            지도 로딩 중...
-          </div>
-        </div>
+        <motion.div {...fadeInAnimation}>
+          {/* --- 핵심: ref 속성으로 이 div를 React가 기억하게 합니다. --- */}
+          <div ref={mapElement} style={{ width: '100%', height: '500px' }} className="rounded-lg shadow-lg" />
+        </motion.div>
 
-        {/* 주소 및 교통 정보 */}
-        <div className="bg-white p-8 rounded-lg shadow-md">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">병원 정보</h2>
-          <div className="space-y-4 text-lg">
-            <p><strong>주소:</strong> 경기 고양시 일산동구 일산로 46 남정씨티 프라자 4층 407호</p>
-            <p><strong>전화:</strong> 031-905-7285</p>
-            <p><strong>팩스:</strong> 031-905-7286</p>
-            <p><strong>진료시간:</strong></p>
-            <ul className="list-disc list-inside pl-4 text-base">
-              <li>평일: 10:00 - 18:30</li>
-              <li>토요일: 10:00 - 14:00 (점심시간 없음)</li>
-              <li>점심시간: 13:00 - 14:00</li>
-              <li>일요일/공휴일: 휴진</li>
-            </ul>
+        <motion.div {...fadeInAnimation} className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
+          <div className="bg-gray-50 p-8 rounded-lg">
+            <MapPin className="mx-auto h-10 w-10 text-indigo-600" />
+            <h3 className="mt-4 text-xl font-bold text-gray-900">주소</h3>
+            <p className="mt-2 text-gray-600">경기 고양시 일산동구 일산로 46 남정씨티프라자 4층 407호 연세미치과</p>
           </div>
-        </div>
+          <div className="bg-gray-50 p-8 rounded-lg">
+            <Phone className="mx-auto h-10 w-10 text-indigo-600" />
+            <h3 className="mt-4 text-xl font-bold text-gray-900">전화번호</h3>
+            <p className="mt-2 text-gray-600">031-905-7285</p>
+          </div>
+          <div className="bg-gray-50 p-8 rounded-lg">
+            <Clock className="mx-auto h-10 w-10 text-indigo-600" />
+            <h3 className="mt-4 text-xl font-bold text-gray-900">진료시간</h3>
+            <p className="mt-2 text-gray-600">
+              평일: 10:00 - 18:30<br />
+              토요일: 10:00 - 14:00 점심시간 없음<br />
+              (점심시간 13:00 - 14:00)
+            </p>
+          </div>
+        </motion.div>
       </div>
     </div>
   );
