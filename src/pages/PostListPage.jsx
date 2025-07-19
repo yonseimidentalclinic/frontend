@@ -22,6 +22,11 @@ const PostListPage = () => {
         const response = await api.get('/posts', {
           params: { page }
         });
+
+        // --- [디버깅 코드] ---
+        // 서버로부터 받은 데이터를 브라우저 개발자 도구 콘솔에 출력합니다.
+        console.log('자유게시판 서버로부터 받은 실제 데이터:', response.data); 
+        
         // 핵심 수정: response.data에서 items 배열을 가져와 상태를 설정합니다.
         setPosts(response.data.items);
         setTotalPages(response.data.totalPages);
@@ -50,7 +55,7 @@ const PostListPage = () => {
       </div>
       <div className="bg-white shadow-md rounded-lg">
         <ul className="divide-y divide-gray-200">
-          {posts && posts.length > 0 ? (
+          {posts && posts.length > 0 ? ( // posts가 null이 아닌지 확인
             posts.map((post) => (
               <li key={post.id} className="p-4 hover:bg-gray-50">
                 <Link to={`/posts/${post.id}`} className="block">
