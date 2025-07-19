@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
-import { MessageSquare, Edit, Trash2, CheckSquare } from 'lucide-react';
+import { MessageSquare, Edit, Trash2, CheckSquare, Lock } from 'lucide-react';
 
 const AdminConsultationListPage = () => {
   const [consultations, setConsultations] = useState([]);
@@ -15,7 +15,6 @@ const AdminConsultationListPage = () => {
     setLoading(true);
     try {
       const response = await api.get('/consultations', { params: { limit: 1000 } });
-      // --- 핵심 수정: API 응답 구조 변경에 따라 .items를 추가합니다. ---
       setConsultations(response.data.items);
     } catch (err) {
       setError('상담글 목록을 불러오는 데 실패했습니다.');
@@ -29,7 +28,7 @@ const AdminConsultationListPage = () => {
   }, [fetchConsultations]);
 
   const handleDelete = async (id) => {
-    if (window.confirm(`[ID: ${id}] 상담글을 정말로 삭제하시겠습니까?`)) {
+    if (window.confirm(`[ID: ${id}] 상담글을 정말로 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`)) {
       try {
         await api.delete(`/admin/consultations/${id}`);
         fetchConsultations();
@@ -59,23 +58,26 @@ const AdminConsultationListPage = () => {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {consultations.map((item) => (
-              <tr key={item.id}>
+              <tr key={item.id} className={!item.isAnswered ? 'bg-red-50' : ''}>
                 <td className="px-6 py-4 whitespace-nowrap">
                   {item.isAnswered ? 
                     <span className="text-blue-600 font-semibold flex items-center"><CheckSquare size={16} className="mr-1"/>답변완료</span> : 
                     <span className="text-red-600 font-semibold">답변대기</span>
                   }
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap font-medium">{item.title}</td>
+                <td className="px-6 py-4 whitespace-nowrap font-medium flex items-center gap-2">
+                  {item.isSecret && <Lock size={16} className="text-gray-400" />}
+                  {item.title}
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap">{item.author}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {new Date(item.createdAt).toLocaleString('ko-KR')}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-center">
                   <div className="flex justify-center gap-4">
-                    <button onClick={() => navigate(`/admin/consultations/reply/${item.id}`)} className="text-blue-600 hover:text-blue-900"><MessageSquare size={20} /></button>
-                    <button onClick={() => navigate(`/admin/consultations/edit/${item.id}`)} className="text-indigo-600 hover:text-indigo-900"><Edit size={20} /></button>
-                    <button onClick={() => handleDelete(item.id)} className="text-red-600 hover:text-red-900"><Trash2 size={20} /></button>
+                    <button onClick={() => navigate(`/admin/consultations/reply/${item.id}`)} title="답변/수정" className="text-blue-600 hover:text-blue-900"><MessageSquare size={20} /></button>
+                    <button onClick={() => navigate(`/admin/consultations/edit/${item.id}`)} title="글 내용 수정" className="text-indigo-600 hover:text-indigo-900"><Edit size={20} /></button>
+                    <button onClick={() => handleDelete(item.id)} title="삭제" className="text-red-600 hover:text-red-900"><Trash2 size={20} /></button>
                   </div>
                 </td>
               </tr>
