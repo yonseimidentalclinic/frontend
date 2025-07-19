@@ -76,7 +76,7 @@ const Footer = () => {
           </p>
           <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row items-center justify-center gap-x-4 gap-y-2">
              <p className="text-xs text-slate-500">
-                주소: r경기 고양시 일산동구 일산로 46 남정씨티 프라자 4층 407호 | 대표: 박건현
+                주소: 경기 고양시 일산동구 일산로 46 남정씨티 프라자 4층 407호 | 대표: 박건현
              </p>
              <Link to="/admin" className="text-xs text-slate-500 hover:text-indigo-400 transition-colors">
               관리자 페이지
