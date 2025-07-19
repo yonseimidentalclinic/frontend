@@ -13,7 +13,8 @@ import {
   HelpCircle,
   Newspaper,
   MessageSquare,
-  LogOut
+  LogOut,
+  History // 아이콘 추가
 } from 'lucide-react';
 
 const SidebarLink = ({ to, icon: Icon, children }) => {
@@ -51,6 +52,8 @@ const AdminLayout = () => {
         </div>
         <nav className="flex-grow space-y-2">
           <SidebarLink to="dashboard" icon={LayoutDashboard}>대시보드</SidebarLink>
+          {/* --- 핵심 추가: 관리자 접근 기록 메뉴를 추가했습니다. --- */}
+          <SidebarLink to="logs" icon={History}>접근 기록</SidebarLink>
           
           <p className="text-xs text-gray-400 uppercase font-semibold mt-6 mb-2 px-4">예약/환자</p>
           <SidebarLink to="reservations" icon={Calendar}>예약 관리</SidebarLink>
