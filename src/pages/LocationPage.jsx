@@ -11,19 +11,17 @@ const LocationPage = () => {
     // index.html에서 네이버 지도 API를 미리 불러오므로,
     // 이 컴포넌트는 지도를 생성하기만 하면 됩니다.
     
-    // naver.maps가 준비되었는지 확인
-    if (window.naver && window.naver.maps) {
-      initMap();
-    } else {
-      // 만약 스크립트가 아직 로딩 중이라면, 잠시 후 다시 시도
-      // 일반적으로 index.html에서 먼저 로드되므로 이 경우는 드뭅니다.
-      const timer = setTimeout(() => {
-        if (window.naver && window.naver.maps) {
-          initMap();
-        }
-      }, 500);
-      return () => clearTimeout(timer);
-    }
+    const init = () => {
+      if (window.naver && window.naver.maps) {
+        initMap();
+      } else {
+        // 만약 스크립트가 아직 로딩 중이라면, 0.1초 후 다시 시도
+        setTimeout(init, 100);
+      }
+    };
+    
+    init();
+
   }, []);
 
   const initMap = () => {
