@@ -50,13 +50,13 @@ const LocationPage = () => {
         <div className="bg-white p-8 rounded-lg shadow-md">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">병원 정보</h2>
           <div className="space-y-4 text-lg">
-            <p><strong>주소:</strong> 서울특별시 서대문구 연세로 50, A타워 3층</p>
-            <p><strong>전화:</strong> 02-123-4567</p>
-            <p><strong>팩스:</strong> 02-123-4568</p>
+            <p><strong>주소:</strong> 경기 고양시 일산동구 일산로 46 남정씨티 프라자 4층 407호</p>
+            <p><strong>전화:</strong> 031-905-7285</p>
+            <p><strong>팩스:</strong> 031-905-7286</p>
             <p><strong>진료시간:</strong></p>
             <ul className="list-disc list-inside pl-4 text-base">
-              <li>평일: 09:30 - 18:30</li>
-              <li>토요일: 09:30 - 14:00 (점심시간 없음)</li>
+              <li>평일: 10:00 - 18:30</li>
+              <li>토요일: 10:00 - 14:00 (점심시간 없음)</li>
               <li>점심시간: 13:00 - 14:00</li>
               <li>일요일/공휴일: 휴진</li>
             </ul>
