@@ -42,12 +42,13 @@ const NoticeDetailPage = () => {
               작성일: {new Date(notice.createdAt).toLocaleDateString('ko-KR')}
             </p>
           </div>
-          <div className="p-8 prose max-w-none text-slate-700 leading-relaxed whitespace-pre-wrap">
-            {notice.content}
-          </div>
+          {/* --- 핵심 수정: dangerouslySetInnerHTML을 사용하여 HTML을 렌더링합니다. --- */}
+          <div
+            className="p-8 prose max-w-none text-slate-700 leading-relaxed"
+            dangerouslySetInnerHTML={{ __html: notice.content }}
+          />
         </div>
         <div className="mt-8 text-center">
-          {/* --- 핵심 수정: 목록으로 돌아가는 링크 주소를 올바르게 수정했습니다. --- */}
           <Link 
             to="/notices" 
             className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors duration-300 shadow-sm"

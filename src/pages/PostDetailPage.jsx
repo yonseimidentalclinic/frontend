@@ -1,16 +1,15 @@
 // src/pages/PostDetailPage.jsx
 
 import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import api from '../services/api';
-import { ArrowLeft, Edit, Trash2 } from 'lucide-react';
+import { ArrowLeft, Edit } from 'lucide-react';
 
 const PostDetailPage = () => {
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { id } = useParams();
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -46,13 +45,14 @@ const PostDetailPage = () => {
               </p>
             </div>
           </div>
-          <div className="p-8 prose max-w-none text-slate-700 leading-relaxed whitespace-pre-wrap">
-            {post.content}
-          </div>
+          {/* --- 핵심 수정: dangerouslySetInnerHTML을 사용하여 HTML을 렌더링합니다. --- */}
+          <div
+            className="p-8 prose max-w-none text-slate-700 leading-relaxed"
+            dangerouslySetInnerHTML={{ __html: post.content }}
+          />
           {/* 댓글 기능이 있다면 여기에 표시됩니다. */}
         </div>
         <div className="mt-8 flex justify-between items-center">
-          {/* --- 핵심 수정: 목록으로 돌아가는 링크 주소를 올바르게 수정했습니다. --- */}
           <Link 
             to="/posts" 
             className="inline-flex items-center px-6 py-3 bg-slate-600 text-white font-semibold rounded-lg hover:bg-slate-700 transition-colors duration-300 shadow-sm"
@@ -64,7 +64,6 @@ const PostDetailPage = () => {
             <Link to={`/posts/edit/${id}`} className="inline-flex items-center px-4 py-2 bg-yellow-500 text-white font-semibold rounded-lg hover:bg-yellow-600 transition-colors">
               <Edit className="mr-2 h-4 w-4" /> 수정
             </Link>
-            {/* 삭제 버튼은 비밀번호 확인 로직이 필요하여 우선 비활성화 */}
           </div>
         </div>
       </div>

@@ -16,7 +16,6 @@ const ConsultationDetailPage = () => {
       setLoading(true);
       setError(null);
       try {
-        // 비밀글 확인 로직은 이 페이지 진입 전에 처리되었다고 가정합니다.
         const response = await api.get(`/consultations/${id}`);
         setConsultation(response.data);
       } catch (err) {
@@ -47,9 +46,11 @@ const ConsultationDetailPage = () => {
               </p>
             </div>
           </div>
-          <div className="p-8 text-slate-700 leading-relaxed whitespace-pre-wrap">
-            {consultation.content}
-          </div>
+          {/* --- 핵심 수정: dangerouslySetInnerHTML을 사용하여 HTML을 렌더링합니다. --- */}
+          <div
+            className="p-8 prose max-w-none text-slate-700 leading-relaxed"
+            dangerouslySetInnerHTML={{ __html: consultation.content }}
+          />
         </div>
 
         {/* 답변 */}
@@ -60,15 +61,16 @@ const ConsultationDetailPage = () => {
                 <MessageSquare className="mr-3 h-7 w-7" />
                 연세미치과 답변
               </h2>
-              <div className="text-slate-700 leading-relaxed whitespace-pre-wrap">
-                {consultation.replies[0].content}
-              </div>
+              {/* --- 핵심 수정: 답변 내용도 dangerouslySetInnerHTML을 사용합니다. --- */}
+              <div
+                className="prose max-w-none text-slate-700 leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: consultation.replies[0].content }}
+              />
             </div>
           </div>
         )}
 
         <div className="mt-8 text-center">
-          {/* --- 핵심 수정: 목록으로 돌아가는 링크 주소를 올바르게 수정했습니다. --- */}
           <Link 
             to="/consultations" 
             className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors duration-300 shadow-sm"
