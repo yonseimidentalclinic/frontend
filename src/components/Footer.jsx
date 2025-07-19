@@ -1,58 +1,74 @@
+// src/components/Footer.jsx
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-function Footer() {
-  const currentYear = new Date().getFullYear();
+const FooterLink = ({ to, children }) => (
+  <Link to={to} className="text-gray-400 hover:text-white transition-colors duration-200">
+    {children}
+  </Link>
+);
 
+const Footer = () => {
   return (
-    <footer className="bg-gray-800 text-white mt-16">
-      <div className="container mx-auto px-6 py-10">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* 병원 정보 */}
-          <div>
-            <h3 className="text-lg font-bold mb-4">연세미치과</h3>
-            <p className="text-gray-400">
-              환자의 미소를 최우선으로 생각하며,
-              <br />
-              정직하고 편안한 진료를 약속합니다.
+    <footer className="bg-gray-800 text-white">
+      <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          
+          {/* 정보 섹션 */}
+          <div className="col-span-2 md:col-span-1">
+            <h3 className="text-lg font-semibold mb-4">연세미치과</h3>
+            <p className="text-gray-400 text-sm leading-relaxed">
+              환자 한 분 한 분의 건강한 미소를 위해, <br />
+              저희는 보이지 않는 곳까지 정성을 다합니다.
             </p>
           </div>
 
-          {/* 주요 링크 */}
+          {/* 바로가기 메뉴 섹션 */}
           <div>
-            <h3 className="text-lg font-bold mb-4">바로가기</h3>
-            <ul className="space-y-2">
-              <li><Link to="/about" className="text-gray-400 hover:text-white">병원소개</Link></li>
-              <li><Link to="/services" className="text-gray-400 hover:text-white">진료안내</Link></li>
-              <li><Link to="/notices" className="text-gray-400 hover:text-white">병원소식</Link></li>
-              <li><Link to="/consultations" className="text-gray-400 hover:text-white">온라인 상담</Link></li>
+            <h3 className="text-sm font-semibold tracking-wider uppercase mb-4">바로가기</h3>
+            <ul className="space-y-3">
+              <li><FooterLink to="/about">병원소개</FooterLink></li>
+              <li><FooterLink to="/doctors">의료진</FooterLink></li>
+              <li><FooterLink to="/cases">치료사례</FooterLink></li>
+              <li><FooterLink to="/location">오시는 길</FooterLink></li>
             </ul>
           </div>
 
-          {/* 연락처 정보 */}
+          {/* 게시판 메뉴 섹션 */}
           <div>
-            <h3 className="text-lg font-bold mb-4">오시는 길 & 연락처</h3>
-            <p className="text-gray-400">주소: 경기도 고양시 일산서구 주엽로 150</p>
-            <p className="text-gray-400">전화: 031-123-4567</p>
-            <p className="text-gray-400 mt-2">월-금: 09:30 - 18:30</p>
-            <p className="text-gray-400">토요일: 09:30 - 14:00 (점심시간 없음)</p>
-            <p className="text-gray-400">일요일/공휴일 휴진</p>
+            <h3 className="text-sm font-semibold tracking-wider uppercase mb-4">커뮤니티</h3>
+            <ul className="space-y-3">
+              <li><FooterLink to="/notices">병원소식</FooterLink></li>
+              <li><FooterLink to="/posts">자유게시판</FooterLink></li>
+              <li><FooterLink to="/consultations">온라인상담</FooterLink></li>
+              <li><FooterLink to="/faq">자주 묻는 질문</FooterLink></li>
+            </ul>
           </div>
+
+          {/* 예약 섹션 */}
+           <div>
+            <h3 className="text-sm font-semibold tracking-wider uppercase mb-4">예약 및 문의</h3>
+            <ul className="space-y-3">
+               <li><FooterLink to="/reservation">온라인 예약</FooterLink></li>
+               <li className="text-gray-400">전화: 02-1234-5678</li>
+            </ul>
+          </div>
+
         </div>
 
-        {/* 하단 저작권 및 관리자 링크 */}
-        <div className="mt-10 pt-8 border-t border-gray-700 text-center text-gray-500">
-          <p>&copy; {currentYear} 연세미치과. All Rights Reserved.</p>
-          <div className="mt-4">
-            {/* 관리자 로그인 링크 추가 */}
-            <Link to="/admin/login" className="text-sm text-gray-600 hover:text-gray-400">
-              관리자 페이지
-            </Link>
-          </div>
+        {/* 하단 저작권 */}
+        <div className="mt-12 border-t border-gray-700 pt-8 text-center">
+          <p className="text-base text-gray-400">
+            &copy; {new Date().getFullYear()} 연세미치과. All rights reserved.
+          </p>
+          <p className="text-xs text-gray-500 mt-2">
+            주소: 서울특별시 서대문구 연세로 50 | 대표: 박건현
+          </p>
         </div>
       </div>
     </footer>
   );
-}
+};
 
 export default Footer;
