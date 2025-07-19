@@ -31,7 +31,6 @@ const Footer = () => {
               <li><FooterLink to="/about">병원소개</FooterLink></li>
               <li><FooterLink to="/doctors">의료진</FooterLink></li>
               <li><FooterLink to="/cases">치료사례</FooterLink></li>
-              <li><FooterLink to="/location">오시는 길</FooterLink></li>
             </ul>
           </div>
 
@@ -51,6 +50,7 @@ const Footer = () => {
             <h3 className="text-sm font-semibold tracking-wider uppercase mb-4">예약 및 문의</h3>
             <ul className="space-y-3">
                <li><FooterLink to="/reservation">온라인 예약</FooterLink></li>
+               <li><FooterLink to="/location">오시는 길</FooterLink></li>
                <li className="text-gray-400">전화: 02-1234-5678</li>
             </ul>
           </div>
@@ -65,6 +65,12 @@ const Footer = () => {
           <p className="text-xs text-gray-500 mt-2">
             주소: 서울특별시 서대문구 연세로 50 | 대표: 박건현
           </p>
+          {/* --- 핵심 추가: 관리자 페이지로 이동하는 링크를 추가했습니다. --- */}
+          <div className="mt-4">
+            <Link to="/admin" className="text-xs text-gray-500 hover:text-gray-300 transition-colors">
+              관리자 페이지
+            </Link>
+          </div>
         </div>
       </div>
     </footer>
