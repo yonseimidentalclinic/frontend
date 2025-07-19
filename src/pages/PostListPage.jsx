@@ -50,7 +50,7 @@ const PostListPage = () => {
       </div>
       <div className="bg-white shadow-md rounded-lg">
         <ul className="divide-y divide-gray-200">
-          {posts.length > 0 ? (
+          {posts && posts.length > 0 ? (
             posts.map((post) => (
               <li key={post.id} className="p-4 hover:bg-gray-50">
                 <Link to={`/posts/${post.id}`} className="block">

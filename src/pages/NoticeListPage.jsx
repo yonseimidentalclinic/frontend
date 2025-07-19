@@ -45,7 +45,7 @@ const NoticeListPage = () => {
       <h1 className="text-3xl font-bold text-center mb-8">병원소식</h1>
       <div className="bg-white shadow-md rounded-lg">
         <ul className="divide-y divide-gray-200">
-          {notices.length > 0 ? (
+          {notices && notices.length > 0 ? (
             notices.map((notice) => (
               <li key={notice.id} className="p-4 hover:bg-gray-50">
                 <Link to={`/notices/${notice.id}`} className="block">
