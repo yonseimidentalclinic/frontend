@@ -21,7 +21,9 @@ const LocationPage = () => {
   // --- 핵심: API 키를 사용하여 구글 지도 스크립트를 안전하게 불러옵니다. ---
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+    // --- 핵심 수정: 지도 언어를 한국어로 설정합니다. ---
+    language: 'ko',
   });
 
   const fadeInAnimation = {
@@ -66,19 +68,19 @@ const LocationPage = () => {
           <div className="bg-gray-50 p-8 rounded-lg">
             <MapPin className="mx-auto h-10 w-10 text-indigo-600" />
             <h3 className="mt-4 text-xl font-bold text-gray-900">주소</h3>
-            <p className="mt-2 text-gray-600">서울특별시 서대문구 연세로 50</p>
+            <p className="mt-2 text-gray-600">경기 고양시 일산동구 일산로 46 남정씨티 프라자 4층 407호</p>
           </div>
           <div className="bg-gray-50 p-8 rounded-lg">
             <Phone className="mx-auto h-10 w-10 text-indigo-600" />
             <h3 className="mt-4 text-xl font-bold text-gray-900">전화번호</h3>
-            <p className="mt-2 text-gray-600">02-1234-5678</p>
+            <p className="mt-2 text-gray-600">031-905-7285</p>
           </div>
           <div className="bg-gray-50 p-8 rounded-lg">
             <Clock className="mx-auto h-10 w-10 text-indigo-600" />
             <h3 className="mt-4 text-xl font-bold text-gray-900">진료시간</h3>
             <p className="mt-2 text-gray-600">
-              평일: 09:30 - 18:30<br />
-              토요일: 09:30 - 14:00<br />
+              평일: 10:00 - 18:30<br />
+              토요일: 10:00 - 14:00  점시시간없음<br />
               (점심시간 13:00 - 14:00)
             </p>
           </div>
