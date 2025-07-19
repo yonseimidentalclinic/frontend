@@ -6,8 +6,9 @@ import { motion } from 'framer-motion';
 
 const LocationPage = () => {
   const mapElement = useRef(null);
-  const [mapReady, setMapReady] = useState(false);
   const [mapError, setMapError] = useState(null);
+  // 스크립트 로딩 상태를 관리하여 중복 실행을 방지합니다.
+  const scriptLoaded = useRef(false);
 
   useEffect(() => {
     // .env.local 파일 또는 Vercel 환경 변수에 정의된 Client ID를 가져옵니다.
@@ -18,42 +19,32 @@ const LocationPage = () => {
       return;
     }
 
-    // 스크립트가 중복으로 추가되는 것을 방지합니다.
-    if (window.naver && window.naver.maps) {
-      initMap();
+    // 스크립트가 이미 로딩되었다면 함수를 종료합니다.
+    if (scriptLoaded.current) {
+      initMap(naverMapClientId);
       return;
     }
 
-    const scriptId = 'naver-maps-script';
-    let script = document.getElementById(scriptId);
-
-    if (!script) {
-      script = document.createElement('script');
-      script.id = scriptId;
-      script.src = `https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${naverMapClientId}`;
-      script.async = true;
-      script.onload = () => setMapReady(true); // 스크립트 로딩 완료 시 상태 변경
-      script.onerror = () => setMapError("네이버 지도 스크립트를 불러오는 데 실패했습니다.");
-      document.head.appendChild(script);
-    }
+    const script = document.createElement('script');
+    script.src = `https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${naverMapClientId}`;
+    script.async = true;
+    script.onload = () => {
+      scriptLoaded.current = true;
+      initMap(naverMapClientId);
+    };
+    script.onerror = () => {
+      setMapError("네이버 지도 스크립트를 불러오는 데 실패했습니다.");
+    };
     
+    document.head.appendChild(script);
+
     return () => {
-      // 페이지를 벗어날 때 스크립트를 정리할 수 있습니다.
-      const existingScript = document.getElementById(scriptId);
-      if (existingScript) {
-        // document.head.removeChild(existingScript);
-      }
+      // 컴포넌트가 사라질 때 스크립트 태그를 제거할 수 있습니다.
+      // document.head.removeChild(script);
     };
   }, []);
 
-  // 스크립트가 준비되면 지도를 초기화합니다.
-  useEffect(() => {
-    if (mapReady) {
-      initMap();
-    }
-  }, [mapReady]);
-
-  const initMap = () => {
+  const initMap = (clientId) => {
     if (!mapElement.current || !window.naver || !window.naver.maps) {
       setMapError("지도 초기화에 필요한 리소스가 준비되지 않았습니다.");
       return;
@@ -70,13 +61,19 @@ const LocationPage = () => {
       },
     };
 
-    const map = new window.naver.maps.Map(mapElement.current, mapOptions);
+    try {
+      const map = new window.naver.maps.Map(mapElement.current, mapOptions);
 
-    new window.naver.maps.Marker({
-      position: location,
-      map: map,
-      title: '연세미치과',
-    });
+      new window.naver.maps.Marker({
+        position: location,
+        map: map,
+        title: '연세미치과',
+      });
+    } catch (error) {
+        // ID나 URL 인증 오류 발생 시 여기서 에러를 잡습니다.
+        console.error("Map creation error:", error);
+        setMapError("지도 인증에 실패했습니다. Client ID와 등록된 URL을 확인해주세요.");
+    }
   };
 
   const fadeInAnimation = {
@@ -101,7 +98,7 @@ const LocationPage = () => {
 
         <motion.div {...fadeInAnimation}>
           <div ref={mapElement} style={{ width: '100%', height: '500px' }} className="rounded-lg shadow-lg bg-gray-200 flex items-center justify-center">
-            {mapError && <p className="text-red-500 font-semibold">{mapError}</p>}
+            {mapError && <p className="text-red-500 font-semibold px-4 text-center">{mapError}</p>}
           </div>
         </motion.div>
 
