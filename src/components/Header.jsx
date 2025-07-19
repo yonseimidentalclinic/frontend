@@ -51,6 +51,7 @@ const Header = () => {
             <NavItem to="/about">병원소개</NavItem>
             <NavItem to="/doctors">의료진</NavItem>
             <NavItem to="/cases">치료사례</NavItem>
+            {/* --- 핵심 수정: '/news'를 올바른 주소인 '/notices'로 변경했습니다. --- */}
             <NavItem to="/notices">병원소식</NavItem>
             <NavItem to="/posts">자유게시판</NavItem>
             <NavItem to="/consultations">온라인상담</NavItem>
