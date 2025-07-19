@@ -29,7 +29,31 @@ const ConsultationDetailPage = () => {
     fetchConsultation();
   }, [id]);
 
-  // --- 핵심 추가: 상담글 삭제 기능 ---
+  // --- 핵심 추가: 수정 시 비밀번호 확인 기능 ---
+  const handleEdit = async () => {
+    const password = window.prompt('상담글을 수정하려면 비밀번호를 입력하세요.');
+    if (password === null) return; // 사용자가 '취소'를 누른 경우
+    if (!password) {
+      alert('비밀번호를 입력해야 합니다.');
+      return;
+    }
+
+    try {
+      // 백엔드에 비밀번호 확인 요청
+      const response = await api.post(`/consultations/${id}/verify`, { password });
+      if (response.data.success) {
+        // 성공 시 수정 페이지로 이동
+        navigate(`/consultations/edit/${id}`);
+      } else {
+        alert('비밀번호가 올바르지 않습니다.');
+      }
+    } catch (err) {
+      alert('확인 중 오류가 발생했습니다. 다시 시도해주세요.');
+      console.error(err);
+    }
+  };
+
+  // --- 상담글 삭제 기능 (기존과 동일) ---
   const handleDelete = async () => {
     const password = window.prompt('상담글을 삭제하려면 비밀번호를 입력하세요.');
     if (password === null) return;
@@ -102,11 +126,14 @@ const ConsultationDetailPage = () => {
             <ArrowLeft className="mr-2 h-5 w-5" />
             목록으로
           </Link>
-          {/* --- 핵심 추가: 수정 및 삭제 버튼 --- */}
           <div className="flex space-x-4">
-            <Link to={`/consultations/edit/${id}`} className="inline-flex items-center px-4 py-2 bg-yellow-500 text-white font-semibold rounded-lg hover:bg-yellow-600 transition-colors">
+            {/* --- 핵심 수정: Link를 button으로 변경하고 onClick 이벤트를 연결합니다. --- */}
+            <button 
+              onClick={handleEdit}
+              className="inline-flex items-center px-4 py-2 bg-yellow-500 text-white font-semibold rounded-lg hover:bg-yellow-600 transition-colors"
+            >
               <Edit className="mr-2 h-4 w-4" /> 수정
-            </Link>
+            </button>
             <button 
               onClick={handleDelete}
               className="inline-flex items-center px-4 py-2 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition-colors"

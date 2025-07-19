@@ -29,29 +29,48 @@ const PostDetailPage = () => {
     fetchPost();
   }, [id]);
 
-  // --- 핵심 추가: 게시글 삭제 기능 ---
-  const handleDelete = async () => {
-    const password = window.prompt('게시글을 삭제하려면 비밀번호를 입력하세요.');
-    if (password === null) { // 사용자가 '취소'를 누른 경우
-      return;
-    }
+  // --- 핵심 추가: 수정 시 비밀번호 확인 기능 ---
+  const handleEdit = async () => {
+    const password = window.prompt('게시글을 수정하려면 비밀번호를 입력하세요.');
+    if (password === null) return;
     if (!password) {
       alert('비밀번호를 입력해야 합니다.');
       return;
     }
 
     try {
-      // Axios의 delete 메소드로 body를 보낼 때는 data 객체로 감싸야 합니다.
+      const response = await api.post(`/posts/${id}/verify`, { password });
+      if (response.data.success) {
+        navigate(`/posts/edit/${id}`);
+      } else {
+        alert('비밀번호가 올바르지 않습니다.');
+      }
+    } catch (err) {
+      alert('확인 중 오류가 발생했습니다. 다시 시도해주세요.');
+      console.error(err);
+    }
+  };
+
+  // --- 핵심 추가: 게시글 삭제 기능 ---
+  const handleDelete = async () => {
+    const password = window.prompt('게시글을 삭제하려면 비밀번호를 입력하세요.');
+    if (password === null) return;
+    if (!password) {
+      alert('비밀번호를 입력해야 합니다.');
+      return;
+    }
+
+    try {
       await api.delete(`/posts/${id}`, {
         data: { password }
       });
       alert('게시글이 성공적으로 삭제되었습니다.');
-      navigate('/posts'); // 삭제 후 목록으로 이동
+      navigate('/posts');
     } catch (err) {
       if (err.response && err.response.status === 403) {
         alert('비밀번호가 올바르지 않습니다.');
       } else {
-        alert('게시글 삭제에 실패했습니다. 다시 시도해주세요.');
+        alert('게시글 삭제에 실패했습니다.');
       }
       console.error(err);
     }
@@ -78,7 +97,6 @@ const PostDetailPage = () => {
             className="p-8 prose max-w-none text-slate-700 leading-relaxed"
             dangerouslySetInnerHTML={{ __html: post.content }}
           />
-          {/* 댓글 기능이 있다면 여기에 표시됩니다. */}
         </div>
         <div className="mt-8 flex justify-between items-center">
           <Link 
@@ -89,10 +107,13 @@ const PostDetailPage = () => {
             목록으로
           </Link>
           <div className="flex space-x-4">
-            <Link to={`/posts/edit/${id}`} className="inline-flex items-center px-4 py-2 bg-yellow-500 text-white font-semibold rounded-lg hover:bg-yellow-600 transition-colors">
+            {/* --- 핵심 수정: Link를 button으로 변경하고 onClick 이벤트를 연결합니다. --- */}
+            <button 
+              onClick={handleEdit}
+              className="inline-flex items-center px-4 py-2 bg-yellow-500 text-white font-semibold rounded-lg hover:bg-yellow-600 transition-colors"
+            >
               <Edit className="mr-2 h-4 w-4" /> 수정
-            </Link>
-            {/* --- 핵심 추가: 삭제 버튼 --- */}
+            </button>
             <button 
               onClick={handleDelete}
               className="inline-flex items-center px-4 py-2 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition-colors"
