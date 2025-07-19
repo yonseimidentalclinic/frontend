@@ -1,90 +1,82 @@
-// =================================================================
-// 프론트엔드 온라인 상담 상세 페이지 (ConsultationDetailPage.jsx)
-// 최종 업데이트: 2025년 7월 17일
-// 주요 개선사항:
-// 1. 게시글 하단에 사용자가 직접 '수정'과 '삭제'를 할 수 있는 버튼 추가
-// 2. 각 버튼 클릭 시, 비밀번호 확인 페이지로 이동하도록 링크 설정
-// =================================================================
+// src/pages/ConsultationDetailPage.jsx
 
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL;
+import api from '../services/api';
+import { ArrowLeft, MessageSquare } from 'lucide-react';
 
 const ConsultationDetailPage = () => {
-  const { id } = useParams();
-  const [data, setData] = useState(null);
+  const [consultation, setConsultation] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { id } = useParams();
 
   useEffect(() => {
-    const fetchDetails = async () => {
+    const fetchConsultation = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        setLoading(true);
-        const response = await axios.get(`${API_URL}/api/consultations/${id}`);
-        setData(response.data);
+        // 비밀글 확인 로직은 이 페이지 진입 전에 처리되었다고 가정합니다.
+        const response = await api.get(`/consultations/${id}`);
+        setConsultation(response.data);
       } catch (err) {
-        setError('상담 내용을 불러오는 데 실패했습니다.');
+        setError('상담글을 불러오는 데 실패했습니다.');
         console.error(err);
       } finally {
         setLoading(false);
       }
     };
-    fetchDetails();
+    fetchConsultation();
   }, [id]);
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('ko-KR', {
-      year: 'numeric', month: 'long', day: 'numeric'
-    });
-  };
-
-  if (loading) return <div className="text-center p-10">로딩 중...</div>;
-  if (error) return <div className="text-center p-10 text-red-500">{error}</div>;
-  if (!data) return <div className="text-center p-10">해당 상담글을 찾을 수 없습니다.</div>;
+  if (loading) return <div className="text-center py-20">로딩 중...</div>;
+  if (error) return <div className="text-center py-20 text-red-500">{error}</div>;
+  if (!consultation) return <div className="text-center py-20">상담글을 찾을 수 없습니다.</div>;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
-      {/* 질문 */}
-      <div className="bg-white p-8 rounded-lg shadow-md mb-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">{data.title}</h1>
-        <div className="text-sm text-gray-500 mb-6 border-b pb-4 flex justify-between">
-          <span>작성자: {data.author}</span>
-          <span>작성일: {formatDate(data.createdAt)}</span>
-        </div>
-        <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: data.content }} />
-      </div>
-
-      {/* 답변 */}
-      {data.replies && data.replies.length > 0 && (
-        <div className="bg-blue-50 p-8 rounded-lg shadow-md">
-          <h2 className="text-2xl font-bold text-blue-800 mb-4">원장님 답변</h2>
-          {data.replies.map(reply => (
-            <div key={reply.id} className="border-t pt-4 mt-4 first:mt-0 first:border-t-0 first:pt-0">
-              <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: reply.content }} />
-              <p className="text-right text-sm text-gray-500 mt-4">{formatDate(reply.createdAt)}</p>
+    <div className="bg-slate-50 min-h-screen">
+      <div className="max-w-4xl mx-auto px-4 py-12">
+        {/* 질문 */}
+        <div className="bg-white shadow-xl rounded-lg overflow-hidden">
+          <div className="p-8 border-b">
+            <h1 className="text-3xl font-bold text-slate-800">{consultation.title}</h1>
+            <div className="flex justify-between items-center mt-2">
+              <p className="text-sm text-slate-500">작성자: {consultation.author}</p>
+              <p className="text-sm text-slate-500">
+                작성일: {new Date(consultation.createdAt).toLocaleDateString('ko-KR')}
+              </p>
             </div>
-          ))}
+          </div>
+          <div className="p-8 text-slate-700 leading-relaxed whitespace-pre-wrap">
+            {consultation.content}
+          </div>
         </div>
-      )}
 
-      {/* [핵심 추가] 수정/삭제 버튼 영역 */}
-      <div className="mt-8 flex justify-between items-center">
-        <Link to="/consultation" className="bg-gray-600 text-white px-6 py-2 rounded-md font-semibold hover:bg-gray-700 transition-colors">
-          목록으로
-        </Link>
-        {/* 답변이 없는 경우에만 수정/삭제 버튼을 표시합니다. */}
-        {(!data.replies || data.replies.length === 0) && (
-          <div className="flex gap-2">
-            <Link to={`/consultation/${id}/verify?action=edit`} className="bg-blue-600 text-white px-6 py-2 rounded-md font-semibold hover:bg-blue-700">
-              수정
-            </Link>
-            <Link to={`/consultation/${id}/verify?action=delete`} className="bg-red-600 text-white px-6 py-2 rounded-md font-semibold hover:bg-red-700">
-              삭제
-            </Link>
+        {/* 답변 */}
+        {consultation.replies && consultation.replies.length > 0 && (
+          <div className="mt-8 bg-indigo-50 shadow-xl rounded-lg overflow-hidden">
+            <div className="p-8">
+              <h2 className="text-2xl font-bold text-indigo-800 flex items-center mb-4">
+                <MessageSquare className="mr-3 h-7 w-7" />
+                연세미치과 답변
+              </h2>
+              <div className="text-slate-700 leading-relaxed whitespace-pre-wrap">
+                {consultation.replies[0].content}
+              </div>
+            </div>
           </div>
         )}
+
+        <div className="mt-8 text-center">
+          {/* --- 핵심 수정: 목록으로 돌아가는 링크 주소를 올바르게 수정했습니다. --- */}
+          <Link 
+            to="/consultations" 
+            className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors duration-300 shadow-sm"
+          >
+            <ArrowLeft className="mr-2 h-5 w-5" />
+            목록으로
+          </Link>
+        </div>
       </div>
     </div>
   );

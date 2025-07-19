@@ -1,28 +1,25 @@
-// =================================================================
-// 프론트엔드 공지사항 상세 페이지 (NoticeDetailPage.jsx)
-// 파일 경로: /src/pages/NoticeDetailPage.jsx
-// =================================================================
+// src/pages/NoticeDetailPage.jsx
 
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL;
+import api from '../services/api';
+import { ArrowLeft } from 'lucide-react';
 
 const NoticeDetailPage = () => {
-  const { id } = useParams();
   const [notice, setNotice] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { id } = useParams();
 
   useEffect(() => {
     const fetchNotice = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        setLoading(true);
-        const response = await axios.get(`${API_URL}/api/notices/${id}`);
+        const response = await api.get(`/notices/${id}`);
         setNotice(response.data);
       } catch (err) {
-        setError('공지사항을 불러오는 데 실패했습니다.');
+        setError('게시글을 불러오는 데 실패했습니다.');
         console.error(err);
       } finally {
         setLoading(false);
@@ -31,29 +28,34 @@ const NoticeDetailPage = () => {
     fetchNotice();
   }, [id]);
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('ko-KR', {
-      year: 'numeric', month: 'long', day: 'numeric'
-    });
-  };
-
-  if (loading) return <div className="text-center p-10">로딩 중...</div>;
-  if (error) return <div className="text-center p-10 text-red-500">{error}</div>;
-  if (!notice) return <div className="text-center p-10">해당 공지사항을 찾을 수 없습니다.</div>;
+  if (loading) return <div className="text-center py-20">로딩 중...</div>;
+  if (error) return <div className="text-center py-20 text-red-500">{error}</div>;
+  if (!notice) return <div className="text-center py-20">게시글을 찾을 수 없습니다.</div>;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
-      <div className="bg-white p-8 rounded-lg shadow-md">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">{notice.title}</h1>
-        <p className="text-sm text-gray-500 mb-6 border-b pb-4">
-          작성일: {formatDate(notice.createdAt)}
-        </p>
-        <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: notice.content }} />
-      </div>
-      <div className="mt-8 text-center">
-        <Link to="/news" className="bg-blue-600 text-white px-6 py-2 rounded-md font-semibold hover:bg-blue-700 transition-colors">
-          목록으로
-        </Link>
+    <div className="bg-slate-50 min-h-screen">
+      <div className="max-w-4xl mx-auto px-4 py-12">
+        <div className="bg-white shadow-xl rounded-lg overflow-hidden">
+          <div className="p-8 border-b">
+            <h1 className="text-3xl font-bold text-slate-800">{notice.title}</h1>
+            <p className="text-sm text-slate-500 mt-2">
+              작성일: {new Date(notice.createdAt).toLocaleDateString('ko-KR')}
+            </p>
+          </div>
+          <div className="p-8 prose max-w-none text-slate-700 leading-relaxed whitespace-pre-wrap">
+            {notice.content}
+          </div>
+        </div>
+        <div className="mt-8 text-center">
+          {/* --- 핵심 수정: 목록으로 돌아가는 링크 주소를 올바르게 수정했습니다. --- */}
+          <Link 
+            to="/notices" 
+            className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors duration-300 shadow-sm"
+          >
+            <ArrowLeft className="mr-2 h-5 w-5" />
+            목록으로
+          </Link>
+        </div>
       </div>
     </div>
   );
