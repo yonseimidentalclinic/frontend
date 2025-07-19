@@ -1,75 +1,90 @@
-import React from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+// src/components/AdminLayout.jsx
 
-function AdminLayout() {
+import React from 'react';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import {
+  LayoutDashboard,
+  Calendar,
+  Clock,
+  Building,
+  Users,
+  Image,
+  Star,
+  HelpCircle,
+  Newspaper,
+  MessageSquare,
+  LogOut
+} from 'lucide-react';
+
+const SidebarLink = ({ to, icon: Icon, children }) => {
+  const location = useLocation();
+  // '/admin/notices' 같은 기본 경로와 '/admin/notices/write' 같은 하위 경로 모두 활성화되도록 startsWith 사용
+  const isActive = location.pathname.startsWith(`/admin/${to}`);
+  
+  return (
+    <Link
+      to={to}
+      className={`flex items-center px-4 py-3 text-gray-200 hover:bg-gray-700 rounded-lg transition-colors duration-200 ${isActive ? 'bg-gray-700 font-semibold' : ''}`}
+    >
+      <Icon className="h-5 w-5 mr-3" />
+      <span>{children}</span>
+    </Link>
+  );
+};
+
+const AdminLayout = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // localStorage에 저장된 토큰을 삭제합니다.
-    localStorage.removeItem('adminToken');
-    // 병원 홈페이지 메인 화면으로 이동시킵니다.
-    navigate('/');
-  };
-
-  // NavLink에서 활성화된 메뉴 스타일
-  const activeLinkStyle = {
-    backgroundColor: '#2563eb', // bg-blue-600
-    color: 'white',
+    if (window.confirm('정말로 로그아웃하시겠습니까?')) {
+      localStorage.removeItem('accessToken');
+      navigate('/admin/login');
+    }
   };
 
   return (
     <div className="flex h-screen bg-gray-100">
       {/* 사이드바 */}
-      <aside className="w-64 bg-gray-800 text-white flex flex-col">
-        <div className="p-4 text-2xl font-bold border-b border-gray-700">
-          연세미치과 관리
+      <aside className="w-64 bg-gray-800 text-white flex flex-col p-4">
+        <div className="text-2xl font-bold mb-8 px-4">
+          <Link to="/admin">연세미치과 관리</Link>
         </div>
-        <nav className="flex-grow p-4 space-y-2">
-          <NavLink
-            to="/admin/dashboard"
-            style={({ isActive }) => (isActive ? activeLinkStyle : undefined)}
-            className="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700"
-          >
-            대시보드
-          </NavLink>
-          <NavLink 
-            to="/admin/consultations" 
-            style={({ isActive }) => (isActive ? activeLinkStyle : undefined)} 
-            className="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700"
-          >
-            상담 관리
-          </NavLink>
-          <NavLink 
-            to="/admin/notices" 
-            style={({ isActive }) => (isActive ? activeLinkStyle : undefined)} 
-            className="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700"
-          >
-            공지사항 관리
-          </NavLink>
-          <NavLink 
-            to="/admin/posts" 
-            style={({ isActive }) => (isActive ? activeLinkStyle : undefined)} 
-            className="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700"
-          >
-            자유게시판 관리
-          </NavLink>
+        <nav className="flex-grow space-y-2">
+          <SidebarLink to="dashboard" icon={LayoutDashboard}>대시보드</SidebarLink>
+          
+          <p className="text-xs text-gray-400 uppercase font-semibold mt-6 mb-2 px-4">예약/환자</p>
+          <SidebarLink to="reservations" icon={Calendar}>예약 관리</SidebarLink>
+          <SidebarLink to="schedule" icon={Clock}>스케줄 관리</SidebarLink>
+          <SidebarLink to="reviews" icon={Star}>후기 관리</SidebarLink>
+
+          <p className="text-xs text-gray-400 uppercase font-semibold mt-6 mb-2 px-4">콘텐츠</p>
+          <SidebarLink to="about" icon={Building}>병원소개 관리</SidebarLink>
+          <SidebarLink to="doctors" icon={Users}>의료진 관리</SidebarLink>
+          <SidebarLink to="cases" icon={Image}>치료사례 관리</SidebarLink>
+          <SidebarLink to="faqs" icon={HelpCircle}>FAQ 관리</SidebarLink>
+          
+          <p className="text-xs text-gray-400 uppercase font-semibold mt-6 mb-2 px-4">게시판</p>
+          <SidebarLink to="notices" icon={Newspaper}>공지사항 관리</SidebarLink>
+          <SidebarLink to="posts" icon={MessageSquare}>자유게시판 관리</SidebarLink>
+          <SidebarLink to="consultations" icon={MessageSquare}>온라인상담 관리</SidebarLink>
         </nav>
-        <div className="p-4 border-t border-gray-700">
+        <div className="mt-auto">
           <button
             onClick={handleLogout}
-            className="w-full py-2.5 px-4 rounded transition duration-200 bg-red-600 hover:bg-red-700"
+            className="w-full flex items-center justify-center px-4 py-3 text-red-300 bg-red-900 bg-opacity-50 hover:bg-opacity-75 rounded-lg transition-colors duration-200"
           >
-            로그아웃
+            <LogOut className="h-5 w-5 mr-3" />
+            <span>로그아웃</span>
           </button>
         </div>
       </aside>
 
-      {/* 메인 컨텐츠 */}
-      <main className="flex-grow p-8 overflow-auto">
+      {/* 메인 콘텐츠 영역 */}
+      <main className="flex-1 overflow-y-auto">
         <Outlet />
       </main>
     </div>
   );
-}
+};
 
 export default AdminLayout;
