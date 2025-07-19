@@ -43,7 +43,7 @@ import AdminConsultationEditPage from './pages/admin/AdminConsultationEditPage';
 import AdminConsultationListPage from './pages/admin/AdminConsultationListPage';
 import AdminConsultationReplyPage from './pages/admin/AdminConsultationReplyPage';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
-import AdminDoctorsListPage from './pages/admin/AdminDoctorListPage';
+import AdminDoctorsListPage from './pages/admin/AdminDoctorsListPage';
 import AdminFaqListPage from './pages/admin/AdminFaqListPage';
 import AdminFaqPage from './pages/admin/AdminFaqPage';
 import AdminLogsPage from './pages/admin/AdminLogsPage';
@@ -141,7 +141,7 @@ function App() {
           <Route path="reviews" element={<AdminReviewsPage />} />
           <Route path="reviews/list" element={<AdminReviewListPage />} />
           <Route path="schedule" element={<AdminSchedulePage />} />
-          
+
           
           {/* --- 참고 --- */}
           {/* 아래 페이지들은 파일을 만드신 후 주석을 해제하여 경로를 연결해주세요. */}
