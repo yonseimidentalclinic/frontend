@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../services/api';
 import Editor from '../../components/Editor';
-import { Upload, Trash2, Image as ImageIcon, Save } from 'lucide-react';
+import { Upload, Trash2, Image as ImageIcon, Save, Edit, XCircle } from 'lucide-react';
 
 const AdminAboutPage = () => {
   const [about, setAbout] = useState({ title: '', subtitle: '', content: '', imageData: null });
@@ -11,12 +11,17 @@ const AdminAboutPage = () => {
   const [newPhoto, setNewPhoto] = useState({ file: null, caption: '' });
   const [loading, setLoading] = useState(true);
 
+  // 갤러리 사진 캡션 수정을 위한 상태
+  const [editingPhotoId, setEditingPhotoId] = useState(null);
+  const [editingCaption, setEditingCaption] = useState('');
+
   const fetchAllData = useCallback(async () => {
     setLoading(true);
     try {
-      const aboutPromise = api.get('/about');
-      const photosPromise = api.get('/admin/clinic-photos');
-      const [aboutResponse, photosResponse] = await Promise.all([aboutPromise, photosPromise]);
+      const [aboutResponse, photosResponse] = await Promise.all([
+        api.get('/about'),
+        api.get('/admin/clinic-photos')
+      ]);
       setAbout(aboutResponse.data);
       setClinicPhotos(photosResponse.data);
     } catch (err) {
@@ -26,9 +31,7 @@ const AdminAboutPage = () => {
     }
   }, []);
 
-  useEffect(() => {
-    fetchAllData();
-  }, [fetchAllData]);
+  useEffect(() => { fetchAllData(); }, [fetchAllData]);
 
   const handleAboutChange = (e) => {
     const { name, value } = e.target;
@@ -50,6 +53,12 @@ const AdminAboutPage = () => {
     }
   };
 
+  const handleRemoveMainImage = () => {
+    if (window.confirm('대표 이미지를 삭제하시겠습니까?')) {
+      setAbout(prevState => ({ ...prevState, imageData: null }));
+    }
+  };
+
   const handleAboutSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -60,7 +69,6 @@ const AdminAboutPage = () => {
     }
   };
 
-  // --- 병원 둘러보기 사진 관리 ---
   const handleNewPhotoChange = (e) => {
     if (e.target.type === 'file') {
       setNewPhoto(prev => ({...prev, file: e.target.files[0]}));
@@ -85,22 +93,38 @@ const AdminAboutPage = () => {
       });
       alert('사진이 추가되었습니다.');
       setNewPhoto({ file: null, caption: '' });
-      e.target.reset(); // form 리셋
-      fetchAllData(); // 목록 새로고침
+      e.target.reset();
+      fetchAllData();
     } catch (err) {
       alert('사진 추가에 실패했습니다.');
     }
   };
-
+  
   const handlePhotoDelete = async (id) => {
     if (window.confirm(`이 사진을 정말로 삭제하시겠습니까?`)) {
       try {
         await api.delete(`/admin/clinic-photos/${id}`);
         alert('사진이 삭제되었습니다.');
-        fetchAllData(); // 목록 새로고침
+        fetchAllData();
       } catch (err) {
         alert('사진 삭제에 실패했습니다.');
       }
+    }
+  };
+  
+  const startEditingCaption = (photo) => {
+    setEditingPhotoId(photo.id);
+    setEditingCaption(photo.caption || '');
+  };
+
+  const handleCaptionSave = async (id) => {
+    try {
+      await api.put(`/admin/clinic-photos/${id}`, { caption: editingCaption });
+      alert('캡션이 수정되었습니다.');
+      setEditingPhotoId(null);
+      fetchAllData();
+    } catch (err) {
+      alert('캡션 수정에 실패했습니다.');
     }
   };
 
@@ -108,7 +132,6 @@ const AdminAboutPage = () => {
 
   return (
     <div className="p-6 md:p-8 space-y-8">
-      {/* 병원소개 관리 */}
       <form onSubmit={handleAboutSubmit} className="bg-white p-8 shadow-md rounded-lg space-y-6">
         <h1 className="text-3xl font-bold">병원소개 관리</h1>
         <div>
@@ -122,7 +145,14 @@ const AdminAboutPage = () => {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">대표 이미지</label>
           <input type="file" onChange={handleAboutImageChange} className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"/>
-          {about.imageData && <img src={about.imageData} alt="Preview" className="mt-4 max-h-48 rounded-md" />}
+          {about.imageData && (
+            <div className="mt-4 relative w-fit">
+              <img src={about.imageData} alt="Preview" className="max-h-48 rounded-md border"/>
+              <button type="button" onClick={handleRemoveMainImage} className="absolute -top-2 -right-2 p-1 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors">
+                <XCircle size={18}/>
+              </button>
+            </div>
+          )}
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">본문 내용</label>
@@ -135,11 +165,8 @@ const AdminAboutPage = () => {
         </div>
       </form>
 
-      {/* 병원 둘러보기 관리 */}
       <div className="bg-white p-8 shadow-md rounded-lg space-y-6">
         <h2 className="text-2xl font-bold flex items-center gap-3"><ImageIcon /> 병원 둘러보기 이미지 관리</h2>
-        
-        {/* 사진 추가 폼 */}
         <form onSubmit={handlePhotoUpload} className="flex flex-col sm:flex-row gap-4 border p-4 rounded-md">
           <input type="file" onChange={handleNewPhotoChange} required className="flex-grow text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"/>
           <input type="text" value={newPhoto.caption} onChange={handleNewPhotoChange} placeholder="사진 설명 (예: 진료실)" className="p-2 border rounded-md" />
@@ -147,18 +174,33 @@ const AdminAboutPage = () => {
             <Upload size={18} /> 추가
           </button>
         </form>
-
-        {/* 사진 목록 */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {clinicPhotos.map(photo => (
-            <div key={photo.id} className="relative group border rounded-lg overflow-hidden">
-              <img src={photo.imageData} alt={photo.caption || '병원 사진'} className="w-full h-40 object-cover" />
-              <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-sm truncate">
-                {photo.caption || '설명 없음'}
+            <div key={photo.id} className="border rounded-lg overflow-hidden flex flex-col">
+              <div className="relative group">
+                <img src={photo.imageData} alt={photo.caption || '병원 사진'} className="w-full h-40 object-cover" />
+                <button onClick={() => handlePhotoDelete(photo.id)} className="absolute top-2 right-2 p-1.5 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Trash2 size={16} />
+                </button>
               </div>
-              <button onClick={() => handlePhotoDelete(photo.id)} className="absolute top-2 right-2 p-1.5 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                <Trash2 size={16} />
-              </button>
+              <div className="p-2 flex-grow flex flex-col">
+                {editingPhotoId === photo.id ? (
+                  <div className="flex-grow flex flex-col">
+                    <input type="text" value={editingCaption} onChange={(e) => setEditingCaption(e.target.value)} className="w-full text-sm p-1 border rounded mb-2"/>
+                    <div className="flex gap-2 mt-auto">
+                      <button onClick={() => handleCaptionSave(photo.id)} className="text-xs bg-green-500 text-white px-2 py-1 rounded">저장</button>
+                      <button onClick={() => setEditingPhotoId(null)} className="text-xs bg-gray-500 text-white px-2 py-1 rounded">취소</button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex-grow flex flex-col">
+                    <p className="text-sm text-gray-700 flex-grow">{photo.caption || '설명 없음'}</p>
+                    <button onClick={() => startEditingCaption(photo)} className="mt-2 text-xs text-blue-600 hover:underline self-start">
+                      설명 수정
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           ))}
         </div>
