@@ -20,6 +20,22 @@ const NavItem = ({ to, children, onClick }) => (
   </NavLink>
 );
 
+// --- 핵심 추가: 모바일 메뉴 아이템 스타일 ---
+const MobileNavItem = ({ to, children, onClick }) => (
+    <NavLink
+      to={to}
+      onClick={onClick}
+      className={({ isActive }) =>
+        `block px-4 py-3 rounded-md text-base font-medium ${
+          isActive ? 'bg-indigo-600 text-white' : 'text-slate-700 hover:bg-gray-100'
+        }`
+      }
+    >
+      {children}
+    </NavLink>
+);
+
+
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -74,19 +90,21 @@ const Header = () => {
           </div>
         </div>
       </div>
+
+      {/* --- 핵심 수정: 모바일 메뉴 디자인을 개선했습니다. --- */}
       <div 
-        className={`md:hidden overflow-hidden transition-all duration-500 ease-in-out ${isOpen ? 'max-h-96' : 'max-h-0'}`}
+        className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out bg-white shadow-lg ${isOpen ? 'max-h-screen' : 'max-h-0'}`}
       >
         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-          <NavItem to="/about" onClick={() => setIsOpen(false)}>병원소개</NavItem>
-          <NavItem to="/doctors" onClick={() => setIsOpen(false)}>의료진</NavItem>
-          <NavItem to="/cases" onClick={() => setIsOpen(false)}>치료사례</NavItem>
-          <NavItem to="/reviews" onClick={() => setIsOpen(false)}>치료후기</NavItem>
-          <NavItem to="/notices" onClick={() => setIsOpen(false)}>병원소식</NavItem>
-          <NavItem to="/posts" onClick={() => setIsOpen(false)}>자유게시판</NavItem>
-          <NavItem to="/consultations" onClick={() => setIsOpen(false)}>온라인상담</NavItem>
-          <NavItem to="/faq" onClick={() => setIsOpen(false)}>FAQ</NavItem>
-          <NavItem to="/location" onClick={() => setIsOpen(false)}>오시는 길</NavItem>
+          <MobileNavItem to="/about" onClick={() => setIsOpen(false)}>병원소개</MobileNavItem>
+          <MobileNavItem to="/doctors" onClick={() => setIsOpen(false)}>의료진</MobileNavItem>
+          <MobileNavItem to="/cases" onClick={() => setIsOpen(false)}>치료사례</MobileNavItem>
+          <MobileNavItem to="/reviews" onClick={() => setIsOpen(false)}>치료후기</MobileNavItem>
+          <MobileNavItem to="/notices" onClick={() => setIsOpen(false)}>병원소식</MobileNavItem>
+          <MobileNavItem to="/posts" onClick={() => setIsOpen(false)}>자유게시판</MobileNavItem>
+          <MobileNavItem to="/consultations" onClick={() => setIsOpen(false)}>온라인상담</MobileNavItem>
+          <MobileNavItem to="/faq" onClick={() => setIsOpen(false)}>FAQ</MobileNavItem>
+          <MobileNavItem to="/location" onClick={() => setIsOpen(false)}>오시는 길</MobileNavItem>
           <div className="mt-4 px-2">
             <Link 
               to="/reservation"
