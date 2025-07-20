@@ -1,117 +1,129 @@
-// =================================================================
-// 사용자용 치료 사례 갤러리 페이지 (CasesPage.jsx)
-// 파일 경로: /src/pages/CasesPage.jsx
-// 주요 기능:
-// 1. 서버에서 치료 사례 목록을 불러와 표시
-// 2. 카테고리별로 사례를 필터링하는 기능
-// 3. 페이지네이션 기능으로 많은 사례를 효율적으로 보여줌
-// =================================================================
+// src/pages/CasesPage.jsx
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import Pagination from '../components/Pagination.jsx';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams, Link } from 'react-router-dom';
+import api from '../services/api';
+import Pagination from '../components/Pagination';
+// --- 핵심 추가: 애니메이션 라이브러리를 불러옵니다. ---
+import { motion } from 'framer-motion';
 
-const API_URL = import.meta.env.VITE_API_URL;
-const CATEGORIES = ['전체', '임플란트', '치아교정', '심미보철', '잇몸치료'];
+// 애니메이션 효과를 위한 설정
+const fadeInAnimation = {
+  initial: { opacity: 0, y: 30 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true },
+  transition: { duration: 0.8, ease: "easeOut" }
+};
 
 const CasesPage = () => {
   const [cases, setCases] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  
+  const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
-
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-
-  const activeCategory = searchParams.get('category') || '전체';
-
-  const fetchData = useCallback(async (page, category) => {
-    setIsLoading(true);
-    try {
-      const params = { page, limit: 9 };
-      if (category && category !== '전체') {
-        params.category = category;
-      }
-      const response = await axios.get(`${API_URL}/api/cases`, { params });
-      setCases(response.data.items || []);
-      setTotalPages(response.data.totalPages || 0);
-      setCurrentPage(response.data.currentPage || 1);
-    } catch (err) {
-      setError('치료 사례를 불러오는 데 실패했습니다.');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  const activeCategory = searchParams.get('category') || '';
 
   useEffect(() => {
-    const pageFromUrl = parseInt(searchParams.get('page') || '1', 10);
-    const categoryFromUrl = searchParams.get('category') || '전체';
-    fetchData(pageFromUrl, categoryFromUrl);
-  }, [searchParams, fetchData]);
+    const fetchCases = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const page = searchParams.get('page') || 1;
+        const category = searchParams.get('category') || '';
+        const response = await api.get('/cases', { params: { page, category } });
+        setCases(response.data.items);
+        setTotalPages(response.data.totalPages);
+        setCurrentPage(response.data.currentPage);
+      } catch (err) {
+        setError('치료사례를 불러오는 데 실패했습니다.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCases();
+  }, [searchParams]);
+  
+  // 예시 카테고리 (실제로는 DB에서 가져오는 것이 이상적입니다)
+  const categories = ['임플란트', '치아미백', '라미네이트', '잇몸성형'];
 
   const handleCategoryClick = (category) => {
-    navigate(`/cases?category=${category}&page=1`);
+    setSearchParams({ category: category, page: 1 });
   };
 
-  const handlePageChange = (page) => {
-    navigate(`/cases?category=${activeCategory}&page=${page}`);
-  };
+  if (loading) return <div className="text-center py-20">로딩 중...</div>;
+  if (error) return <div className="text-center py-20 text-red-500">{error}</div>;
 
   return (
-    <div className="bg-white py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-800">치료 전후 사례</h1>
-          <p className="text-gray-500 mt-2">연세미치과의 치료 결과를 직접 확인해보세요.</p>
-        </div>
+    <div className="bg-gray-50">
+      <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:py-24 lg:px-8">
+        <motion.div {...fadeInAnimation} className="text-center">
+          <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">치료사례</h2>
+          <p className="mt-4 text-lg text-gray-600">연세미치과의 전문성을 결과로 확인하세요.</p>
+        </motion.div>
 
-        <div className="flex justify-center flex-wrap gap-2 mb-10">
-          {CATEGORIES.map(category => (
+        {/* 카테고리 필터 */}
+        <motion.div {...fadeInAnimation} className="mt-10 flex justify-center flex-wrap gap-2">
+          <button
+            onClick={() => handleCategoryClick('')}
+            className={`px-4 py-2 text-sm font-medium rounded-full transition-colors ${
+              activeCategory === '' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            전체
+          </button>
+          {categories.map((cat) => (
             <button
-              key={category}
-              onClick={() => handleCategoryClick(category)}
-              className={`px-4 py-2 rounded-full font-semibold text-sm ${
-                activeCategory === category
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              key={cat}
+              onClick={() => handleCategoryClick(cat)}
+              className={`px-4 py-2 text-sm font-medium rounded-full transition-colors ${
+                activeCategory === cat ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-200'
               }`}
             >
-              {category}
+              {cat}
             </button>
           ))}
-        </div>
+        </motion.div>
 
-        {isLoading && <p className="text-center">로딩 중...</p>}
-        {error && <p className="text-center text-red-500">{error}</p>}
-        {!isLoading && !error && cases.length === 0 && (
-          <p className="text-center text-gray-500 py-10">해당 카테고리의 치료 사례가 없습니다.</p>
-        )}
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {cases.map(caseItem => (
-            <div key={caseItem.id} className="border rounded-lg overflow-hidden shadow-lg group">
-              <div className="grid grid-cols-2">
-                <img src={caseItem.beforeImageData || 'https://placehold.co/400x400?text=Before'} alt={`치료 전 - ${caseItem.title}`} className="w-full h-48 object-cover" />
-                <img src={caseItem.afterImageData || 'https://placehold.co/400x400?text=After'} alt={`치료 후 - ${caseItem.title}`} className="w-full h-48 object-cover" />
+        {/* 치료사례 그리드 */}
+        <div className="mt-12 grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          {cases.map((caseItem, index) => (
+            <motion.div
+              key={caseItem.id}
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              className="group block bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow"
+            >
+              <div className="flex">
+                <div className="w-1/2">
+                  <img src={caseItem.beforeImageData} alt={`Before - ${caseItem.title}`} className="h-48 w-full object-cover"/>
+                  <p className="text-center py-1 bg-gray-200 text-sm font-semibold">Before</p>
+                </div>
+                <div className="w-1/2">
+                  <img src={caseItem.afterImageData} alt={`After - ${caseItem.title}`} className="h-48 w-full object-cover"/>
+                  <p className="text-center py-1 bg-indigo-200 text-sm font-semibold text-indigo-800">After</p>
+                </div>
               </div>
               <div className="p-4">
-                <p className="text-xs text-blue-600 font-semibold">{caseItem.category}</p>
-                <h3 className="text-lg font-bold truncate mt-1">{caseItem.title}</h3>
-                <p className="text-sm text-gray-600 mt-1 h-10 overflow-hidden">{caseItem.description}</p>
+                <p className="text-sm text-indigo-600 font-semibold">{caseItem.category}</p>
+                <h3 className="mt-1 text-lg font-semibold text-gray-900">{caseItem.title}</h3>
+                <p className="mt-2 text-sm text-gray-600">{caseItem.description}</p>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
 
-        <div className="mt-12">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-          />
+        {cases.length === 0 && !loading && (
+          <motion.p {...fadeInAnimation} className="text-center text-gray-500 mt-16">
+            해당 카테고리의 치료사례가 없습니다.
+          </motion.p>
+        )}
+
+        <div className="mt-16">
+          <Pagination currentPage={currentPage} totalPages={totalPages} />
         </div>
       </div>
     </div>
