@@ -1,35 +1,30 @@
-// =================================================================
-// 관리자 의료진 관리 페이지 - 최종 완성본 (이미지 리사이징 라이브러리 적용)
-// 최종 업데이트: 2025년 7월 16일
-// 주요 개선사항:
-// 1. 'browser-image-compression' 라이브러리를 사용하여 이미지 선택 시,
-//    브라우저에서 자동으로 리사이징 및 압축하여 업로드 속도 및 안정성 대폭 향상
-// =================================================================
+// src/pages/admin/AdminDoctorsListPage.jsx
 
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
-import { Plus, Edit, Trash2, X, Upload } from 'lucide-react';
-import imageCompression from 'browser-image-compression'; // 이미지 압축 라이브러리 임포트
-
-const API_URL = import.meta.env.VITE_API_URL;
+import api from '../../services/api';
+import { PlusCircle, Edit, Trash2, Save, XCircle } from 'lucide-react';
 
 const AdminDoctorsListPage = () => {
   const [doctors, setDoctors] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const initialFormState = { id: null, name: '', position: '', history: '', imageData: '' };
-  const [formState, setFormState] = useState(initialFormState);
+  // 수정/추가 폼의 상태
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingDoctor, setEditingDoctor] = useState(null); // null이면 '추가', 객체면 '수정'
+  const [formData, setFormData] = useState({ name: '', position: '', history: '' });
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
 
   const fetchDoctors = useCallback(async () => {
-    setIsLoading(true);
+    setLoading(true);
     try {
-      const response = await axios.get(`${API_URL}/api/doctors`);
-      setDoctors(Array.isArray(response.data) ? response.data : []);
+      const response = await api.get('/doctors');
+      setDoctors(response.data);
     } catch (err) {
-      setError('의료진 정보를 불러오는 데 실패했습니다.');
+      setError('의료진 목록을 불러오는 데 실패했습니다.');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   }, []);
 
@@ -37,89 +32,81 @@ const AdminDoctorsListPage = () => {
     fetchDoctors();
   }, [fetchDoctors]);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormState(prev => ({ ...prev, [name]: value }));
+  // 폼 열기/닫기 핸들러
+  const openFormForAdd = () => {
+    setEditingDoctor(null);
+    setFormData({ name: '', position: '', history: '' });
+    setImageFile(null);
+    setImagePreview(null);
+    setIsFormOpen(true);
   };
 
-  // [핵심 수정] 이미지 압축 라이브러리를 사용한 이미지 처리 핸들러
-  const handleImageChange = async (e) => {
+  const openFormForEdit = (doctor) => {
+    setEditingDoctor(doctor);
+    setFormData({ name: doctor.name, position: doctor.position, history: doctor.history });
+    setImageFile(null);
+    setImagePreview(doctor.imageData);
+    setIsFormOpen(true);
+  };
+
+  const closeForm = () => {
+    setIsFormOpen(false);
+  };
+
+  // 입력값 변경 핸들러
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if (!file) return;
-
-    // 압축 옵션 설정
-    const options = {
-      maxSizeMB: 1,          // 최대 파일 크기 1MB
-      maxWidthOrHeight: 800, // 최대 너비 또는 높이 800px
-      useWebWorker: true,    // 웹 워커를 사용하여 UI 멈춤 방지
-    };
-
-    try {
-      // 이미지 압축 실행
-      const compressedFile = await imageCompression(file, options);
-
-      // 압축된 파일을 Base64 데이터로 변환
+    if (file) {
+      setImageFile(file);
       const reader = new FileReader();
-      reader.readAsDataURL(compressedFile);
       reader.onloadend = () => {
-        const base64data = reader.result;
-        setFormState(prev => ({ ...prev, imageData: base64data }));
+        setImagePreview(reader.result);
       };
-      reader.onerror = () => {
-        alert('압축된 이미지를 처리하는 중 오류가 발생했습니다.');
-      };
-
-    } catch (error) {
-      console.error('Image compression error:', error);
-      alert('이미지 압축에 실패했습니다. 다른 파일을 선택해 주세요.');
+      reader.readAsDataURL(file);
     }
   };
-
-  const resetForm = () => {
-    setFormState(initialFormState);
-  };
-
-  const handleEditClick = (doctor) => {
-    setFormState({
-      id: doctor.id,
-      name: doctor.name,
-      position: doctor.position,
-      history: doctor.history,
-      imageData: doctor.imageData, // 기존 이미지 데이터
-    });
-    window.scrollTo(0, 0);
-  };
-
+  
+  // 폼 제출 핸들러 (추가/수정)
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { id, name, position, history, imageData } = formState;
-    if (!name || !position) return alert('이름과 직책은 필수 항목입니다.');
+    const submissionData = new FormData();
+    submissionData.append('name', formData.name);
+    submissionData.append('position', formData.position);
+    submissionData.append('history', formData.history);
+    if (imageFile) {
+      submissionData.append('image', imageFile);
+    } else if (editingDoctor) {
+      submissionData.append('existingImageData', editingDoctor.imageData || '');
+    }
 
-    const token = localStorage.getItem('accessToken');
-    const headers = { Authorization: `Bearer ${token}` };
-    const data = { name, position, history, imageData };
-    const action = id ? '수정' : '추가';
-    const url = id ? `${API_URL}/api/admin/doctors/${id}` : `${API_URL}/api/admin/doctors`;
-    const method = id ? 'put' : 'post';
-    
     try {
-      await axios({ method, url, data, headers });
-      alert(`성공적으로 ${action}되었습니다.`);
-      resetForm();
+      if (editingDoctor) {
+        // 수정
+        await api.put(`/admin/doctors/${editingDoctor.id}`, submissionData);
+        alert('의료진 정보가 수정되었습니다.');
+      } else {
+        // 추가
+        await api.post('/admin/doctors', submissionData);
+        alert('새로운 의료진이 추가되었습니다.');
+      }
+      closeForm();
       fetchDoctors();
     } catch (err) {
-      console.error(`${action} 실패:`, err);
-      alert('작업에 실패했습니다. 다시 시도해 주세요.');
+      alert('작업에 실패했습니다.');
     }
   };
 
-  const handleDelete = async (doctorId) => {
-    if (window.confirm('정말로 이 정보를 삭제하시겠습니까?')) {
-      const token = localStorage.getItem('accessToken');
-      const url = `${API_URL}/api/admin/doctors/${doctorId}`;
+  // 삭제 핸들러
+  const handleDelete = async (id) => {
+    if (window.confirm(`이 의료진 정보를 정말로 삭제하시겠습니까?`)) {
       try {
-        await axios.delete(url, { headers: { Authorization: `Bearer ${token}` } });
-        alert('성공적으로 삭제되었습니다.');
+        await api.delete(`/admin/doctors/${id}`);
+        alert('삭제되었습니다.');
         fetchDoctors();
       } catch (err) {
         alert('삭제에 실패했습니다.');
@@ -127,50 +114,57 @@ const AdminDoctorsListPage = () => {
     }
   };
 
+  if (loading) return <div className="p-8 text-center">로딩 중...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
+
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6">의료진 관리</h1>
-        <div className="bg-white p-8 rounded-lg shadow-md mb-8">
-          <h2 className="text-2xl font-bold mb-4">{formState.id ? '정보 수정' : '새 의료진 추가'}</h2>
+    <div className="p-6 md:p-8">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">의료진 관리</h1>
+        <button onClick={openFormForAdd} className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700">
+          <PlusCircle size={20} /> 새 의료진 추가
+        </button>
+      </div>
+
+      {/* 추가/수정 폼 (모달 또는 별도 섹션) */}
+      {isFormOpen && (
+        <div className="bg-white p-6 rounded-lg shadow-md mb-8">
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <input name="name" value={formState.name} onChange={handleInputChange} placeholder="이름" className="w-full p-2 border rounded" />
-              <input name="position" value={formState.position} onChange={handleInputChange} placeholder="직책" className="w-full p-2 border rounded" />
+            <h2 className="text-xl font-semibold">{editingDoctor ? '의료진 정보 수정' : '새 의료진 추가'}</h2>
+            <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="이름" required className="w-full p-2 border rounded"/>
+            <input type="text" name="position" value={formData.position} onChange={handleChange} placeholder="직책 (예: 원장)" required className="w-full p-2 border rounded"/>
+            <textarea name="history" value={formData.history} onChange={handleChange} placeholder="주요 이력 (한 줄에 하나씩 입력)" rows="5" className="w-full p-2 border rounded"></textarea>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">사진</label>
+              <input type="file" onChange={handleImageChange} accept="image/*" className="mt-1 w-full text-sm"/>
+              {imagePreview && <img src={imagePreview} alt="Preview" className="mt-2 h-40 w-auto rounded border"/>}
             </div>
-            <div className="flex items-center gap-4">
-              <label htmlFor="imageUpload" className="cursor-pointer bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center">
-                <Upload className="w-4 h-4 mr-2" />
-                사진 선택
-              </label>
-              <input id="imageUpload" type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
-              {formState.imageData && <img src={formState.imageData} alt="미리보기" className="w-20 h-20 object-cover rounded" />}
-            </div>
-            <textarea name="history" value={formState.history} onChange={handleInputChange} placeholder="주요 이력 (한 줄에 하나씩)" rows="4" className="w-full p-2 border rounded"></textarea>
-            <div className="flex justify-end gap-4">
-              {formState.id && <button type="button" onClick={resetForm} className="bg-gray-300 px-4 py-2 rounded-md">취소</button>}
-              <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-md">{formState.id ? '저장' : '추가'}</button>
+            <div className="flex gap-4">
+              <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-green-700">
+                <Save size={20} /> {editingDoctor ? '수정 완료' : '추가하기'}
+              </button>
+              <button type="button" onClick={closeForm} className="bg-gray-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-gray-600">
+                <XCircle size={20} /> 취소
+              </button>
             </div>
           </form>
         </div>
-        <div className="bg-white rounded-lg shadow-md">
-          {isLoading && <p className="p-4 text-center">로딩 중...</p>}
-          {error && <p className="p-4 text-center text-red-500">{error}</p>}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-            {doctors.map(doctor => (
-              <div key={doctor.id} className="border rounded-lg p-4 flex flex-col">
-                <img src={doctor.imageData || 'https://placehold.co/300x300?text=No+Image'} alt={doctor.name} className="w-full h-48 object-cover rounded-md mb-4" />
-                <h3 className="text-xl font-bold">{doctor.name}</h3>
-                <p className="text-blue-600 mb-2">{doctor.position}</p>
-                <div className="text-sm text-gray-600 flex-grow whitespace-pre-wrap">{doctor.history}</div>
-                <div className="mt-4 flex gap-2">
-                  <button onClick={() => handleEditClick(doctor)} className="bg-green-500 text-white px-3 py-1 text-sm rounded flex items-center"><Edit className="mr-1 w-3 h-3" />수정</button>
-                  <button onClick={() => handleDelete(doctor.id)} className="bg-red-500 text-white px-3 py-1 text-sm rounded flex items-center"><Trash2 className="mr-1 w-3 h-3" />삭제</button>
-                </div>
-              </div>
-            ))}
+      )}
+
+      {/* 의료진 목록 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {doctors.map(doctor => (
+          <div key={doctor.id} className="bg-white p-4 rounded-lg shadow-md text-center">
+            <img src={doctor.imageData || 'https://placehold.co/400x500?text=No+Image'} alt={doctor.name} className="w-full h-80 object-cover rounded-md mb-4"/>
+            <h3 className="text-xl font-bold">{doctor.name}</h3>
+            <p className="text-indigo-600">{doctor.position}</p>
+            <p className="text-sm text-gray-500 mt-2 whitespace-pre-line">{doctor.history}</p>
+            <div className="flex justify-center gap-4 mt-4 border-t pt-4">
+              <button onClick={() => openFormForEdit(doctor)} className="text-blue-600 hover:text-blue-800"><Edit /></button>
+              <button onClick={() => handleDelete(doctor.id)} className="text-red-600 hover:text-red-800"><Trash2 /></button>
+            </div>
           </div>
-        </div>
+        ))}
       </div>
     </div>
   );
