@@ -9,7 +9,7 @@ import { Upload } from 'lucide-react';
 const PostWritePage = () => {
   const [formData, setFormData] = useState({ title: '', author: '', password: '' });
   const [content, setContent] = useState('');
-  const [imageFile, setImageFile] = useState(null); // 이미지 파일 상태
+  const [imageFile, setImageFile] = useState(null);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -28,7 +28,6 @@ const PostWritePage = () => {
       return;
     }
 
-    // 파일 전송을 위해 FormData를 사용합니다.
     const submissionData = new FormData();
     submissionData.append('title', formData.title);
     submissionData.append('author', formData.author);
@@ -39,9 +38,8 @@ const PostWritePage = () => {
     }
 
     try {
-      await api.post('/posts', submissionData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      // 수정된 api.js가 Content-Type을 자동으로 처리해줍니다.
+      await api.post('/posts', submissionData);
       alert('게시글이 성공적으로 등록되었습니다.');
       navigate('/posts');
     } catch (error) {
@@ -92,7 +90,6 @@ const PostWritePage = () => {
           <div className="mt-1"><Editor value={content} onChange={setContent} /></div>
         </div>
         
-        {/* --- 핵심 추가: 이미지 첨부 UI --- */}
         <div>
           <label htmlFor="image" className="block text-sm font-medium text-gray-700">이미지 첨부 (선택)</label>
           <div className="mt-1 flex items-center justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">

@@ -39,9 +39,8 @@ const ConsultationWritePage = () => {
     }
 
     try {
-      await api.post('/consultations', submissionData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      // 수정된 api.js가 Content-Type을 자동으로 처리해줍니다.
+      await api.post('/consultations', submissionData);
       alert('상담글이 성공적으로 등록되었습니다.');
       navigate('/consultations');
     } catch (error) {
