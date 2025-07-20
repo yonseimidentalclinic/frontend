@@ -1,5 +1,4 @@
 // src/pages/NoticeDetailPage.jsx
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../services/api';
@@ -36,23 +35,23 @@ const NoticeDetailPage = () => {
     <div className="bg-slate-50 min-h-screen">
       <div className="max-w-4xl mx-auto px-4 py-12">
         <div className="bg-white shadow-xl rounded-lg overflow-hidden">
+          {/* --- 핵심 추가: 첨부된 이미지가 있으면 상단에 크게 보여줍니다. --- */}
+          {notice.imageData && (
+            <img src={notice.imageData} alt={notice.title} className="w-full h-auto object-cover" />
+          )}
           <div className="p-8 border-b">
             <h1 className="text-3xl font-bold text-slate-800">{notice.title}</h1>
             <p className="text-sm text-slate-500 mt-2">
               작성일: {new Date(notice.createdAt).toLocaleDateString('ko-KR')}
             </p>
           </div>
-          {/* --- 핵심 수정: dangerouslySetInnerHTML을 사용하여 HTML을 렌더링합니다. --- */}
           <div
             className="p-8 prose max-w-none text-slate-700 leading-relaxed"
             dangerouslySetInnerHTML={{ __html: notice.content }}
           />
         </div>
         <div className="mt-8 text-center">
-          <Link 
-            to="/notices" 
-            className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors duration-300 shadow-sm"
-          >
+          <Link to="/notices" className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors duration-300 shadow-sm">
             <ArrowLeft className="mr-2 h-5 w-5" />
             목록으로
           </Link>
