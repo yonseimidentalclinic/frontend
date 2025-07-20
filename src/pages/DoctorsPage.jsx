@@ -1,79 +1,83 @@
-// =================================================================
-// 사용자용 의료진 소개 페이지 (DoctorsPage.jsx)
-// 주요 개선사항:
-// 1. 이미지 URL(imageUrl) 대신 이미지 데이터(imageData)를 사용하도록 수정
-// =================================================================
+// src/pages/DoctorsPage.jsx
 
-import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
+import api from '../services/api';
+// --- 핵심 추가: 애니메이션 라이브러리를 불러옵니다. ---
+import { motion } from 'framer-motion';
 
-const API_URL = import.meta.env.VITE_API_URL;
+// 애니메이션 효과를 위한 설정
+const fadeInAnimation = {
+  initial: { opacity: 0, y: 30 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true },
+  transition: { duration: 0.8, ease: "easeOut" }
+};
 
 const DoctorsPage = () => {
   const [doctors, setDoctors] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchDoctors = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const response = await axios.get(`${API_URL}/api/doctors`);
-      if (Array.isArray(response.data)) {
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      setLoading(true);
+      try {
+        const response = await api.get('/doctors');
         setDoctors(response.data);
-      } else {
-        setDoctors([]);
+      } catch (err) {
+        setError("의료진 정보를 불러오는 데 실패했습니다.");
+        console.error(err);
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      setError('의료진 정보를 불러오는 데 실패했습니다.');
-    } finally {
-      setIsLoading(false);
-    }
+    };
+    fetchDoctors();
   }, []);
 
-  useEffect(() => {
-    fetchDoctors();
-  }, [fetchDoctors]);
+  if (loading) return <div className="text-center py-20">로딩 중...</div>;
+  if (error) return <div className="text-center py-20 text-red-500">{error}</div>;
 
   return (
     <div className="bg-white">
-      <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:py-24 lg:px-8">
-        <div className="text-center">
-          <h2 className="text-base font-semibold text-blue-600 tracking-wide uppercase">Our Team</h2>
-          <p className="mt-1 text-4xl font-extrabold text-gray-900 sm:text-5xl">연세미치과 의료진</p>
-          <p className="max-w-xl mt-5 mx-auto text-xl text-gray-500">
-            풍부한 경험과 따뜻한 마음으로 최상의 진료를 약속합니다.
-          </p>
-        </div>
+      <div className="max-w-7xl mx-auto py-12 px-4 text-center sm:px-6 lg:px-8 lg:py-24">
+        <motion.div {...fadeInAnimation} className="space-y-12">
+          <div className="space-y-5 sm:mx-auto sm:max-w-xl sm:space-y-4 lg:max-w-5xl">
+            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">의료진 소개</h2>
+            <p className="text-xl text-gray-500">
+              연세미치과는 각 분야별 전문 의료진이 책임감을 가지고 진료합니다.
+            </p>
+          </div>
+          <ul
+            role="list"
+            className="mx-auto grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 lg:gap-x-8 lg:gap-y-12"
+          >
+            {doctors.map((doctor, index) => (
+              <motion.li 
+                key={doctor.id}
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="space-y-4"
+              >
+                <div className="aspect-w-3 aspect-h-4">
+                  <img className="object-cover shadow-lg rounded-lg" src={doctor.imageData || 'https://placehold.co/400x500?text=No+Image'} alt={`${doctor.name} ${doctor.position}`} />
+                </div>
 
-        <div className="mt-12">
-          {isLoading && <p className="text-center">로딩 중...</p>}
-          {error && <p className="text-center text-red-500">{error}</p>}
-          <ul role="list" className="space-y-12 sm:grid sm:grid-cols-2 sm:gap-x-6 sm:gap-y-12 sm:space-y-0 lg:grid-cols-3 lg:gap-x-8">
-            {doctors.map((doctor) => (
-              <li key={doctor.id}>
-                <div className="space-y-4">
-                  <div className="aspect-w-3 aspect-h-2">
-                    {/* [핵심 수정] imageUrl 대신 imageData 사용 */}
-                    <img className="object-cover shadow-lg rounded-lg w-full h-80" src={doctor.imageData || 'https://placehold.co/400x500?text=No+Image'} alt={doctor.name} />
+                <div className="space-y-2">
+                  <div className="text-lg leading-6 font-medium space-y-1">
+                    <h3 className="text-2xl font-bold">{doctor.name}</h3>
+                    <p className="text-indigo-600">{doctor.position}</p>
                   </div>
-                  <div className="space-y-2">
-                    <div className="text-lg leading-6 font-medium space-y-1">
-                      <h3 className="text-2xl font-bold">{doctor.name}</h3>
-                      <p className="text-blue-600">{doctor.position}</p>
-                    </div>
-                    <div className="text-lg">
-                      <ul className="list-disc list-inside text-gray-500 whitespace-pre-wrap">
-                        {doctor.history && doctor.history.split('\n').map((line, index) => (
-                          <li key={index}>{line}</li>
-                        ))}
-                      </ul>
-                    </div>
+                  <div className="text-lg">
+                    {/* whitespace-pre-line: DB에 저장된 줄바꿈을 그대로 화면에 표시해줍니다. */}
+                    <p className="text-gray-500 whitespace-pre-line">{doctor.history}</p>
                   </div>
                 </div>
-              </li>
+              </motion.li>
             ))}
           </ul>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
