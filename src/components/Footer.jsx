@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Facebook, Instagram, MessageCircle } from 'lucide-react'; // 아이콘 추가
+import { Facebook, Instagram, MessageCircle } from 'lucide-react';
 
 const FooterLink = ({ to, children }) => (
   <Link to={to} className="text-slate-400 hover:text-indigo-400 transition-colors duration-300">
@@ -21,8 +21,6 @@ const Footer = () => {
     <footer className="bg-slate-900 text-white">
       <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
         <div className="xl:grid xl:grid-cols-3 xl:gap-8">
-          
-          {/* 정보 및 소셜 링크 섹션 */}
           <div className="space-y-8 xl:col-span-1">
             <h2 className="text-3xl font-bold text-white">연세미치과</h2>
             <p className="text-slate-400 text-base max-w-xs">
@@ -34,8 +32,6 @@ const Footer = () => {
               <SocialLink href="#" icon={MessageCircle} />
             </div>
           </div>
-          
-          {/* 바로가기 메뉴 섹션 */}
           <div className="mt-12 grid grid-cols-2 gap-8 xl:mt-0 xl:col-span-2">
             <div className="md:grid md:grid-cols-2 md:gap-8">
               <div>
@@ -44,6 +40,7 @@ const Footer = () => {
                   <li><FooterLink to="/about">병원소개</FooterLink></li>
                   <li><FooterLink to="/doctors">의료진</FooterLink></li>
                   <li><FooterLink to="/cases">치료사례</FooterLink></li>
+                  <li><FooterLink to="/reviews">치료후기</FooterLink></li>
                 </ul>
               </div>
               <div className="mt-12 md:mt-0">
@@ -68,15 +65,13 @@ const Footer = () => {
             </div>
           </div>
         </div>
-
-        {/* 하단 저작권 */}
         <div className="mt-12 border-t border-slate-800 pt-8 flex flex-col sm:flex-row-reverse sm:items-center sm:justify-between">
           <p className="text-base text-slate-400 text-center">
             &copy; {new Date().getFullYear()} 연세미치과. All rights reserved.
           </p>
           <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row items-center justify-center gap-x-4 gap-y-2">
              <p className="text-xs text-slate-500">
-                주소: 경기 고양시 일산동구 일산로 46 남정씨티 프라자 4층 407호 | 대표: 박건현
+                주소: 경기 고양시 일산동구 일산로 46 | 대표: 박건현
              </p>
              <Link to="/admin" className="text-xs text-slate-500 hover:text-indigo-400 transition-colors">
               관리자 페이지

@@ -1,6 +1,6 @@
 // src/components/Header.jsx
 
-import React,  { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 
@@ -47,6 +47,7 @@ const Header = () => {
             <NavItem to="/about">병원소개</NavItem>
             <NavItem to="/doctors">의료진</NavItem>
             <NavItem to="/cases">치료사례</NavItem>
+            <NavItem to="/reviews">치료후기</NavItem>
             <NavItem to="/notices">병원소식</NavItem>
             <NavItem to="/posts">자유게시판</NavItem>
             <NavItem to="/consultations">온라인상담</NavItem>
@@ -80,6 +81,7 @@ const Header = () => {
           <NavItem to="/about" onClick={() => setIsOpen(false)}>병원소개</NavItem>
           <NavItem to="/doctors" onClick={() => setIsOpen(false)}>의료진</NavItem>
           <NavItem to="/cases" onClick={() => setIsOpen(false)}>치료사례</NavItem>
+          <NavItem to="/reviews" onClick={() => setIsOpen(false)}>치료후기</NavItem>
           <NavItem to="/notices" onClick={() => setIsOpen(false)}>병원소식</NavItem>
           <NavItem to="/posts" onClick={() => setIsOpen(false)}>자유게시판</NavItem>
           <NavItem to="/consultations" onClick={() => setIsOpen(false)}>온라인상담</NavItem>
