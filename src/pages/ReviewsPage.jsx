@@ -79,6 +79,15 @@ const ReviewsPage = () => {
                 </div>
                 <p className="text-sm text-gray-500 mt-1">{new Date(review.createdAt).toLocaleDateString('ko-KR')}</p>
                 <p className="mt-4 text-gray-700 leading-relaxed whitespace-pre-wrap">{review.content}</p>
+
+                 {/* --- 핵심 추가: 첨부된 이미지가 있으면 보여줍니다. --- */}
+                {review.imageData && (
+                  <div className="mt-4">
+                    <img src={review.imageData} alt="치료 후기 사진" className="max-w-sm h-auto rounded-lg mx-auto" />
+                  </div>
+                )}
+
+
                 {review.adminReply && (
                   <div className="mt-4 p-4 bg-indigo-50 rounded-lg">
                     <p className="font-semibold text-sm text-indigo-800 flex items-center gap-2">

@@ -90,6 +90,21 @@ const AdminReviewListPage = () => {
               </div>
               <p className="mt-2 text-gray-800">{review.content}</p>
               
+{/* --- 핵심 추가: 첨부된 이미지가 있으면 보여줍니다. --- */}
+              {review.imageData && (
+                <div className="mt-3">
+                  <a href={review.imageData} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm text-blue-600 hover:underline">
+                    <ImageIcon size={16} /> 첨부 사진 보기
+                  </a>
+                </div>
+              )}
+
+
+
+
+
+
+              
               {review.adminReply && (
                 <div className="mt-3 p-3 bg-gray-100 rounded">
                   <p className="font-semibold text-sm text-blue-800">병원 답글:</p>
