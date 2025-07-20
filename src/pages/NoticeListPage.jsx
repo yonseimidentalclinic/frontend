@@ -5,6 +5,13 @@ import { Link, useSearchParams } from 'react-router-dom';
 import api from '../services/api';
 import Pagination from '../components/Pagination';
 import { Search } from 'lucide-react';
+import { motion } from 'framer-motion';
+
+const fadeInAnimation = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.5 }
+};
 
 const NoticeListPage = () => {
   const [notices, setNotices] = useState([]);
@@ -13,7 +20,6 @@ const NoticeListPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  // --- 검색 기능 추가 ---
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
 
@@ -34,7 +40,6 @@ const NoticeListPage = () => {
         setCurrentPage(response.data.currentPage);
       } catch (err) {
         setError('게시글을 불러오는 데 실패했습니다.');
-        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -43,7 +48,6 @@ const NoticeListPage = () => {
     fetchNotices();
   }, [searchParams]);
 
-  // 검색 실행 핸들러
   const handleSearch = (e) => {
     e.preventDefault();
     setSearchParams({ search: searchInput, page: 1 });
@@ -53,10 +57,9 @@ const NoticeListPage = () => {
   if (error) return <div className="text-center py-20 text-red-500">{error}</div>;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <motion.div initial="initial" animate="animate" variants={fadeInAnimation} className="max-w-4xl mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-center mb-8">병원소식</h1>
       
-      {/* 검색창 UI */}
       <form onSubmit={handleSearch} className="mb-8 max-w-lg mx-auto">
         <div className="relative">
           <input
@@ -64,7 +67,7 @@ const NoticeListPage = () => {
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder="제목 또는 내용으로 검색"
-            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full pl-10 pr-4 py-2 border rounded-lg"
           />
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <Search className="h-5 w-5 text-gray-400" />
@@ -75,8 +78,14 @@ const NoticeListPage = () => {
       <div className="bg-white shadow-md rounded-lg">
         <ul className="divide-y divide-gray-200">
           {notices && notices.length > 0 ? (
-            notices.map((notice) => (
-              <li key={notice.id} className="p-4 hover:bg-gray-50">
+            notices.map((notice, index) => (
+              <motion.li 
+                key={notice.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.05 }}
+                className="p-4 hover:bg-gray-50"
+              >
                 <Link to={`/notices/${notice.id}`} className="block">
                   <div className="flex justify-between items-center">
                     <p className="text-lg font-semibold text-gray-800 truncate">{notice.title}</p>
@@ -85,7 +94,7 @@ const NoticeListPage = () => {
                     </span>
                   </div>
                 </Link>
-              </li>
+              </motion.li>
             ))
           ) : (
             <li className="p-4 text-center text-gray-500">
@@ -97,7 +106,7 @@ const NoticeListPage = () => {
       <div className="mt-8">
         <Pagination currentPage={currentPage} totalPages={totalPages} />
       </div>
-    </div>
+    </motion.div>
   );
 };
 

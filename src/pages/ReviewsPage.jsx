@@ -2,9 +2,16 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
-import api from '../services/api'; // 중앙 api 모듈 사용
+import api from '../services/api';
 import Pagination from '../components/Pagination';
 import { Star, MessageSquare, PlusCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
+
+const fadeInAnimation = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.5 }
+};
 
 const ReviewsPage = () => {
   const [reviews, setReviews] = useState([]);
@@ -36,7 +43,6 @@ const ReviewsPage = () => {
   }, [searchParams]);
 
   const handlePageChange = (page) => {
-    // 페이지네이션을 위해 navigate 대신 URL 파라미터를 변경합니다.
     navigate(`/reviews?page=${page}`);
   };
 
@@ -44,7 +50,7 @@ const ReviewsPage = () => {
   if (error) return <div className="text-center py-20 text-red-500">{error}</div>;
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <motion.div initial="initial" animate="animate" variants={fadeInAnimation} className="bg-gray-50 min-h-screen">
       <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:py-16">
         <div className="text-center">
           <h1 className="text-4xl font-extrabold text-gray-900">치료 후기</h1>
@@ -55,7 +61,7 @@ const ReviewsPage = () => {
         <div className="text-center my-8">
           <Link
             to="/reviews/write"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700"
           >
             <PlusCircle size={20} />
             후기 작성하기
@@ -63,8 +69,14 @@ const ReviewsPage = () => {
         </div>
         <div className="space-y-8">
           {reviews.length > 0 ? (
-            reviews.map((review) => (
-              <div key={review.id} className="bg-white p-6 rounded-lg shadow-md">
+            reviews.map((review, index) => (
+              <motion.div 
+                key={review.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="bg-white p-6 rounded-lg shadow-md"
+              >
                 <div className="flex items-center justify-between">
                   <p className="font-semibold text-lg text-gray-800">{review.patientName} 님</p>
                   <div className="flex items-center">
@@ -79,24 +91,20 @@ const ReviewsPage = () => {
                 </div>
                 <p className="text-sm text-gray-500 mt-1">{new Date(review.createdAt).toLocaleDateString('ko-KR')}</p>
                 <p className="mt-4 text-gray-700 leading-relaxed whitespace-pre-wrap">{review.content}</p>
-
-                 {/* --- 핵심 추가: 첨부된 이미지가 있으면 보여줍니다. --- */}
                 {review.imageData && (
                   <div className="mt-4">
-                    <img src={review.imageData} alt="치료 후기 사진" className="max-w-sm h-auto rounded-lg mx-auto" />
+                    <img src={review.imageData} alt="치료 후기 사진" className="max-w-sm h-auto rounded-lg" />
                   </div>
                 )}
-
-
                 {review.adminReply && (
                   <div className="mt-4 p-4 bg-indigo-50 rounded-lg">
                     <p className="font-semibold text-sm text-indigo-800 flex items-center gap-2">
                       <MessageSquare size={16} /> 연세미치과 답변
                     </p>
-                    <p className="mt-2 text-sm text-gray-700 whitespace-pre-wrap">{review.adminReply}</p>
+                    <p className="mt-2 text-sm text-gray-700">{review.adminReply}</p>
                   </div>
                 )}
-              </div>
+              </motion.div>
             ))
           ) : (
             <div className="text-center py-16 bg-white rounded-lg shadow-md">
@@ -108,7 +116,7 @@ const ReviewsPage = () => {
           <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

@@ -3,6 +3,16 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import api from '../services/api';
 import { Search, ChevronDown, HelpCircle } from 'lucide-react';
+// --- 핵심 추가: 애니메이션 라이브러리를 불러옵니다. ---
+import { motion } from 'framer-motion';
+
+// 애니메이션 효과를 위한 설정
+const fadeInAnimation = {
+  initial: { opacity: 0, y: 30 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true },
+  transition: { duration: 0.8, ease: "easeOut" }
+};
 
 // 개별 FAQ 아이템을 위한 아코디언 컴포넌트
 const AccordionItem = ({ faq, isOpen, onClick }) => {
@@ -40,13 +50,11 @@ const FaqPage = () => {
   const [activeAccordion, setActiveAccordion] = useState(null);
   const [activeCategory, setActiveCategory] = useState('전체');
 
-  // API로부터 FAQ 데이터를 가져오는 함수
   useEffect(() => {
     const fetchFaqs = async () => {
       setLoading(true);
       setError(null);
       try {
-        // 백엔드에 검색어를 파라미터로 전달합니다.
         const response = await api.get('/faqs', {
           params: { search: searchTerm }
         });
@@ -59,15 +67,13 @@ const FaqPage = () => {
       }
     };
 
-    // 사용자가 입력을 멈추면 검색을 실행 (디바운싱)
     const timerId = setTimeout(() => {
       fetchFaqs();
-    }, 300); // 300ms 후에 검색 실행
+    }, 300);
 
     return () => clearTimeout(timerId);
   }, [searchTerm]);
 
-  // 카테고리별로 FAQ를 그룹화
   const groupedFaqs = useMemo(() => {
     return faqs.reduce((acc, faq) => {
       const category = faq.category || '기타';
@@ -81,7 +87,6 @@ const FaqPage = () => {
 
   const categories = ['전체', ...Object.keys(groupedFaqs)];
 
-  // 표시할 FAQ 필터링
   const filteredFaqs = useMemo(() => {
     if (activeCategory === '전체') {
       return groupedFaqs;
@@ -96,8 +101,7 @@ const FaqPage = () => {
   return (
     <div className="bg-gray-50 min-h-screen">
       <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8">
-        {/* 페이지 헤더 */}
-        <div className="text-center">
+        <motion.div {...fadeInAnimation} className="text-center">
           <HelpCircle className="mx-auto h-12 w-12 text-indigo-600" />
           <h2 className="mt-2 text-3xl font-extrabold text-gray-900 sm:text-4xl">
             자주 묻는 질문
@@ -105,10 +109,9 @@ const FaqPage = () => {
           <p className="mt-4 text-lg text-gray-600">
             연세미치과에 대해 궁금한 점을 찾아보세요.
           </p>
-        </div>
+        </motion.div>
 
-        {/* 검색창 */}
-        <div className="mt-10 max-w-2xl mx-auto">
+        <motion.div {...fadeInAnimation} className="mt-10 max-w-2xl mx-auto">
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-5 w-5 text-gray-400" />
@@ -121,10 +124,9 @@ const FaqPage = () => {
               className="block w-full bg-white border border-gray-300 rounded-full py-4 pl-12 pr-6 text-lg shadow-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             />
           </div>
-        </div>
+        </motion.div>
 
-        {/* 카테고리 필터 */}
-        <div className="mt-8 flex justify-center flex-wrap gap-2">
+        <motion.div {...fadeInAnimation} className="mt-8 flex justify-center flex-wrap gap-2">
           {categories.map((category) => (
             <button
               key={category}
@@ -138,10 +140,9 @@ const FaqPage = () => {
               {category}
             </button>
           ))}
-        </div>
+        </motion.div>
 
-        {/* FAQ 목록 */}
-        <div className="mt-12">
+        <motion.div {...fadeInAnimation} className="mt-12">
           {loading ? (
             <p className="text-center text-gray-500">불러오는 중...</p>
           ) : error ? (
@@ -165,7 +166,7 @@ const FaqPage = () => {
           ) : (
             <p className="text-center text-gray-500 pt-8">검색 결과가 없습니다.</p>
           )}
-        </div>
+        </motion.div>
       </div>
     </div>
   );
