@@ -29,7 +29,6 @@ const PostDetailPage = () => {
     fetchPost();
   }, [id]);
 
-  // --- 핵심 추가: 수정 시 비밀번호 확인 기능 ---
   const handleEdit = async () => {
     const password = window.prompt('게시글을 수정하려면 비밀번호를 입력하세요.');
     if (password === null) return;
@@ -51,7 +50,6 @@ const PostDetailPage = () => {
     }
   };
 
-  // --- 핵심 추가: 게시글 삭제 기능 ---
   const handleDelete = async () => {
     const password = window.prompt('게시글을 삭제하려면 비밀번호를 입력하세요.');
     if (password === null) return;
@@ -93,6 +91,13 @@ const PostDetailPage = () => {
               </p>
             </div>
           </div>
+          
+          {post.imageData && (
+            <div className="p-8 border-b">
+              <img src={post.imageData} alt="첨부 이미지" className="max-w-full h-auto rounded-lg mx-auto" />
+            </div>
+          )}
+
           <div
             className="p-8 prose max-w-none text-slate-700 leading-relaxed"
             dangerouslySetInnerHTML={{ __html: post.content }}
@@ -107,7 +112,6 @@ const PostDetailPage = () => {
             목록으로
           </Link>
           <div className="flex space-x-4">
-            {/* --- 핵심 수정: Link를 button으로 변경하고 onClick 이벤트를 연결합니다. --- */}
             <button 
               onClick={handleEdit}
               className="inline-flex items-center px-4 py-2 bg-yellow-500 text-white font-semibold rounded-lg hover:bg-yellow-600 transition-colors"

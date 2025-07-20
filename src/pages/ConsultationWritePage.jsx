@@ -3,24 +3,22 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
-import Editor from '../components/Editor'; // Editor 컴포넌트 import
+import Editor from '../components/Editor';
+import { Upload } from 'lucide-react';
 
 const ConsultationWritePage = () => {
-  const [formData, setFormData] = useState({
-    title: '',
-    author: '',
-    password: '',
-    isSecret: true,
-  });
-  const [content, setContent] = useState(''); // Editor 상태 분리
+  const [formData, setFormData] = useState({ title: '', author: '', password: '', isSecret: true });
+  const [content, setContent] = useState('');
+  const [imageFile, setImageFile] = useState(null);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prevState => ({
-      ...prevState,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
+    setFormData(prevState => ({ ...prevState, [name]: type === 'checkbox' ? checked : value }));
+  };
+
+  const handleImageChange = (e) => {
+    setImageFile(e.target.files[0]);
   };
 
   const handleSubmit = async (e) => {
@@ -29,8 +27,21 @@ const ConsultationWritePage = () => {
       alert('모든 항목을 입력해주세요.');
       return;
     }
+    
+    const submissionData = new FormData();
+    submissionData.append('title', formData.title);
+    submissionData.append('author', formData.author);
+    submissionData.append('password', formData.password);
+    submissionData.append('isSecret', formData.isSecret);
+    submissionData.append('content', content);
+    if (imageFile) {
+      submissionData.append('image', imageFile);
+    }
+
     try {
-      await api.post('/consultations', { ...formData, content });
+      await api.post('/consultations', submissionData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
       alert('상담글이 성공적으로 등록되었습니다.');
       navigate('/consultations');
     } catch (error) {
@@ -51,7 +62,7 @@ const ConsultationWritePage = () => {
             id="author"
             value={formData.author}
             onChange={handleChange}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
           />
         </div>
         <div>
@@ -62,7 +73,7 @@ const ConsultationWritePage = () => {
             id="password"
             value={formData.password}
             onChange={handleChange}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
           />
         </div>
         <div>
@@ -73,43 +84,37 @@ const ConsultationWritePage = () => {
             id="title"
             value={formData.title}
             onChange={handleChange}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
           />
         </div>
         <div>
           <label htmlFor="content" className="block text-sm font-medium text-gray-700">내용</label>
-          {/* --- 핵심 수정: textarea를 Editor 컴포넌트로 교체했습니다. --- */}
-          <div className="mt-1">
-            <Editor value={content} onChange={setContent} />
+          <div className="mt-1"><Editor value={content} onChange={setContent} /></div>
+        </div>
+        
+        <div>
+          <label htmlFor="image" className="block text-sm font-medium text-gray-700">사진 첨부 (선택)</label>
+          <div className="mt-1 flex items-center justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+            <div className="space-y-1 text-center">
+              <Upload className="mx-auto h-12 w-12 text-gray-400" />
+              <div className="flex text-sm text-gray-600">
+                <label htmlFor="image-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500">
+                  <span>파일 선택</span>
+                  <input id="image-upload" name="image" type="file" className="sr-only" onChange={handleImageChange} accept="image/*" />
+                </label>
+              </div>
+              <p className="text-xs text-gray-500">{imageFile ? imageFile.name : 'PNG, JPG, GIF up to 5MB'}</p>
+            </div>
           </div>
         </div>
+
         <div className="flex items-center">
-          <input
-            id="isSecret"
-            name="isSecret"
-            type="checkbox"
-            checked={formData.isSecret}
-            onChange={handleChange}
-            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-          />
-          <label htmlFor="isSecret" className="ml-2 block text-sm text-gray-900">
-            비밀글로 작성
-          </label>
+          <input id="isSecret" name="isSecret" type="checkbox" checked={formData.isSecret} onChange={handleChange} className="h-4 w-4 text-indigo-600 rounded" />
+          <label htmlFor="isSecret" className="ml-2 block text-sm text-gray-900">비밀글로 작성</label>
         </div>
         <div className="flex justify-end space-x-4">
-          <button
-            type="button"
-            onClick={() => navigate('/consultations')}
-            className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-          >
-            취소
-          </button>
-          <button
-            type="submit"
-            className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
-          >
-            등록
-          </button>
+          <button type="button" onClick={() => navigate('/consultations')} className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">취소</button>
+          <button type="submit" className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">등록</button>
         </div>
       </form>
     </div>
