@@ -61,7 +61,7 @@ const ReviewsPage = () => {
         <div className="text-center my-8">
           <Link
             to="/reviews/write"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
           >
             <PlusCircle size={20} />
             후기 작성하기
@@ -73,11 +73,12 @@ const ReviewsPage = () => {
               <motion.div 
                 key={review.id}
                 initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 className="bg-white p-6 rounded-lg shadow-md"
               >
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                   <p className="font-semibold text-lg text-gray-800">{review.patientName} 님</p>
                   <div className="flex items-center">
                     {[...Array(5)].map((_, i) => (
@@ -91,17 +92,19 @@ const ReviewsPage = () => {
                 </div>
                 <p className="text-sm text-gray-500 mt-1">{new Date(review.createdAt).toLocaleDateString('ko-KR')}</p>
                 <p className="mt-4 text-gray-700 leading-relaxed whitespace-pre-wrap">{review.content}</p>
+                
                 {review.imageData && (
                   <div className="mt-4">
-                    <img src={review.imageData} alt="치료 후기 사진" className="max-w-sm h-auto rounded-lg" />
+                    <img src={review.imageData} alt="치료 후기 사진" className="w-full max-w-xs sm:max-w-sm h-auto rounded-lg mx-auto shadow-md" />
                   </div>
                 )}
+
                 {review.adminReply && (
                   <div className="mt-4 p-4 bg-indigo-50 rounded-lg">
                     <p className="font-semibold text-sm text-indigo-800 flex items-center gap-2">
                       <MessageSquare size={16} /> 연세미치과 답변
                     </p>
-                    <p className="mt-2 text-sm text-gray-700">{review.adminReply}</p>
+                    <p className="mt-2 text-sm text-gray-700 whitespace-pre-wrap">{review.adminReply}</p>
                   </div>
                 )}
               </motion.div>

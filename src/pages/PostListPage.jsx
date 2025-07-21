@@ -93,7 +93,8 @@ const PostListPage = () => {
               >
                 <Link to={`/posts/${post.id}`} className="block">
                   <p className="text-lg font-semibold text-gray-800 truncate">{post.title}</p>
-                  <div className="flex justify-between items-center mt-1">
+                  {/* --- 핵심 수정: 작은 화면에서 작성자/날짜가 제목 아래로 내려가도록 수정 --- */}
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mt-1">
                     <span className="text-sm text-gray-600">{post.author}</span>
                     <span className="text-sm text-gray-500">
                       {new Date(post.createdAt).toLocaleDateString('ko-KR')}

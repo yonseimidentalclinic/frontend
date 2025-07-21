@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
 import { Stethoscope, Calendar, Users, ArrowRight } from 'lucide-react';
-// --- 핵심 추가: 애니메이션 라이브러리를 불러옵니다. ---
 import { motion } from 'framer-motion';
 
 // 섹션 제목 컴포넌트

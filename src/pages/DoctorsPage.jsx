@@ -2,10 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
-// --- 핵심 추가: 애니메이션 라이브러리를 불러옵니다. ---
 import { motion } from 'framer-motion';
 
-// 애니메이션 효과를 위한 설정
 const fadeInAnimation = {
   initial: { opacity: 0, y: 30 },
   whileInView: { opacity: 1, y: 0 },
@@ -49,7 +47,7 @@ const DoctorsPage = () => {
           </div>
           <ul
             role="list"
-            className="mx-auto grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 lg:gap-x-8 lg:gap-y-12"
+            className="mx-auto grid grid-cols-1 gap-y-12 sm:grid-cols-2 sm:gap-x-8 lg:grid-cols-3 lg:gap-x-10"
           >
             {doctors.map((doctor, index) => (
               <motion.li 
@@ -60,8 +58,8 @@ const DoctorsPage = () => {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 className="space-y-4"
               >
-                <div className="aspect-w-3 aspect-h-4">
-                  <img className="object-cover shadow-lg rounded-lg" src={doctor.imageData || 'https://placehold.co/400x500?text=No+Image'} alt={`${doctor.name} ${doctor.position}`} />
+                <div className="aspect-[3/4] w-full overflow-hidden rounded-lg">
+                  <img className="h-full w-full object-cover object-center shadow-lg" src={doctor.imageData || 'https://placehold.co/400x500?text=No+Image'} alt={`${doctor.name} ${doctor.position}`} />
                 </div>
 
                 <div className="space-y-2">
@@ -69,8 +67,7 @@ const DoctorsPage = () => {
                     <h3 className="text-2xl font-bold">{doctor.name}</h3>
                     <p className="text-indigo-600">{doctor.position}</p>
                   </div>
-                  <div className="text-lg">
-                    {/* whitespace-pre-line: DB에 저장된 줄바꿈을 그대로 화면에 표시해줍니다. */}
+                  <div className="text-base text-left px-2">
                     <p className="text-gray-500 whitespace-pre-line">{doctor.history}</p>
                   </div>
                 </div>

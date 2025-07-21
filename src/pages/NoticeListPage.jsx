@@ -67,7 +67,7 @@ const NoticeListPage = () => {
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder="제목 또는 내용으로 검색"
-            className="w-full pl-10 pr-4 py-2 border rounded-lg"
+            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <Search className="h-5 w-5 text-gray-400" />
@@ -87,9 +87,10 @@ const NoticeListPage = () => {
                 className="p-4 hover:bg-gray-50"
               >
                 <Link to={`/notices/${notice.id}`} className="block">
-                  <div className="flex justify-between items-center">
+                  {/* --- 핵심 수정: 작은 화면에서 날짜가 제목 아래로 내려가도록 수정 --- */}
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
                     <p className="text-lg font-semibold text-gray-800 truncate">{notice.title}</p>
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-gray-500 mt-1 sm:mt-0">
                       {new Date(notice.createdAt).toLocaleDateString('ko-KR')}
                     </span>
                   </div>

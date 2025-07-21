@@ -21,6 +21,7 @@ const Footer = () => {
     <footer className="bg-slate-900 text-white">
       <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
         <div className="xl:grid xl:grid-cols-3 xl:gap-8">
+          
           <div className="space-y-8 xl:col-span-1">
             <h2 className="text-3xl font-bold text-white">연세미치과</h2>
             <p className="text-slate-400 text-base max-w-xs">
@@ -32,39 +33,38 @@ const Footer = () => {
               <SocialLink href="#" icon={MessageCircle} />
             </div>
           </div>
-          <div className="mt-12 grid grid-cols-2 gap-8 xl:mt-0 xl:col-span-2">
-            <div className="md:grid md:grid-cols-2 md:gap-8">
-              <div>
-                <h3 className="text-sm font-semibold text-slate-300 tracking-wider uppercase">바로가기</h3>
-                <ul className="mt-4 space-y-4">
-                  <li><FooterLink to="/about">병원소개</FooterLink></li>
-                  <li><FooterLink to="/doctors">의료진</FooterLink></li>
-                  <li><FooterLink to="/cases">치료사례</FooterLink></li>
-                  <li><FooterLink to="/reviews">치료후기</FooterLink></li>
-                </ul>
-              </div>
-              <div className="mt-12 md:mt-0">
-                <h3 className="text-sm font-semibold text-slate-300 tracking-wider uppercase">커뮤니티</h3>
-                <ul className="mt-4 space-y-4">
-                  <li><FooterLink to="/notices">병원소식</FooterLink></li>
-                  <li><FooterLink to="/posts">자유게시판</FooterLink></li>
-                  <li><FooterLink to="/consultations">온라인상담</FooterLink></li>
-                  <li><FooterLink to="/faq">자주 묻는 질문</FooterLink></li>
-                </ul>
-              </div>
+          
+          {/* --- 핵심 수정: 작은 화면(md) 이하에서는 세로로, 그 이상에서는 가로로 정렬되도록 수정했습니다. --- */}
+          <div className="mt-12 grid grid-cols-2 gap-8 md:grid-cols-3 xl:mt-0 xl:col-span-2">
+            <div>
+              <h3 className="text-sm font-semibold text-slate-300 tracking-wider uppercase">바로가기</h3>
+              <ul className="mt-4 space-y-4">
+                <li><FooterLink to="/about">병원소개</FooterLink></li>
+                <li><FooterLink to="/doctors">의료진</FooterLink></li>
+                <li><FooterLink to="/cases">치료사례</FooterLink></li>
+                <li><FooterLink to="/reviews">치료후기</FooterLink></li>
+              </ul>
             </div>
-            <div className="md:grid md:grid-cols-1 md:gap-8">
-               <div>
-                <h3 className="text-sm font-semibold text-slate-300 tracking-wider uppercase">예약 및 문의</h3>
-                <ul className="mt-4 space-y-4">
-                   <li><FooterLink to="/reservation">온라인 예약</FooterLink></li>
-                   <li><FooterLink to="/location">오시는 길</FooterLink></li>
-                   <li className="text-slate-400">전화: 031-905-7285</li>
-                </ul>
-              </div>
+            <div className="mt-0">
+              <h3 className="text-sm font-semibold text-slate-300 tracking-wider uppercase">커뮤니티</h3>
+              <ul className="mt-4 space-y-4">
+                <li><FooterLink to="/notices">병원소식</FooterLink></li>
+                <li><FooterLink to="/posts">자유게시판</FooterLink></li>
+                <li><FooterLink to="/consultations">온라인상담</FooterLink></li>
+                <li><FooterLink to="/faq">자주 묻는 질문</FooterLink></li>
+              </ul>
+            </div>
+            <div className="col-span-2 md:col-span-1">
+              <h3 className="text-sm font-semibold text-slate-300 tracking-wider uppercase">예약 및 문의</h3>
+              <ul className="mt-4 space-y-4">
+                 <li><FooterLink to="/reservation">온라인 예약</FooterLink></li>
+                 <li><FooterLink to="/location">오시는 길</FooterLink></li>
+                 <li className="text-slate-400">전화: 031-905-7285</li>
+              </ul>
             </div>
           </div>
         </div>
+
         <div className="mt-12 border-t border-slate-800 pt-8 flex flex-col sm:flex-row-reverse sm:items-center sm:justify-between">
           <p className="text-base text-slate-400 text-center">
             &copy; {new Date().getFullYear()} 연세미치과. All rights reserved.

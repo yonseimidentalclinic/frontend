@@ -96,9 +96,10 @@ const ConsultationListPage = () => {
                     {item.isSecret && <Lock size={16} className="text-gray-500" />}
                     <span className="truncate">{item.title}</span>
                   </div>
-                  <div className="flex justify-between items-center mt-1">
+                  {/* --- 핵심 수정: 작은 화면에서 작성자/날짜/답변상태가 제목 아래로 내려가도록 수정 --- */}
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mt-1">
                     <span className="text-sm text-gray-600">{item.author}</span>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 mt-1 sm:mt-0">
                       {item.isAnswered && (
                         <span className="flex items-center text-sm text-blue-600 font-semibold">
                           <CheckSquare size={14} className="mr-1" /> 답변완료
