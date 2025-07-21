@@ -1,17 +1,10 @@
-// =================================================================
-// 관리자 대시보드 페이지 (AdminDashboardPage.jsx) - API 경로 수정 버전
-// 최종 업데이트: 2025년 7월 18일
-// 주요 개선사항:
-// 1. 올바른 백엔드 API 주소(/admin/dashboard-stats)로 요청하도록 수정
-// 2. 중앙 api.js 모듈을 사용하도록 변경하여 코드 일관성 및 안정성 확보
-// =================================================================
+// src/pages/admin/AdminDashboardPage.jsx
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-// *** 핵심 수정: axios 대신 중앙 api 모듈을 사용합니다. ***
 import api from '../../services/api';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Megaphone, Newspaper, MessageSquare, Bell, AlertTriangle } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { Megaphone, Newspaper, MessageSquare, Bell, AlertTriangle, Users, History } from 'lucide-react';
 
 // 통계 카드 컴포넌트
 const StatCard = ({ icon: Icon, title, value, linkTo, colorClass }) => (
@@ -28,20 +21,27 @@ const StatCard = ({ icon: Icon, title, value, linkTo, colorClass }) => (
 
 const AdminDashboardPage = () => {
   const [stats, setStats] = useState(null);
+  const [chartData, setChartData] = useState(null); // 차트 데이터 상태 추가
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchStats = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      // *** 핵심 수정: api 모듈을 사용하여 올바른 주소로 요청합니다. ***
-      // 이제 인증 헤더는 api.js에서 자동으로 처리됩니다.
-      const response = await api.get('/admin/dashboard-stats');
-      setStats(response.data);
+      const statsPromise = api.get('/admin/dashboard-stats');
+      const chartsPromise = api.get('/admin/dashboard-charts'); // 새 API 호출
+
+      const [statsResponse, chartsResponse] = await Promise.all([
+        statsPromise,
+        chartsPromise,
+      ]);
+
+      setStats(statsResponse.data);
+      setChartData(chartsResponse.data); // 차트 데이터 설정
+
     } catch (err) {
       console.error("대시보드 데이터 로딩 실패:", err);
-      // api.js의 인터셉터가 401 오류를 처리하므로, 여기서는 일반 오류만 처리합니다.
       if (err.response?.status !== 401) {
         setError('대시보드 데이터를 불러오는 데 실패했습니다.');
       }
@@ -51,28 +51,17 @@ const AdminDashboardPage = () => {
   }, []);
 
   useEffect(() => {
-    fetchStats();
-  }, [fetchStats]);
+    fetchData();
+  }, [fetchData]);
 
-  const chartData = [
-    { name: '공지사항', count: stats?.totalNotices || 0 },
-    { name: '자유게시판', count: stats?.totalPosts || 0 },
-    { name: '온라인상담', count: stats?.totalConsultations || 0 },
-  ];
-
-  if (loading) {
-    return <div className="p-10 text-center text-gray-600">대시보드 데이터를 불러오는 중...</div>;
-  }
-  if (error) {
-    return <div className="p-10 text-center text-red-500 bg-red-50 rounded-lg">{error}</div>;
-  }
+  if (loading) return <div className="p-10 text-center text-gray-600">대시보드 데이터를 불러오는 중...</div>;
+  if (error) return <div className="p-10 text-center text-red-500 bg-red-50 rounded-lg">{error}</div>;
 
   return (
     <div className="p-6 md:p-8 bg-gray-100 min-h-screen">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-8">대시보드</h1>
         
-        {/* 중요 알림 섹션 */}
         {stats?.unansweredConsultations > 0 && (
           <div className="mb-8 bg-red-100 border-l-4 border-red-500 text-red-800 p-4 rounded-r-lg flex items-center shadow-md" role="alert">
             <AlertTriangle className="h-6 w-6 mr-3" />
@@ -83,7 +72,6 @@ const AdminDashboardPage = () => {
           </div>
         )}
         
-        {/* 통계 카드 그리드 */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatCard icon={MessageSquare} title="답변 대기 상담" value={stats?.unansweredConsultations || 0} linkTo="/admin/consultations" colorClass="border-red-500" />
           <StatCard icon={Bell} title="오늘 접수된 상담" value={stats?.todayConsultations || 0} linkTo="/admin/consultations" colorClass="border-yellow-500" />
@@ -91,14 +79,30 @@ const AdminDashboardPage = () => {
           <StatCard icon={Megaphone} title="총 공지사항" value={stats?.totalNotices || 0} linkTo="/admin/notices" colorClass="border-blue-500" />
         </div>
         
-        {/* 콘텐츠 현황 차트 */}
-        <div className="bg-white p-6 rounded-2xl shadow-lg">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">콘텐츠 현황</h2>
-          <div style={{ width: '100%', height: 400 }}>
-            <ResponsiveContainer>
-              <BarChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+        {/* --- [새 기능] 통계 차트 그리드 --- */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* 주간 상담 접수 현황 */}
+          <div className="bg-white p-6 rounded-2xl shadow-lg">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">주간 상담 접수 현황</h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={chartData?.weeklyConsultations} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
+                <XAxis dataKey="date" tickFormatter={(date) => new Date(date).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })} />
+                <YAxis allowDecimals={false} />
+                <Tooltip />
+                <Legend />
+                <Line type="monotone" dataKey="count" name="상담 수" stroke="#8884d8" strokeWidth={2} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* 월별 게시물 작성 추이 */}
+          <div className="bg-white p-6 rounded-2xl shadow-lg">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">월별 게시물 작성 추이</h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={chartData?.monthlyPosts} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
                 <YAxis allowDecimals={false} />
                 <Tooltip />
                 <Legend />
