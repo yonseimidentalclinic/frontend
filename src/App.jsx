@@ -1,18 +1,17 @@
-// src/App.jsx
-
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from './context/AuthContext'; // useAuth import
 
+// 1. 인증 컨텍스트와 새로운 보호 라우트 컴포넌트를 가져옵니다.
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute'; // ★ 기존 PrivateRoute를 대체할 새 컴포넌트
 
-// 공용 레이아웃 컴포넌트
+// --- 공용 레이아웃 컴포넌트 ---
 import MainLayout from './components/MainLayout';
 import AdminLayout from './components/AdminLayout';
 
-// --- 환자용 페이지 컴포넌트 (실제로 존재하는 파일만 import) ---
+// --- 환자용 페이지 컴포넌트 (기존 파일 구조 유지) ---
 import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
-import AdminLoginPage from './pages/AdminLoginPage';
 import CasesPage from './pages/CasesPage';
 import ConsultationDetailPage from './pages/ConsultationDetailPage';
 import ConsultationEditPage from './pages/ConsultationEditPage';
@@ -31,16 +30,19 @@ import PostDetailPage from './pages/PostDetailPage';
 import PostWritePage from './pages/PostWritePage';
 import PostEditPage from './pages/PostEditPage';
 import ReservationPage from './pages/ReservationPage';
-// [새 기능] 예약 관리 페이지 import
 import ReservationCheckPage from './pages/ReservationCheckPage';
 import ReservationDetailPage from './pages/ReservationDetailPage';
 import ReservationEditPage from './pages/ReservationEditPage';
-// *** 수정: ReviewPage.jsx 파일이 없어 빌드 오류가 발생하므로 관련 코드를 주석 처리합니다. ***
 import ReviewsPage from './pages/ReviewsPage';
 import ReviewWritePage from './pages/ReviewWritePage';
 import ServicesPage from './pages/ServicesPage';
-// -관리자용 페이지 컴포넌트 (스크린샷에서 확인된 파일만 활성화) ---
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import MyPage from './pages/MyPage';
 
+// --- 관리자용 페이지 컴포넌트 (기존 파일 구조 유지) ---
+import AdminLoginPage from './pages/AdminLoginPage';
+import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import AdminAboutPage from './pages/admin/AdminAboutPage';
 import AdminCasePhotosPage from './pages/admin/AdminCasePhotosPage';
 import AdminClinicPhotospage from './pages/admin/AdminClinicPhotosPage';
@@ -48,7 +50,6 @@ import AdminConsultationDetailPage from './pages/admin/AdminConsultationDetailPa
 import AdminConsultationEditPage from './pages/admin/AdminConsultationEditPage';
 import AdminConsultationListPage from './pages/admin/AdminConsultationListPage';
 import AdminConsultationReplyPage from './pages/admin/AdminConsultationReplyPage';
-import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import AdminDoctorsListPage from './pages/admin/AdminDoctorsListPage';
 import AdminFaqListPage from './pages/admin/AdminFaqListPage';
 import AdminFaqPage from './pages/admin/AdminFaqPage';
@@ -64,118 +65,92 @@ import AdminReviewListPage from './pages/admin/AdminReviewListPage';
 import AdminReviewsPage from './pages/admin/AdminReviewsPage';
 import AdminSchedulePage from './pages/admin/AdminSchedulePage';
 
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import MyPage from './pages/MyPage';
-
- 
-
-
-// 인증 상태에 따라 관리자 페이지 접근을 제어하는 컴포넌트
-const PrivateRoute = ({ children }) => {
-  const { user, loading } = useAuth();
-  if (loading) return <div>로딩중...</div>; // 로딩 중에는 아무것도 보여주지 않음
-  return user ? children : <Navigate to="/login" />;
-}; 
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        {/* 환자용 페이지 라우트 */}
-        <Route path="/" element={<MainLayout />}>
-          <Route index element={<HomePage />} />
-          <Route path="about" element={<AboutPage />} />
-          <Route path="doctors" element={<DoctorsPage />} />
-          <Route path="cases" element={<CasesPage />} />
-          <Route path="faq" element={<FaqPage />} />
-          <Route path="location" element={<LocationPage />} />
-          <Route path="contact" element={<ContactPage />} />
-          <Route path="services" element={<ServicesPage />} />
-          <Route path="reviews" element={<ReviewsPage />} />
-          <Route path="reviews/write" element={<ReviewWritePage />} />
-          <Route path="consultations/verify" element={<ConsultationVerifyPage />} />
-          <Route path="posts/verify" element={<PostVerifyPage />} />
+    // AuthProvider가 앱 전체의 로그인 상태를 관리합니다.
+    <AuthProvider>
+      <Router>
+        <Routes>
+          {/* --- 섹션 1: 환자용 페이지 (MainLayout 적용) --- */}
+          <Route path="/" element={<MainLayout />}>
+            {/* 누구나 접근 가능한 페이지 */}
+            <Route index element={<HomePage />} />
+            <Route path="about" element={<AboutPage />} />
+            <Route path="doctors" element={<DoctorsPage />} />
+            <Route path="cases" element={<CasesPage />} />
+            <Route path="faq" element={<FaqPage />} />
+            <Route path="location" element={<LocationPage />} />
+            <Route path="contact" element={<ContactPage />} />
+            <Route path="services" element={<ServicesPage />} />
+            <Route path="reviews" element={<ReviewsPage />} />
+            <Route path="reviews/write" element={<ReviewWritePage />} />
+            <Route path="consultations/verify" element={<ConsultationVerifyPage />} />
+            <Route path="posts/verify" element={<PostVerifyPage />} />
+            <Route path="notices" element={<NoticeListPage />} />
+            <Route path="notices/:id" element={<NoticeDetailPage />} />
+            <Route path="posts" element={<PostListPage />} />
+            <Route path="posts/:id" element={<PostDetailPage />} />
+            <Route path="posts/write" element={<PostWritePage />} />
+            <Route path="posts/edit/:id" element={<PostEditPage />} />
+            <Route path="consultations" element={<ConsultationListPage />} />
+            <Route path="consultations/:id" element={<ConsultationDetailPage />} />
+            <Route path="consultations/write" element={<ConsultationWritePage />} />
+            <Route path="consultations/edit/:id" element={<ConsultationEditPage />} />
+            <Route path="reservation" element={<ReservationPage />} />
+            <Route path="reservation/check" element={<ReservationCheckPage />} />
+            <Route path="reservation/:id" element={<ReservationDetailPage />} />
+            <Route path="reservation/edit/:id" element={<ReservationEditPage />} />
+            <Route path="login" element={<LoginPage />} />
+            <Route path="register" element={<RegisterPage />} />
 
+            {/* ★★★ 핵심 수정: 로그인한 "일반 사용자"만 접근 가능한 경로 그룹 ★★★ */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="mypage" element={<MyPage />} />
+              {/* 여기에 다른 사용자 전용 페이지(예: 예약내역 상세)를 추가할 수 있습니다. */}
+            </Route>
+          </Route>
 
-          <Route path="notices" element={<NoticeListPage />} />
-          <Route path="notices/:id" element={<NoticeDetailPage />} />
-          <Route path="posts" element={<PostListPage />} />
-          <Route path="posts/:id" element={<PostDetailPage />} />
-          <Route path="posts/write" element={<PostWritePage />} />
-          <Route path="posts/edit/:id" element={<PostEditPage />} />
-          <Route path="consultations" element={<ConsultationListPage />} />
-          <Route path="consultations/:id" element={<ConsultationDetailPage />} />
-          <Route path="consultations/write" element={<ConsultationWritePage />} />
-          <Route path="consultations/edit/:id" element={<ConsultationEditPage />} />
-          <Route path="reservation" element={<ReservationPage />} />
-          <Route path="review/write" element={<ReviewWritePage />} />
+          {/* --- 섹션 2: 관리자용 페이지 --- */}
+          {/* 관리자 로그인 페이지는 보호되지 않아야 하므로 외부에 둡니다. */}
+          <Route path="/admin/login" element={<AdminLoginPage />} />
 
-
-          {/* *** 수정: ReviewPage 라우트를 주석 처리합니다. *** */}
-          <Route path="reviews" element={<ReviewsPage />} /> 
-          <Route path="reservation/check" element={<ReservationCheckPage />} />
-          <Route path="reservation/:id" element={<ReservationDetailPage />} />
-          <Route path="reservation/edit/:id" element={<ReservationEditPage />} />
-
-         {/* --- 핵심 추가: 로그인, 회원가입, 마이페이지 경로를 추가합니다. --- */}
-          <Route path="login" element={<LoginPage />} />
-          <Route path="register" element={<RegisterPage />} />
-          <Route path="mypage" element={
-            <PrivateRoute>
-              <MyPage />
-            </PrivateRoute>
-          } />
-        </Route>
-
-        {/* 관리자용 페이지 라우트 (실제로 존재하는 페이지만 연결) */}
-        <Route path="/admin/login" element={<AdminLoginPage />} />
-        <Route
-          path="/admin"
-          element={
-            <PrivateRoute>
-              <AdminLayout />
-            </PrivateRoute>
-          }
-        >
-          <Route index element={<Navigate to="dashboard" replace />} />
-          <Route path="dashboard" element={<AdminDashboardPage />} />
-          <Route path="about" element={<AdminAboutPage />} />
-          <Route path="doctors" element={<AdminDoctorsListPage />} />
-          <Route path="cases" element={<AdminCasePhotosPage />} />
-          <Route path="notices" element={<AdminNoticeListPage />} />
-          <Route path="consultations" element={<AdminConsultationListPage />} />
-          <Route path="consultations/:id" element={<AdminConsultationDetailPage />} />
-          <Route path="consultations/edit/:id" element={<AdminConsultationEditPage />} />
-          <Route path="consultations/reply/:id" element={<AdminConsultationReplyPage />} />
-          <Route path="Dashboard" element={<AdminDashboardPage />} />
-          <Route path="clinic-photos" element={<AdminClinicPhotospage />} />
-          <Route path="Doctors" element={<AdminDoctorsListPage />} />
-          <Route path="Faq" element={<AdminFaqPage />} />
-          <Route path="faqs" element={<AdminFaqListPage />} />
-          <Route path="Logs" element={<AdminLogsPage />} />
-          <Route path="notices/edit/:id" element={<AdminNoticeEditPage />} />
-          <Route path="notices/new" element={<AdminNoticeWritePage />} />
-          <Route path="notices" element={<AdminNoticeListPage />} />
-
-          <Route path="posts/edit/:id" element={<AdminPostEditPage />} />
-          <Route path="posts" element={<AdminPostListPage />} />
-          <Route path="reservations" element={<AdminReservationsPage />} />
-          <Route path="reservations/list" element={<AdminReservationListPage />} />
-          <Route path="reviews" element={<AdminReviewsPage />} />
-          <Route path="reviews/list" element={<AdminReviewListPage />} />
-          <Route path="schedule" element={<AdminSchedulePage />} />
-
+          {/* ★★★ 핵심 수정: "관리자"만 접근 가능한 경로 그룹 (AdminLayout 적용) ★★★ */}
+          <Route element={<ProtectedRoute adminOnly={true} />}>
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<Navigate to="dashboard" replace />} />
+              <Route path="dashboard" element={<AdminDashboardPage />} />
+              <Route path="about" element={<AdminAboutPage />} />
+              <Route path="doctors" element={<AdminDoctorsListPage />} />
+              <Route path="cases" element={<AdminCasePhotosPage />} />
+              <Route path="clinic-photos" element={<AdminClinicPhotospage />} />
+              <Route path="faqs" element={<AdminFaqListPage />} />
+              <Route path="logs" element={<AdminLogsPage />} />
+              <Route path="notices" element={<AdminNoticeListPage />} />
+              <Route path="notices/new" element={<AdminNoticeWritePage />} />
+              <Route path="notices/edit/:id" element={<AdminNoticeEditPage />} />
+              <Route path="posts" element={<AdminPostListPage />} />
+              <Route path="posts/edit/:id" element={<AdminPostEditPage />} />
+              <Route path="consultations" element={<AdminConsultationListPage />} />
+              <Route path="consultations/:id" element={<AdminConsultationDetailPage />} />
+              <Route path="consultations/edit/:id" element={<AdminConsultationEditPage />} />
+              <Route path="consultations/reply/:id" element={<AdminConsultationReplyPage />} />
+              <Route path="reservations" element={<AdminReservationsPage />} />
+              <Route path="reviews" element={<AdminReviewsPage />} />
+              <Route path="schedule" element={<AdminSchedulePage />} />
+              
+              {/* 중복되는 경로는 하나로 정리하는 것이 좋습니다. 예: Faq, faqs -> faqs */}
+              <Route path="Faq" element={<AdminFaqPage />} />
+              <Route path="reservations/list" element={<AdminReservationListPage />} />
+              <Route path="reviews/list" element={<AdminReviewListPage />} />
+            </Route>
+          </Route>
           
-          {/* --- 참고 --- */}
-          {/* 아래 페이지들은 파일을 만드신 후 주석을 해제하여 경로를 연결해주세요. */}
-           
-           
-           
-           
-        </Route>
-      </Routes>
-    </Router>
+          {/* 여기에 404 Not Found 페이지 라우트를 추가할 수 있습니다. */}
+          {/* <Route path="*" element={<NotFoundPage />} /> */}
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 
