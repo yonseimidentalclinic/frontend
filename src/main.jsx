@@ -11,9 +11,14 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App.jsx';
 import './index.css'; // Tailwind CSS를 포함한 기본 스타일시트
+import { AuthProvider } from './context/AuthContext.jsx';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <App />
+  {/* --- 핵심 추가: App 전체를 AuthProvider로 감싸줍니다. --- */}
+    <AuthProvider>
+      <App />
+    </AuthProvider>
   </React.StrictMode>,
 );
+  

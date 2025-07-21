@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, User, LogOut } from 'lucide-react';
+import { useAuth } from '../context/AuthContext'; // AuthContext 사용
 
 const NavItem = ({ to, children, onClick }) => (
   <NavLink
@@ -20,7 +21,6 @@ const NavItem = ({ to, children, onClick }) => (
   </NavLink>
 );
 
-// --- 핵심 추가: 모바일 메뉴 아이템 스타일 ---
 const MobileNavItem = ({ to, children, onClick }) => (
     <NavLink
       to={to}
@@ -35,10 +35,10 @@ const MobileNavItem = ({ to, children, onClick }) => (
     </NavLink>
 );
 
-
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const { user, logout } = useAuth(); // user와 logout 함수 가져오기
 
   useEffect(() => {
     const handleScroll = () => {
@@ -70,14 +70,27 @@ const Header = () => {
             <NavItem to="/faq">FAQ</NavItem>
             <NavItem to="/location">오시는 길</NavItem>
           </nav>
-          <div className="hidden md:block">
-             <Link 
-               to="/reservation" 
-               className="bg-indigo-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition-all duration-300 shadow-sm hover:shadow-md"
-             >
-                온라인 예약
-             </Link>
+          
+          <div className="hidden md:flex items-center gap-4">
+            {user ? (
+              <>
+                <NavLink to="/mypage" className="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-indigo-600">
+                  <User size={16} /> 마이페이지
+                </NavLink>
+                <button onClick={logout} className="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-indigo-600">
+                  <LogOut size={16} /> 로그아웃
+                </button>
+              </>
+            ) : (
+              <>
+                <NavLink to="/login" className="text-sm font-medium text-slate-600 hover:text-indigo-600">로그인</NavLink>
+                <Link to="/register" className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700">
+                  회원가입
+                </Link>
+              </>
+            )}
           </div>
+
           <div className="-mr-2 flex md:hidden">
             <button
               onClick={() => setIsOpen(!isOpen)}
@@ -91,10 +104,7 @@ const Header = () => {
         </div>
       </div>
 
-      {/* --- 핵심 수정: 모바일 메뉴 디자인을 개선했습니다. --- */}
-      <div 
-        className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out bg-white shadow-lg ${isOpen ? 'max-h-screen' : 'max-h-0'}`}
-      >
+      <div className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out bg-white shadow-lg ${isOpen ? 'max-h-screen' : 'max-h-0'}`}>
         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
           <MobileNavItem to="/about" onClick={() => setIsOpen(false)}>병원소개</MobileNavItem>
           <MobileNavItem to="/doctors" onClick={() => setIsOpen(false)}>의료진</MobileNavItem>
@@ -105,6 +115,23 @@ const Header = () => {
           <MobileNavItem to="/consultations" onClick={() => setIsOpen(false)}>온라인상담</MobileNavItem>
           <MobileNavItem to="/faq" onClick={() => setIsOpen(false)}>FAQ</MobileNavItem>
           <MobileNavItem to="/location" onClick={() => setIsOpen(false)}>오시는 길</MobileNavItem>
+          
+          <div className="border-t my-4"></div>
+
+          {user ? (
+              <>
+                <MobileNavItem to="/mypage" onClick={() => setIsOpen(false)}>마이페이지</MobileNavItem>
+                <button onClick={() => { logout(); setIsOpen(false); }} className="w-full text-left block px-4 py-3 rounded-md text-base font-medium text-slate-700 hover:bg-gray-100">
+                  로그아웃
+                </button>
+              </>
+          ) : (
+              <>
+                <MobileNavItem to="/login" onClick={() => setIsOpen(false)}>로그인</MobileNavItem>
+                <MobileNavItem to="/register" onClick={() => setIsOpen(false)}>회원가입</MobileNavItem>
+              </>
+          )}
+
           <div className="mt-4 px-2">
             <Link 
               to="/reservation"

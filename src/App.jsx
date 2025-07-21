@@ -2,6 +2,8 @@
 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from './context/AuthContext'; // useAuth import
+
 
 // 공용 레이아웃 컴포넌트
 import MainLayout from './components/MainLayout';
@@ -61,14 +63,20 @@ import AdminReservationsPage from './pages/admin/AdminReservationsPage';
 import AdminReviewListPage from './pages/admin/AdminReviewListPage';
 import AdminReviewsPage from './pages/admin/AdminReviewsPage';
 import AdminSchedulePage from './pages/admin/AdminSchedulePage';
+
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import MyPage from './pages/MyPage';
+
  
 
 
 // 인증 상태에 따라 관리자 페이지 접근을 제어하는 컴포넌트
 const PrivateRoute = ({ children }) => {
-  const isAuthenticated = !!localStorage.getItem('accessToken');
-  return isAuthenticated ? children : <Navigate to="/admin/login" />;
-};
+  const { user, loading } = useAuth();
+  if (loading) return <div>로딩중...</div>; // 로딩 중에는 아무것도 보여주지 않음
+  return user ? children : <Navigate to="/login" />;
+}; 
 
 function App() {
   return (
@@ -109,7 +117,16 @@ function App() {
           <Route path="reservation/check" element={<ReservationCheckPage />} />
           <Route path="reservation/:id" element={<ReservationDetailPage />} />
           <Route path="reservation/edit/:id" element={<ReservationEditPage />} />
-          </Route>
+
+         {/* --- 핵심 추가: 로그인, 회원가입, 마이페이지 경로를 추가합니다. --- */}
+          <Route path="login" element={<LoginPage />} />
+          <Route path="register" element={<RegisterPage />} />
+          <Route path="mypage" element={
+            <PrivateRoute>
+              <MyPage />
+            </PrivateRoute>
+          } />
+        </Route>
 
         {/* 관리자용 페이지 라우트 (실제로 존재하는 페이지만 연결) */}
         <Route path="/admin/login" element={<AdminLoginPage />} />
