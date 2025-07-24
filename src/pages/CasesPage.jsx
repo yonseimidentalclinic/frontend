@@ -43,6 +43,7 @@ const CasesPage = () => {
     fetchCases();
   }, [searchParams]);
   
+  // 예시 카테고리 (실제로는 DB에서 가져오는 것이 이상적입니다)
   const categories = ['임플란트', '치아미백', '라미네이트', '잇몸성형'];
 
   const handleCategoryClick = (category) => {
