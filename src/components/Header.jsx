@@ -3,12 +3,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { Menu, X, User, LogOut } from 'lucide-react';
-import { useAuth } from '../context/AuthContext'; // AuthContext 사용
+import { useAuth } from '../context/AuthContext';
 
 const NavItem = ({ to, children, onClick }) => (
   <NavLink
     to={to}
     onClick={onClick}
+    end // '홈' 메뉴가 다른 경로에서 활성화되지 않도록 end prop 추가
     className={({ isActive }) =>
       `block px-3 py-2 rounded-md text-base font-medium transition-all duration-300 ${
         isActive 
@@ -25,6 +26,7 @@ const MobileNavItem = ({ to, children, onClick }) => (
     <NavLink
       to={to}
       onClick={onClick}
+      end
       className={({ isActive }) =>
         `block px-4 py-3 rounded-md text-base font-medium ${
           isActive ? 'bg-indigo-600 text-white' : 'text-slate-700 hover:bg-gray-100'
@@ -38,7 +40,7 @@ const MobileNavItem = ({ to, children, onClick }) => (
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const { user, logout } = useAuth(); // user와 logout 함수 가져오기
+  const { user, logout } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -60,6 +62,8 @@ const Header = () => {
             </Link>
           </div>
           <nav className="hidden md:flex items-center space-x-2">
+            {/* --- 핵심 추가: 홈 버튼을 메뉴 가장 앞에 추가했습니다. --- */}
+            <NavItem to="/">홈</NavItem>
             <NavItem to="/about">병원소개</NavItem>
             <NavItem to="/doctors">의료진</NavItem>
             <NavItem to="/cases">치료사례</NavItem>
@@ -106,6 +110,7 @@ const Header = () => {
 
       <div className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out bg-white shadow-lg ${isOpen ? 'max-h-screen' : 'max-h-0'}`}>
         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+          <MobileNavItem to="/" onClick={() => setIsOpen(false)}>홈</MobileNavItem>
           <MobileNavItem to="/about" onClick={() => setIsOpen(false)}>병원소개</MobileNavItem>
           <MobileNavItem to="/doctors" onClick={() => setIsOpen(false)}>의료진</MobileNavItem>
           <MobileNavItem to="/cases" onClick={() => setIsOpen(false)}>치료사례</MobileNavItem>
