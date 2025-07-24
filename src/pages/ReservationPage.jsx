@@ -3,8 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 const ReservationPage = () => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     patientName: '',
     phoneNumber: '',
@@ -15,7 +17,12 @@ const ReservationPage = () => {
   const [schedule, setSchedule] = useState({});
   const navigate = useNavigate();
 
-  // 날짜가 변경될 때마다 해당 월의 스케줄을 가져옵니다.
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({ ...prev, patientName: user.username }));
+    }
+  }, [user]);
+
   useEffect(() => {
     const fetchSchedule = async () => {
       if (!formData.desiredDate) return;
@@ -70,7 +77,7 @@ const ReservationPage = () => {
       <form onSubmit={handleSubmit} className="space-y-6 bg-white p-8 shadow-lg rounded-lg">
         <div>
           <label htmlFor="patientName" className="block text-sm font-medium text-gray-700">이름</label>
-          <input type="text" name="patientName" id="patientName" value={formData.patientName} onChange={handleChange} required className="mt-1 block w-full px-3 py-2 border rounded-md" />
+          <input type="text" name="patientName" id="patientName" value={formData.patientName} onChange={handleChange} readOnly={!!user} required className={`mt-1 block w-full px-3 py-2 border rounded-md ${user ? 'bg-gray-100' : ''}`} />
         </div>
         <div>
           <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700">연락처</label>

@@ -4,8 +4,10 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { ArrowLeft, MessageSquare, Edit, Trash2 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const ConsultationDetailPage = () => {
+  const { user } = useAuth();
   const [consultation, setConsultation] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -30,6 +32,11 @@ const ConsultationDetailPage = () => {
   }, [id]);
 
   const handleEdit = async () => {
+    if (user && user.id === consultation.userId) {
+      navigate(`/consultations/edit/${id}`);
+      return;
+    }
+    
     const password = window.prompt('상담글을 수정하려면 비밀번호를 입력하세요.');
     if (password === null) return;
     if (!password) {
@@ -51,6 +58,20 @@ const ConsultationDetailPage = () => {
   };
 
   const handleDelete = async () => {
+    const isOwner = user && user.id === consultation.userId;
+    const confirmationMessage = '정말로 이 상담글을 삭제하시겠습니까?';
+
+    if (isOwner) {
+      if (window.confirm(confirmationMessage)) {
+        try {
+          await api.delete(`/consultations/${id}`);
+          alert('상담글이 삭제되었습니다.');
+          navigate('/consultations');
+        } catch (err) { alert('삭제에 실패했습니다.'); }
+      }
+      return;
+    }
+
     const password = window.prompt('상담글을 삭제하려면 비밀번호를 입력하세요.');
     if (password === null) return;
     if (!password) {
@@ -59,9 +80,7 @@ const ConsultationDetailPage = () => {
     }
 
     try {
-      await api.delete(`/consultations/${id}`, {
-        data: { password }
-      });
+      await api.delete(`/consultations/${id}`, { data: { password } });
       alert('상담글이 성공적으로 삭제되었습니다.');
       navigate('/consultations');
     } catch (err) {
@@ -81,7 +100,6 @@ const ConsultationDetailPage = () => {
   return (
     <div className="bg-slate-50 min-h-screen">
       <div className="max-w-4xl mx-auto px-4 py-12">
-        {/* 질문 */}
         <div className="bg-white shadow-xl rounded-lg overflow-hidden">
           <div className="p-8 border-b">
             <h1 className="text-3xl font-bold text-slate-800">{consultation.title}</h1>
@@ -92,20 +110,16 @@ const ConsultationDetailPage = () => {
               </p>
             </div>
           </div>
-          
           {consultation.imageData && (
             <div className="p-8 border-b">
               <img src={consultation.imageData} alt="첨부 이미지" className="max-w-full h-auto rounded-lg mx-auto" />
             </div>
           )}
-
           <div
             className="p-8 prose max-w-none text-slate-700 leading-relaxed"
             dangerouslySetInnerHTML={{ __html: consultation.content }}
           />
         </div>
-
-        {/* 답변 */}
         {consultation.replies && consultation.replies.length > 0 && (
           <div className="mt-8 bg-indigo-50 shadow-xl rounded-lg overflow-hidden">
             <div className="p-8">
@@ -120,11 +134,10 @@ const ConsultationDetailPage = () => {
             </div>
           </div>
         )}
-
         <div className="mt-8 flex justify-between items-center">
           <Link 
             to="/consultations" 
-            className="inline-flex items-center px-6 py-3 bg-slate-600 text-white font-semibold rounded-lg hover:bg-slate-700 transition-colors duration-300 shadow-sm"
+            className="inline-flex items-center px-6 py-3 bg-slate-600 text-white font-semibold rounded-lg"
           >
             <ArrowLeft className="mr-2 h-5 w-5" />
             목록으로
@@ -132,13 +145,13 @@ const ConsultationDetailPage = () => {
           <div className="flex space-x-4">
             <button 
               onClick={handleEdit}
-              className="inline-flex items-center px-4 py-2 bg-yellow-500 text-white font-semibold rounded-lg hover:bg-yellow-600 transition-colors"
+              className="inline-flex items-center px-4 py-2 bg-yellow-500 text-white font-semibold rounded-lg"
             >
               <Edit className="mr-2 h-4 w-4" /> 수정
             </button>
             <button 
               onClick={handleDelete}
-              className="inline-flex items-center px-4 py-2 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition-colors"
+              className="inline-flex items-center px-4 py-2 bg-red-500 text-white font-semibold rounded-lg"
             >
               <Trash2 className="mr-2 h-4 w-4" /> 삭제
             </button>

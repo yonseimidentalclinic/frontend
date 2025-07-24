@@ -1,20 +1,36 @@
 // src/pages/ConsultationWritePage.jsx
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import Editor from '../components/Editor';
 import { Upload } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const ConsultationWritePage = () => {
-  const [formData, setFormData] = useState({ title: '', author: '', password: '', isSecret: true });
+  const { user } = useAuth();
+  const [formData, setFormData] = useState({
+    title: '',
+    author: '',
+    password: '',
+    isSecret: true,
+  });
   const [content, setContent] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({ ...prev, author: user.username }));
+    }
+  }, [user]);
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prevState => ({ ...prevState, [name]: type === 'checkbox' ? checked : value }));
+    setFormData(prevState => ({
+      ...prevState,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
   };
 
   const handleImageChange = (e) => {
@@ -23,8 +39,12 @@ const ConsultationWritePage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.title || !formData.author || !formData.password || !content) {
-      alert('모든 항목을 입력해주세요.');
+    if (!formData.title || !formData.author || !content) {
+      alert('제목, 작성자, 내용을 모두 입력해주세요.');
+      return;
+    }
+    if (!user && !formData.password) {
+      alert('비회원은 비밀번호를 입력해야 합니다.');
       return;
     }
     
@@ -39,7 +59,6 @@ const ConsultationWritePage = () => {
     }
 
     try {
-      // 수정된 api.js가 Content-Type을 자동으로 처리해줍니다.
       await api.post('/consultations', submissionData);
       alert('상담글이 성공적으로 등록되었습니다.');
       navigate('/consultations');
@@ -61,20 +80,23 @@ const ConsultationWritePage = () => {
             id="author"
             value={formData.author}
             onChange={handleChange}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+            readOnly={!!user}
+            className={`mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 ${user ? 'bg-gray-100' : ''}`}
           />
         </div>
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700">비밀번호</label>
-          <input
-            type="password"
-            name="password"
-            id="password"
-            value={formData.password}
-            onChange={handleChange}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-          />
-        </div>
+        {!user && (
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700">비밀번호</label>
+            <input
+              type="password"
+              name="password"
+              id="password"
+              value={formData.password}
+              onChange={handleChange}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
+        )}
         <div>
           <label htmlFor="title" className="block text-sm font-medium text-gray-700">제목</label>
           <input
@@ -90,7 +112,6 @@ const ConsultationWritePage = () => {
           <label htmlFor="content" className="block text-sm font-medium text-gray-700">내용</label>
           <div className="mt-1"><Editor value={content} onChange={setContent} /></div>
         </div>
-        
         <div>
           <label htmlFor="image" className="block text-sm font-medium text-gray-700">사진 첨부 (선택)</label>
           <div className="mt-1 flex items-center justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
@@ -106,7 +127,6 @@ const ConsultationWritePage = () => {
             </div>
           </div>
         </div>
-
         <div className="flex items-center">
           <input id="isSecret" name="isSecret" type="checkbox" checked={formData.isSecret} onChange={handleChange} className="h-4 w-4 text-indigo-600 rounded" />
           <label htmlFor="isSecret" className="ml-2 block text-sm text-gray-900">비밀글로 작성</label>

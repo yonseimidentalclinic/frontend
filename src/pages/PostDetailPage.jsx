@@ -4,8 +4,10 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { ArrowLeft, Edit, Trash2 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const PostDetailPage = () => {
+  const { user } = useAuth();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -30,6 +32,13 @@ const PostDetailPage = () => {
   }, [id]);
 
   const handleEdit = async () => {
+    // 로그인한 사용자가 글의 작성자인 경우, 비밀번호 확인 없이 바로 수정 페이지로 이동
+    if (user && post && user.id === post.userId) {
+      navigate(`/posts/edit/${id}`);
+      return;
+    }
+    
+    // 비회원이거나 다른 사용자인 경우, 기존 방식대로 비밀번호 확인
     const password = window.prompt('게시글을 수정하려면 비밀번호를 입력하세요.');
     if (password === null) return;
     if (!password) {
@@ -51,6 +60,26 @@ const PostDetailPage = () => {
   };
 
   const handleDelete = async () => {
+    const isOwner = user && post && user.id === post.userId;
+    const confirmationMessage = '정말로 이 게시글을 삭제하시겠습니까?';
+
+    // 로그인한 사용자가 글의 작성자인 경우, 비밀번호 확인 없이 바로 삭제
+    if (isOwner) {
+      if (window.confirm(confirmationMessage)) {
+        try {
+          // 로그인 상태이므로 토큰이 헤더에 자동으로 포함됩니다.
+          await api.delete(`/posts/${id}`);
+          alert('게시글이 삭제되었습니다.');
+          navigate('/posts');
+        } catch (err) { 
+          alert('삭제에 실패했습니다.'); 
+          console.error(err);
+        }
+      }
+      return;
+    }
+
+    // 비회원이거나 다른 사용자인 경우, 기존 방식대로 비밀번호 확인 후 삭제
     const password = window.prompt('게시글을 삭제하려면 비밀번호를 입력하세요.');
     if (password === null) return;
     if (!password) {
@@ -59,9 +88,7 @@ const PostDetailPage = () => {
     }
 
     try {
-      await api.delete(`/posts/${id}`, {
-        data: { password }
-      });
+      await api.delete(`/posts/${id}`, { data: { password } });
       alert('게시글이 성공적으로 삭제되었습니다.');
       navigate('/posts');
     } catch (err) {
@@ -91,13 +118,11 @@ const PostDetailPage = () => {
               </p>
             </div>
           </div>
-          
           {post.imageData && (
             <div className="p-8 border-b">
               <img src={post.imageData} alt="첨부 이미지" className="max-w-full h-auto rounded-lg mx-auto" />
             </div>
           )}
-
           <div
             className="p-8 prose max-w-none text-slate-700 leading-relaxed"
             dangerouslySetInnerHTML={{ __html: post.content }}
