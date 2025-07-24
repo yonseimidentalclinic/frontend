@@ -8,7 +8,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import MainLayout from './components/MainLayout';
 import AdminLayout from './components/AdminLayout';
 
-// --- 모든 페이지 컴포넌트 ---
+// --- 환자용 페이지 컴포넌트 ---
 import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import DoctorsPage from './pages/DoctorsPage';
@@ -39,7 +39,7 @@ import MyPage from './pages/MyPage';
 import AdminLoginPage from './pages/AdminLoginPage';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import AdminAboutPage from './pages/admin/AdminAboutPage';
-import AdminDoctorsListPage from './pages/admin/AdminDoctorsListPage';
+import AdminDoctorListPage from './pages/admin/AdminDoctorListPage';
 import AdminCasePhotosPage from './pages/admin/AdminCasePhotosPage';
 import AdminNoticeListPage from './pages/admin/AdminNoticeListPage';
 import AdminNoticeWritePage from './pages/admin/AdminNoticeWritePage';
@@ -54,96 +54,101 @@ import AdminReviewListPage from './pages/admin/AdminReviewListPage';
 import AdminFaqListPage from './pages/admin/AdminFaqListPage';
 import AdminSchedulePage from './pages/admin/AdminSchedulePage';
 import AdminLogsPage from './pages/admin/AdminLogsPage';
+import AdminUserListPage from './pages/admin/AdminUserListPage';
 
 
-// --- 핵심 수정: ProtectedRoute 컴포넌트를 하나로 통합하여 관리합니다. ---
-// 환자용/관리자용 로그인 상태를 모두 확인하여 접근을 제어합니다.
+// 인증 상태에 따라 페이지 접근을 제어하는 컴포넌트
 const ProtectedRoute = ({ children, forAdmin = false }) => {
   const { user, loading } = useAuth(); // 환자 로그인 상태
   const isAdminAuthenticated = !!localStorage.getItem('accessToken'); // 관리자 로그인 상태
 
   if (loading && forAdmin === false) {
-    return <div>로딩중...</div>; // 환자 정보 로딩 중일 때만 표시
+    return <div>로딩중...</div>;
   }
 
   if (forAdmin) {
-    // 관리자 전용 경로일 경우
     return isAdminAuthenticated ? children : <Navigate to="/admin/login" />;
   } else {
-    // 환자 전용 경로일 경우 (예: 마이페이지)
     return user ? children : <Navigate to="/login" />;
   }
 };
 
+// App 컴포넌트를 분리하여 AuthProvider 내부에서 useAuth를 사용할 수 있도록 함
+function AppContent() {
+  return (
+    <Routes>
+      {/* 환자용 페이지 라우트 */}
+      <Route path="/" element={<MainLayout />}>
+        <Route index element={<HomePage />} />
+        <Route path="about" element={<AboutPage />} />
+        <Route path="doctors" element={<DoctorsPage />} />
+        <Route path="cases" element={<CasesPage />} />
+        <Route path="faq" element={<FaqPage />} />
+        <Route path="location" element={<LocationPage />} />
+        <Route path="notices" element={<NoticeListPage />} />
+        <Route path="notices/:id" element={<NoticeDetailPage />} />
+        <Route path="posts" element={<PostListPage />} />
+        <Route path="posts/:id" element={<PostDetailPage />} />
+        <Route path="posts/write" element={<PostWritePage />} />
+        <Route path="posts/edit/:id" element={<PostEditPage />} />
+        <Route path="consultations" element={<ConsultationListPage />} />
+        <Route path="consultations/:id" element={<ConsultationDetailPage />} />
+        <Route path="consultations/write" element={<ConsultationWritePage />} />
+        <Route path="consultations/edit/:id" element={<ConsultationEditPage />} />
+        <Route path="reviews" element={<ReviewsPage />} />
+        <Route path="reviews/write" element={<ReviewWritePage />} />
+        <Route path="reservation" element={<ReservationPage />} />
+        <Route path="reservation/check" element={<ReservationCheckPage />} />
+        <Route path="reservation/:id" element={<ReservationDetailPage />} />
+        <Route path="reservation/edit/:id" element={<ReservationEditPage />} />
+        <Route path="login" element={<LoginPage />} />
+        <Route path="register" element={<RegisterPage />} />
+        <Route path="mypage" element={
+          <ProtectedRoute>
+            <MyPage />
+          </ProtectedRoute>
+        } />
+      </Route>
+
+      {/* 관리자 페이지 라우트 */}
+      <Route path="/admin/login" element={<AdminLoginPage />} />
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute forAdmin={true}>
+            <AdminLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<AdminDashboardPage />} />
+        <Route path="logs" element={<AdminLogsPage />} />
+        <Route path="users" element={<AdminUserListPage />} />
+        <Route path="about" element={<AdminAboutPage />} />
+        <Route path="doctors" element={<AdminDoctorsListPage />} />
+        <Route path="cases" element={<AdminCasePhotosPage />} />
+        <Route path="reservations" element={<AdminReservationListPage />} />
+        <Route path="reviews" element={<AdminReviewListPage />} />
+        <Route path="faqs" element={<AdminFaqListPage />} />
+        <Route path="schedule" element={<AdminSchedulePage />} />
+        <Route path="notices" element={<AdminNoticeListPage />} />
+        <Route path="notices/new" element={<AdminNoticeWritePage />} />
+        <Route path="notices/edit/:id" element={<AdminNoticeEditPage />} />
+        <Route path="posts" element={<AdminPostListPage />} />
+        <Route path="posts/edit/:id" element={<AdminPostEditPage />} />
+        <Route path="consultations" element={<AdminConsultationListPage />} />
+        <Route path="consultations/reply/:id" element={<AdminConsultationReplyPage />} />
+        <Route path="consultations/edit/:id" element={<AdminConsultationEditPage />} />
+      </Route>
+    </Routes>
+  );
+}
 
 function App() {
   return (
     <Router>
       <AuthProvider>
-        <Routes>
-          {/* 환자용 페이지 라우트 */}
-          <Route path="/" element={<MainLayout />}>
-            <Route index element={<HomePage />} />
-            <Route path="about" element={<AboutPage />} />
-            <Route path="doctors" element={<DoctorsPage />} />
-            <Route path="cases" element={<CasesPage />} />
-            <Route path="faq" element={<FaqPage />} />
-            <Route path="location" element={<LocationPage />} />
-            <Route path="notices" element={<NoticeListPage />} />
-            <Route path="notices/:id" element={<NoticeDetailPage />} />
-            <Route path="posts" element={<PostListPage />} />
-            <Route path="posts/:id" element={<PostDetailPage />} />
-            <Route path="posts/write" element={<PostWritePage />} />
-            <Route path="posts/edit/:id" element={<PostEditPage />} />
-            <Route path="consultations" element={<ConsultationListPage />} />
-            <Route path="consultations/:id" element={<ConsultationDetailPage />} />
-            <Route path="consultations/write" element={<ConsultationWritePage />} />
-            <Route path="consultations/edit/:id" element={<ConsultationEditPage />} />
-            <Route path="reviews" element={<ReviewsPage />} />
-            <Route path="reviews/write" element={<ReviewWritePage />} />
-            <Route path="reservation" element={<ReservationPage />} />
-            <Route path="reservation/check" element={<ReservationCheckPage />} />
-            <Route path="reservation/:id" element={<ReservationDetailPage />} />
-            <Route path="reservation/edit/:id" element={<ReservationEditPage />} />
-            <Route path="login" element={<LoginPage />} />
-            <Route path="register" element={<RegisterPage />} />
-            <Route path="mypage" element={
-              <ProtectedRoute>
-                <MyPage />
-              </ProtectedRoute>
-            } />
-          </Route>
-
-          {/* 관리자 페이지 라우트 */}
-          <Route path="/admin/login" element={<AdminLoginPage />} />
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute forAdmin={true}>
-                <AdminLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<AdminDashboardPage />} />
-            <Route path="logs" element={<AdminLogsPage />} />
-            <Route path="about" element={<AdminAboutPage />} />
-            <Route path="doctors" element={<AdminDoctorsListPage />} />
-            <Route path="cases" element={<AdminCasePhotosPage />} />
-            <Route path="reservations" element={<AdminReservationListPage />} />
-            <Route path="reviews" element={<AdminReviewListPage />} />
-            <Route path="faqs" element={<AdminFaqListPage />} />
-            <Route path="schedule" element={<AdminSchedulePage />} />
-            <Route path="notices" element={<AdminNoticeListPage />} />
-            <Route path="notices/new" element={<AdminNoticeWritePage />} />
-            <Route path="notices/edit/:id" element={<AdminNoticeEditPage />} />
-            <Route path="posts" element={<AdminPostListPage />} />
-            <Route path="posts/edit/:id" element={<AdminPostEditPage />} />
-            <Route path="consultations" element={<AdminConsultationListPage />} />
-            <Route path="consultations/reply/:id" element={<AdminConsultationReplyPage />} />
-            <Route path="consultations/edit/:id" element={<AdminConsultationEditPage />} />
-          </Route>
-        </Routes>
+        <AppContent />
       </AuthProvider>
     </Router>
   );
