@@ -39,7 +39,7 @@ import MyPage from './pages/MyPage';
 import AdminLoginPage from './pages/AdminLoginPage';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import AdminAboutPage from './pages/admin/AdminAboutPage';
-import AdminDoctorListPage from './pages/admin/AdminDoctorListPage';
+import AdminDoctorsListPage from './pages/admin/AdminDoctorsListPage';
 import AdminCasePhotosPage from './pages/admin/AdminCasePhotosPage';
 import AdminNoticeListPage from './pages/admin/AdminNoticeListPage';
 import AdminNoticeWritePage from './pages/admin/AdminNoticeWritePage';
