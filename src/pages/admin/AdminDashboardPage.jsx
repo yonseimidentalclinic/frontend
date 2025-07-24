@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { Megaphone, Newspaper, MessageSquare, Bell, AlertTriangle } from 'lucide-react';
+import { Megaphone, Newspaper, MessageSquare, Bell, AlertTriangle, Calendar, Star, FileText } from 'lucide-react';
 
 // 통계 카드 컴포넌트
 const StatCard = ({ icon: Icon, title, value, linkTo, colorClass }) => (
@@ -19,9 +19,26 @@ const StatCard = ({ icon: Icon, title, value, linkTo, colorClass }) => (
     </Link>
 );
 
+// 시간 차이를 계산하는 헬퍼 함수
+const timeSince = (date) => {
+  const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+  let interval = seconds / 31536000;
+  if (interval > 1) return Math.floor(interval) + "년 전";
+  interval = seconds / 2592000;
+  if (interval > 1) return Math.floor(interval) + "달 전";
+  interval = seconds / 86400;
+  if (interval > 1) return Math.floor(interval) + "일 전";
+  interval = seconds / 3600;
+  if (interval > 1) return Math.floor(interval) + "시간 전";
+  interval = seconds / 60;
+  if (interval > 1) return Math.floor(interval) + "분 전";
+  return "방금 전";
+};
+
 const AdminDashboardPage = () => {
   const [stats, setStats] = useState(null);
   const [chartData, setChartData] = useState(null);
+  const [activityFeed, setActivityFeed] = useState([]); // 활동 피드 상태 추가
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -29,40 +46,39 @@ const AdminDashboardPage = () => {
     setLoading(true);
     setError(null);
     try {
-      const statsPromise = api.get('/admin/dashboard-stats');
-      const chartsPromise = api.get('/admin/dashboard-charts');
-
-      const [statsResponse, chartsResponse] = await Promise.all([
-        statsPromise,
-        chartsPromise,
+      const [statsRes, chartsRes, feedRes] = await Promise.all([
+        api.get('/admin/dashboard-stats'),
+        api.get('/admin/dashboard-charts'),
+        api.get('/admin/dashboard/activity-feed') // 새 API 호출
       ]);
-
-      setStats(statsResponse.data);
-      setChartData(chartsResponse.data);
-
+      setStats(statsRes.data);
+      setChartData(chartsRes.data);
+      setActivityFeed(feedRes.data); // 활동 피드 데이터 설정
     } catch (err) {
-      console.error("대시보드 데이터 로딩 실패:", err);
-      if (err.response?.status !== 401) {
-        setError('대시보드 데이터를 불러오는 데 실패했습니다.');
-      }
+      setError('대시보드 데이터를 불러오는 데 실패했습니다.');
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  useEffect(() => { fetchData(); }, [fetchData]);
 
-  // --- 핵심 수정: 기존 '콘텐츠 현황' 그래프를 위한 데이터를 다시 만듭니다. ---
   const contentStatusChartData = [
     { name: '공지사항', count: stats?.totalNotices || 0 },
     { name: '자유게시판', count: stats?.totalPosts || 0 },
     { name: '온라인상담', count: stats?.totalConsultations || 0 },
   ];
 
-  if (loading) return <div className="p-10 text-center text-gray-600">대시보드 데이터를 불러오는 중...</div>;
-  if (error) return <div className="p-10 text-center text-red-500 bg-red-50 rounded-lg">{error}</div>;
+  // 활동 유형에 따라 아이콘과 메시지를 반환하는 객체
+  const activityDetails = {
+    reservation: { icon: Calendar, text: '새로운 예약 신청:', link: '/admin/reservations', color: 'text-green-500' },
+    review: { icon: Star, text: '새로운 치료 후기:', link: '/admin/reviews', color: 'text-yellow-500' },
+    consultation: { icon: MessageSquare, text: '새로운 온라인상담:', link: '/admin/consultations', color: 'text-blue-500' },
+    post: { icon: FileText, text: '새로운 자유게시판 글:', link: '/admin/posts', color: 'text-gray-500' },
+  };
+
+  if (loading) return <div className="p-10 text-center">로딩 중...</div>;
+  if (error) return <div className="p-10 text-center text-red-500">{error}</div>;
 
   return (
     <div className="p-6 md:p-8 bg-gray-100 min-h-screen">
@@ -78,15 +94,14 @@ const AdminDashboardPage = () => {
             </div>
           </div>
         )}
-        
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatCard icon={MessageSquare} title="답변 대기 상담" value={stats?.unansweredConsultations || 0} linkTo="/admin/consultations" colorClass="border-red-500" />
           <StatCard icon={Bell} title="오늘 접수된 상담" value={stats?.todayConsultations || 0} linkTo="/admin/consultations" colorClass="border-yellow-500" />
           <StatCard icon={Newspaper} title="총 자유게시판 글" value={stats?.totalPosts || 0} linkTo="/admin/posts" colorClass="border-green-500" />
           <StatCard icon={Megaphone} title="총 공지사항" value={stats?.totalNotices || 0} linkTo="/admin/notices" colorClass="border-blue-500" />
         </div>
-        
-        {/* --- 핵심 수정: 기존 '콘텐츠 현황' 그래프를 다시 추가했습니다. --- */}
+
         <div className="bg-white p-6 rounded-2xl shadow-lg mb-8">
           <h2 className="text-2xl font-bold text-gray-800 mb-4">전체 콘텐츠 현황</h2>
           <ResponsiveContainer width="100%" height={300}>
@@ -101,7 +116,6 @@ const AdminDashboardPage = () => {
           </ResponsiveContainer>
         </div>
 
-        {/* 시간별 통계 차트 그리드 */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="bg-white p-6 rounded-2xl shadow-lg">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">주간 상담 접수 현황</h2>
@@ -128,6 +142,31 @@ const AdminDashboardPage = () => {
                 <Bar dataKey="count" name="게시물 수" fill="#4338ca" />
               </BarChart>
             </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="mt-8 bg-white p-6 rounded-2xl shadow-lg">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">최신 활동 피드</h2>
+          <div className="space-y-4">
+            {activityFeed.length > 0 ? activityFeed.map(item => {
+              const details = activityDetails[item.type];
+              if (!details) return null;
+              const Icon = details.icon;
+              return (
+                <div key={`${item.type}-${item.id}`} className="flex items-start p-3 hover:bg-gray-50 rounded-lg">
+                  <div className={`p-2 rounded-full bg-gray-100 mr-4 ${details.color}`}>
+                    <Icon size={20} />
+                  </div>
+                  <div className="flex-grow">
+                    <p className="text-sm text-gray-500">{details.text}</p>
+                    <Link to={details.link} className="font-semibold text-gray-800 hover:underline">
+                      {item.title}
+                    </Link>
+                  </div>
+                  <p className="text-sm text-gray-400 flex-shrink-0">{timeSince(item.createdAt)}</p>
+                </div>
+              );
+            }) : <p className="text-center text-gray-500 py-4">최근 활동 내역이 없습니다.</p>}
           </div>
         </div>
       </div>
